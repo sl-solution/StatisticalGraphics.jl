@@ -1,0 +1,21 @@
+name = "StatisticalGraphics"
+uuid = "8341d8ab-e5ae-4f11-aa21-e11c5cc71259"
+authors = ["sl-solution <github.sl.solution@icloud.com> and contributors"]
+version = "0.1.0"
+
+[deps]
+InMemoryDatasets = "5c01b14b-ab03-46ff-b164-14c663efdd9f"
+DLMReader = "e1d33f9a-7203-49d2-8e1a-e3c4f85197b8"
+JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
+
+[compat]
+InMemoryDatasets = "0.7"
+DLMReader = "0.4"
+JSON = "0.19, 0.20, 0.21"
+julia = "1.6"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
