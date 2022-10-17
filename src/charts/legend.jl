@@ -1,5 +1,4 @@
 LEGEND_DEFAULT = Dict{Symbol, Any}(
-                                 :font=>"sans-serif",
                                  :name => nothing, #user can use this to modify specific legend
                                  :title => nothing, # automatically assign this if user did not provide any value
                                  :orient => :right, # default location of the legend
@@ -11,6 +10,16 @@ LEGEND_DEFAULT = Dict{Symbol, Any}(
                                  :rowspace => 1, 
                                  :columnspace=>1,
                                  :values=>nothing, # allow manually insert values
+
+                                 :font=>nothing,
+                                 :italic=>nothing,
+                                 :fontweight=>nothing,
+                                 :titlefont=>nothing,
+                                 :titleitalic=>nothing,
+                                 :titlefontweight=>900,
+                                 :labelfont=>nothing,
+                                 :labelitalic=>nothing,
+                                 :labelfontweight=>400,     
                                 )
 
 

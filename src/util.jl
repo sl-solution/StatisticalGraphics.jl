@@ -39,6 +39,18 @@ function _colname_as_string(ds, col)
     end
 end
 
+# apply the default fonts for axes 
+function _apply_fontstyling_for_axes!(axes, all_args)
+    for axis in axes
+        axis.opts[:titlefont] = something(axis.opts[:titlefont], axis.opts[:font], all_args.opts[:font])
+        axis.opts[:titleitalic] = something(axis.opts[:titleitalic], axis.opts[:italic], all_args.opts[:italic])
+        axis.opts[:titlefontweight] = something(axis.opts[:titlefontweight], axis.opts[:fontweight], all_args.opts[:fontweight])
+        axis.opts[:labelfont] = something(axis.opts[:labelfont], axis.opts[:font], all_args.opts[:font])
+        axis.opts[:labelitalic] = something(axis.opts[:labelitalic], axis.opts[:italic], all_args.opts[:italic])
+        axis.opts[:labelfontweight] = something(axis.opts[:labelfontweight], axis.opts[:fontweight], all_args.opts[:fontweight])
+    end
+end
+
 # creates a new scale for each single plot
 function addto_color_scale!(vspec, source, name, col, isnominal; color_model = nothing)
     new_scale = Dict{Symbol,Any}()
@@ -182,11 +194,19 @@ function addto_axis!(in_axis, axis, title)
             in_axis[:values] = axis.opts[:values]
         end
 
+       in_axis[:titleFont]=axis.opts[:titlefont]
+       in_axis[:titleFontStyle]=axis.opts[:titleitalic] ? "italic" : "normal"
+       in_axis[:titleFontWeight]=axis.opts[:titlefontweight]
+       in_axis[:labelFont]=axis.opts[:labelfont]
+       in_axis[:labelFontStyle]=axis.opts[:labelitalic] ? "italic" : "normal"
+       in_axis[:labelFontWeight]=axis.opts[:labelfontweight]
+
+
     end
 end
 
 # apply default values for legend option in the case that user does not have any preference
-function _build_legen!(out_leg, leg_opts, _symbol, _title, _id; opts...)
+function _build_legen!(out_leg, leg_opts, _symbol, _title, _id, all_args; opts...)
     out_leg[:name] = _id
     if leg_opts[:title] === nothing
         out_leg[:title] = _title
@@ -214,6 +234,13 @@ function _build_legen!(out_leg, leg_opts, _symbol, _title, _id; opts...)
         out_leg[:values] = leg_opts[:values]
     end
 
+
+    out_leg[:titleFont] = something(leg_opts[:titlefont], leg_opts[:font], all_args.opts[:font])
+    out_leg[:titleFontStyle] = something(leg_opts[:titleitalic], leg_opts[:italic], all_args.opts[:italic]) ? "italic" : "normal"
+    out_leg[:titleFontWeight] = something(leg_opts[:titlefontweight], leg_opts[:fontweight], all_args.opts[:fontweight])
+    out_leg[:labelFont] = something(leg_opts[:labelfont], leg_opts[:font], all_args.opts[:font])
+    out_leg[:labelFontStyle] = something(leg_opts[:labelitalic], leg_opts[:italic], all_args.opts[:italic]) ? "italic" : "normal"
+    out_leg[:labelFontWeight] = something(leg_opts[:labelfontweight], leg_opts[:fontweight], all_args.opts[:fontweight])
 end
 
 function _fill_scales!(vspec, all_args)
@@ -673,20 +700,51 @@ function _find_width_proportion!(panel_info, all_args)
     end
 end
 
-function _add_title_for_panel!(newmark, info, all_args, all_axes)
-    yaxis_exist = any(x->x[:scale]=="y1", all_axes)
-    y2axis_exist = any(x->x[:scale]=="y2", all_axes)
-    newmark[:title][:text] = string(info["$(sg_col_prefix)__title_info_for_each_panel__"])
-    newmark[:title][:orient] = "top"
-    newmark[:title][:frame] = "group"
-    newmark[:title][:limit] = info["$(sg_col_prefix)width"]
-    newmark[:title][:fontSize] = all_args.opts[:headersize]
-    # adjust the title location when the current panel has visible axes
-    if (info["$(sg_col_prefix)yaxis"] && yaxis_exist)  || (info["$(sg_col_prefix)y2axis"] && y2axis_exist)
-        newmark[:title][:dy] = ceil(all_args.opts[:headersize]/2)
+function _how_to_print(nt, colname)
+    k = keys(nt)
+    val = values(nt)
+    if colname
+        join(string.(k, "=", val), ", ")
+    else
+        join(string.(val), ", ")
     end
-    newmark[:title][:fontWeight] = all_args.opts[:headerfontweight]
-    newmark[:title][:fontStyle] = all_args.opts[:headeritalic] ? "italic" : "normal"
+end
+
+
+function _add_title_for_panel!(newmark, info, all_args, all_axes)
+    # yaxis_exist = any(x->x[:scale]=="y1", all_axes)
+    # y2axis_exist = any(x->x[:scale]=="y2", all_axes)
+    
+    if Symbol(all_args.opts[:headerorient]) in (:top, :bottom)
+        _range = [0, info["$(sg_col_prefix)width"]]
+        _limit=info["$(sg_col_prefix)width"]
+    elseif Symbol(all_args.opts[:headerorient]) in (:left, :right)
+        _range = [info["$(sg_col_prefix)height"],0]
+        _limit=info["$(sg_col_prefix)height"]
+    end
+
+
+    _font = something(all_args.opts[:headerfont], all_args.opts[:font])
+    _fweight = something(all_args.opts[:headerfontweight], all_args.opts[:fontweight])
+    _fitalic = something(all_args.opts[:headeritalic], all_args.opts[:italic])
+
+    dummy_scale = Dict{Symbol, Any}(:name=>"title_panel_scale", :range=>_range)
+    dummy_axis = Dict{Symbol, Any}(:ticks => false,
+                                   :labels=>false,
+                                   :domain=>false,
+                                   :scale => "title_panel_scale",
+                                   :orient => all_args.opts[:headerorient],
+                                   :title=>_how_to_print(info["$(sg_col_prefix)__title_info_for_each_panel__"], all_args.opts[:headercolname]),
+                                   :titleFontSize=>all_args.opts[:headersize],
+                                   :titleFont=>_font,
+                                   :titleFontStyle=>_fitalic ? "italic" : "normal",
+                                   :titleFontWeight=>_fweight,
+                                   :titleLimit=>_limit,
+                                   :titlePadding=>all_args.opts[:headeroffset])
+
+    push!(newmark[:scales], dummy_scale)
+    push!(newmark[:axes], dummy_axis)
+   
 end
 function _add_title_for_lattice!(axis, info, all_args, iscolumn)
     axis[:encode] = Dict{Symbol, Any}()
@@ -694,11 +752,15 @@ function _add_title_for_lattice!(axis, info, all_args, iscolumn)
     axis[:encode][:title][:update] = Dict{Symbol, Any}()
     n_title = axis[:encode][:title][:update]
 
+    _font = something(all_args.opts[:headerfont], all_args.opts[:font])
+    _fweight = something(all_args.opts[:headerfontweight], all_args.opts[:fontweight])
+    _fitalic = something(all_args.opts[:headeritalic], all_args.opts[:italic])
+
     n_title[:text] = Dict{Symbol, Any}(:value => iscolumn ? string(info["$(sg_col_prefix)__column__title__"]) : string(info["$(sg_col_prefix)__row__title__"]))
     n_title[:limit] = Dict{Symbol, Any}(:value => iscolumn ? info["$(sg_col_prefix)width"] : info["$(sg_col_prefix)height"])
     n_title[:fontSize] = Dict{Symbol, Any}(:value => all_args.opts[:headersize])
-    n_title[:fontWeight] = Dict{Symbol, Any}(:value => all_args.opts[:headerfontweight])
-    n_title[:fontStyle] = Dict{Symbol, Any}(:value => all_args.opts[:headeritalic] ? "italic" : "normal")
+    n_title[:fontWeight] = Dict{Symbol, Any}(:value => _fweight)
+    n_title[:fontStyle] = Dict{Symbol, Any}(:value => _fitalic ? "italic" : "normal")
 end
 
 # we cannot use title marks for this, because we need to be able to add title to more than one orient

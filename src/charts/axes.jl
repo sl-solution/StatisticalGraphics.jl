@@ -2,7 +2,7 @@ AXES_DEFAULT = Dict{Symbol, Any}(:type => :linear,
                                  :show => true, # if it is false, domain, ticks, labels and title are set to false
                                  :values => nothing, # manually put ticks
                                  :color => :black,
-                                 :font=>"sans-serif",
+                               
                                  :reverse=>false,
                                  :order => :data, # we support :ascending, and :descending too
                                  :domain=>true,
@@ -21,8 +21,17 @@ AXES_DEFAULT = Dict{Symbol, Any}(:type => :linear,
                                  :nice => true,
                                  :d3format => nothing, # allow users to directly pass an axis format - it must be consistent with d3.format()
                                  :labeloverlap => true,
-                                 
-                                 )
+
+                                 :font=>nothing,
+                                 :italic=>nothing,
+                                 :fontweight=>nothing,
+                                 :titlefont=>nothing,
+                                 :titleitalic=>nothing,
+                                 :titlefontweight=>900,
+                                 :labelfont=>nothing,
+                                 :labelitalic=>nothing,
+                                 :labelfontweight=>400,                             
+                                )
 
 
 struct Axis

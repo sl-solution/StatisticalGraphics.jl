@@ -211,30 +211,30 @@ function _add_legends!(plt::Scatter, all_args, idx)
     if which_scale[1] == which_scale[3] !== nothing
         leg_spec_cp[:stroke] = "group_scale"
         leg_spec_cp[:shape] = "symbol_scale_$idx"
-        _build_legen!(leg_spec_cp, leg_spec.opts, "circle", which_scale[1], "$(legend_id)_group_color_scale_legend_$idx")
+        _build_legen!(leg_spec_cp, leg_spec.opts, "circle", which_scale[1], "$(legend_id)_group_color_scale_legend_$idx", all_args)
         push!(all_args.out_legends, leg_spec_cp)
     elseif (which_scale[1] != which_scale[3]) && (which_scale[1] !== nothing) && (which_scale[3] === nothing)
         leg_spec_cp[:stroke] = "group_scale" 
-        _build_legen!(leg_spec_cp, leg_spec.opts, "circle", which_scale[1], "$(legend_id)_group_scale_legend_$idx")
+        _build_legen!(leg_spec_cp, leg_spec.opts, "circle", which_scale[1], "$(legend_id)_group_scale_legend_$idx", all_args)
         push!(all_args.out_legends, leg_spec_cp)
     elseif (which_scale[1] != which_scale[3]) && (which_scale[3] !== nothing) && (which_scale[1] === nothing)
         leg_spec_cp[:shape] = "symbol_scale_$idx"
         leg_spec_cp[:symbolStrokeColor] = plt.opts[:color]
-        _build_legen!(leg_spec_cp, leg_spec.opts, nothing, which_scale[3], "$(legend_id)_symbol_scale_legend_$idx")
+        _build_legen!(leg_spec_cp, leg_spec.opts, nothing, which_scale[3], "$(legend_id)_symbol_scale_legend_$idx", all_args)
         push!(all_args.out_legends, leg_spec_cp)
     elseif (which_scale[1] != which_scale[3]) && (which_scale[3] !== nothing) && (which_scale[1] !== nothing)
         leg_spec_cp[:stroke] = "group_scale"
-        _build_legen!(leg_spec_cp, leg_spec.opts, "circle", which_scale[1], "$(legend_id)_group_scale_legend_$idx")
+        _build_legen!(leg_spec_cp, leg_spec.opts, "circle", which_scale[1], "$(legend_id)_group_scale_legend_$idx", all_args)
         push!(all_args.out_legends, leg_spec_cp)
         leg_spec_cp = Dict{Symbol, Any}()  
         leg_spec_cp[:shape] = "symbol_scale_$idx"
-        _build_legen!(leg_spec_cp, leg_spec.opts, nothing, which_scale[1], "$(legend_id)_symbol_scale_legend_$idx")
+        _build_legen!(leg_spec_cp, leg_spec.opts, nothing, which_scale[1], "$(legend_id)_symbol_scale_legend_$idx", all_args)
         push!(all_args.out_legends, leg_spec_cp)
     end
     leg_spec_cp = Dict{Symbol, Any}()     
     if which_scale[2] !== nothing
         leg_spec_cp[:fill] = "color_scale_$idx"
-        _build_legen!(leg_spec_cp, leg_spec.opts, nothing, which_scale[1], "$(legend_id)_color_scale_legend_$idx")
+        _build_legen!(leg_spec_cp, leg_spec.opts, nothing, which_scale[1], "$(legend_id)_color_scale_legend_$idx", all_args)
         push!(all_args.out_legends, leg_spec_cp)
     end
 end   

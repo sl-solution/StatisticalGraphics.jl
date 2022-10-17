@@ -19,11 +19,24 @@ SGPANEL_DEFAULT = Dict(:layout=>:panel, # it can be :panel, :lattice - panel sho
         :rowspace => 30,
         :columnspace => 30,
         :groupcolormodel => "category", #default color model for groupspace
+
         :showheaders => true,
+        :headercolname=>true,
+
         :headersize => 10,
-        :headerfontweight=>400,
-        :headeritalic=>false,
+        :headerfontweight=>nothing,
+        :headeritalic=>nothing,
+        :headerfont=>nothing,
+        
+        :headerorient=>:top,
+        :headeroffset=>0,
+
         :axistitleoffset => 40,
+
+        # the global font specification
+        :font => "sans-serif",
+        :italic=>false,
+        :fontweight=>400,
         )
 
 
@@ -95,10 +108,10 @@ function _sgpanel(ds, panelby::IMD.MultiColumnIndex, plts::Vector{<:SGMarks}; ma
     for i in 1:nrow(panel_info)
         newmark = Dict{Symbol,Any}()
         newmark[:type] = :group
-        if all_args.opts[:layout] == :panel && all_args.opts[:showheaders]
-            newmark[:title] = Dict{Symbol, Any}()
-            _add_title_for_panel!(newmark, panel_info[i, :], all_args, sgplot_result[:axes])
-        end
+        # if all_args.opts[:layout] == :panel && all_args.opts[:showheaders]
+        #     newmark[:title] = Dict{Symbol, Any}()
+        #     _add_title_for_panel!(newmark, panel_info[i, :], all_args, sgplot_result[:axes])
+        # end
 
         # update "height" and "width" signals within each cell
         newmark[:signals] = Dict{Symbol, Any}[]
@@ -123,6 +136,11 @@ function _sgpanel(ds, panelby::IMD.MultiColumnIndex, plts::Vector{<:SGMarks}; ma
         newmark[:scales] = new_scales[1:4]
         new_axes = _modify_axes_for_panel(all_args, deepcopy(sgplot_result[:axes]), panel_info[i, :])
         newmark[:axes] = new_axes
+
+        # put panel or lattice headers
+        if all_args.opts[:showheaders] && all_args.opts[:layout] == :panel
+            _add_title_for_panel!(newmark, panel_info[i, :], all_args, sgplot_result[:axes])
+        end
         # i is send to create unique name for filtered data
         _modify_data_for_panel!(vspec, newmark[:marks], panel_info[i, :], i)
         push!(sgpanel_marks[:marks], newmark)

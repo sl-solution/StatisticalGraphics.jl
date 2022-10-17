@@ -157,7 +157,7 @@ function _add_legends!(plt::Line, all_args, idx)
     if which_scale[1] !== nothing
         _title = which_scale[1]
         leg_spec_cp[:stroke] = "group_scale"
-        _build_legen!(leg_spec_cp, leg_spec.opts, "stroke", _title, "$(legend_id)_group_scale_legend_$idx"; symbolDash=plt.opts[:dash])
+        _build_legen!(leg_spec_cp, leg_spec.opts, "stroke", _title, "$(legend_id)_group_scale_legend_$idx", all_args; symbolDash=plt.opts[:dash])
         push!(all_args.out_legends, leg_spec_cp)
     end
 end   

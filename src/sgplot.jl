@@ -27,7 +27,17 @@ mutable struct SGPlot_Args
 end
 
 # include default value for global sgplot specification
-SGPLOT_DEFAULT = Dict(:width => 600, :height => 400, :font => "sans-serif", :groupcolormodel => "category", :autolegend => true)
+SGPLOT_DEFAULT = Dict(:width => 600,
+                      :height => 400,
+                      
+                      # the global font specification
+                      :font => "sans-serif",
+                      :italic=>false,
+                      :fontweight=>400,
+
+                      :groupcolormodel => "category",
+                      :autolegend => true
+                      )
 
 function sgplot(ds::Union{AbstractDataset, IMD.GroupBy, IMD.GatherBy}, plts::Vector{<:SGMarks}; mapformats=true, nominal::Union{Nothing,IMD.ColumnIndex, IMD.MultiColumnIndex}=nothing, xaxis=Axis(), x2axis=Axis(), yaxis=Axis(), y2axis=Axis(), legend::Union{Bool, Legend, Vector{Legend}}=true, threads=nrow(ds) > 10^6, opts...)
     if nominal === nothing
@@ -53,7 +63,7 @@ function _sgplot(ds::AbstractDataset, plts::Vector{<:SGMarks}; mapformats=true, 
     # read opts
     optsd = val_opts(opts)
     global_opts = update_default_opts!(deepcopy(SGPLOT_DEFAULT), optsd)
-
+    
     scale_ds = [Dataset("$(sg_col_prefix)__scale_col__"=>Any[]), Dataset("$(sg_col_prefix)__scale_col__"=>Any[]), Dataset("$(sg_col_prefix)__scale_col__"=>Any[]), Dataset("$(sg_col_prefix)__scale_col__"=>Any[])]
     # some type of plots will produce new data sets - we put all of them in out_ds
     # referred_cols_in_ds used to track which columns of input ds should be written in vspec
@@ -71,6 +81,8 @@ function _sgplot!(all_args)
     global_opts = all_args.opts
     plts = all_args.plts
     referred_cols_in_ds = all_args.referred_cols
+    # apply fontstyling for axes
+    _apply_fontstyling_for_axes!(all_args.axes, all_args)
     xaxis = all_args.axes[1]
     x2axis = all_args.axes[2]
     yaxis = all_args.axes[3]
