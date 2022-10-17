@@ -89,7 +89,7 @@ function addto_group_scale!(group_scale, source, col, all_args)
 end
 
 # the following function is to convert some specific types before sending to js
-_convert_values_for_js(x::TimeType) = datetime2unix(DateTime(x)) * 1000 # JS cannot read Julia datetime
+_convert_values_for_js(x::Union{Date, DateTime}) = datetime2unix(DateTime(x)) * 1000 # JS cannot read Julia datetime
 _convert_values_for_js(x::Bool) = x ? 1 : 0 # filewrite writes bools as 0/1
 _convert_values_for_js(x) = x
 

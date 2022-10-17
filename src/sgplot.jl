@@ -42,9 +42,16 @@ SGPLOT_DEFAULT = Dict(:width => 600,
 function sgplot(ds::Union{AbstractDataset, IMD.GroupBy, IMD.GatherBy}, plts::Vector{<:SGMarks}; mapformats=true, nominal::Union{Nothing,IMD.ColumnIndex, IMD.MultiColumnIndex}=nothing, xaxis=Axis(), x2axis=Axis(), yaxis=Axis(), y2axis=Axis(), legend::Union{Bool, Legend, Vector{Legend}}=true, threads=nrow(ds) > 10^6, opts...)
     if nominal === nothing
         nominal = String[]
+        # if user does not pass `nominal` we add it.
+        for col in names(ds)
+            if eltype(ds[!,col]) <: Union{<:AbstractString, Missing} || IMD.DataAPI.refpool(ds[!, col]) !== nothing
+                push!(nominal, col)
+            end
+        end 
     else
         nominal = names(ds)[IMD.index(ds)[nominal]]
     end
+
     if !(nominal isa AbstractVector)
         nominal = [nominal]
     end
