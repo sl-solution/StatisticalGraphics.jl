@@ -44,7 +44,7 @@ function sgplot(ds::Union{AbstractDataset, IMD.GroupBy, IMD.GatherBy}, plts::Vec
         nominal = String[]
         # if user does not pass `nominal` we add it.
         for col in names(ds)
-            if eltype(ds[!,col]) <: Union{<:AbstractString, Missing} || IMD.DataAPI.refpool(ds[!, col]) !== nothing
+            if eltype(parent(ds)[!,col]) <: Union{<:AbstractString, Missing} || IMD.DataAPI.refpool(parent(ds)[!, col]) !== nothing
                 push!(nominal, col)
             end
         end 
