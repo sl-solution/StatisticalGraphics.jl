@@ -34,7 +34,7 @@ julia> sgplot(ds, Histogram(x=:x, color=:steelblue, outlinethickness=0.5, space=
 
 ```julia
 julia> using DLMReader
-julia> dubai_weather = filereader("assets/dubai_weather.csv", dtformat=Dict(1 => Date))
+julia> dubai_weather = filereader("assets/dubai_weather.csv", types=Dict(1 => Date))
 julia> sgplot(dubai_weather, [
         Band(x=:date, lower=:min, upper=:max),
         Line(x=:date, y=:min, color="#4682b4", thickness=1),
