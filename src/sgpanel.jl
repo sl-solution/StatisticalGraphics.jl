@@ -57,8 +57,7 @@ function _sgpanel(ds, panelby::IMD.MultiColumnIndex, plts::Vector{<:SGMarks}; ma
         rows_id = unique(first_unique[!, [panelby[1]]], mapformats=mapformats, threads = threads)
         panel_info = _crossprod(rows_id, columns_id)
     elseif global_opts[:layout] == :panel
-        panel_info = unique(first_unique[!, reverse!(IMD.index(first_unique)[panelby])], mapformats=mapformats, threads = threads)
-        select!(panel_info, ncol(panel_info):-1:1)
+        panel_info = unique(first_unique[!, IMD.index(first_unique)[panelby]], mapformats=mapformats, threads = threads)
     else
         panel_info = unique(first_unique[!, panelby], mapformats=mapformats, threads = threads)
     end
