@@ -187,7 +187,7 @@ function addto_axis!(in_axis, axis, title)
         in_axis[:tickSize] = axis.opts[:ticksize]
         in_axis[:tickColor] = something(axis.opts[:tickcolor], axis.opts[:color])
         in_axis[:tickWidth] =axis.opts[:tickthickness]
-        if axis.opts[:tickdash] !=[0] # due to bug in vega
+        if axis.opts[:tickdash] !=[0] # due to bug in safari (latest version)
             in_axis[:tickDash] = axis.opts[:tickdash]
         end
         #title

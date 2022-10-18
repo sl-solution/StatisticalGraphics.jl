@@ -13,7 +13,7 @@ AXES_DEFAULT = Dict{Symbol, Any}(:type => :linear,
 
                                  :domaincolor => nothing,
                                  :domain=>true,
-                                 :domainthickness=>1.01, #FIXME due to a bug in vega we set this to 1.01
+                                 :domainthickness=>1.01, #FIXME probably a bug in safari
                                  :domaindash=>[0],
                                 
                                  :title => nothing,
@@ -29,7 +29,7 @@ AXES_DEFAULT = Dict{Symbol, Any}(:type => :linear,
                                  :ticks => true, #due to a bug in vega, setting this to false can cause some issues-workaround ticksize=0
                                  :ticksize => 5,
                                  :tickcolor=>nothing,
-                                 :tickthickness=>1.01, #FIXME due to a bug in vega we set this to 1.01
+                                 :tickthickness=>1.01, #FIXME probably a bug in safari
                                  :tickdash=>[0],
 
 
