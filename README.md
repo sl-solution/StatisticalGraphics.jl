@@ -255,3 +255,16 @@ julia> sgplot(gatherby(panel_example, [:x3, :x4]),
 
 ![barlattice](assets/barlattice.svg)
 
+**panel**
+
+```julia
+julia> sgplot(gatherby(panel_example, [:x5, :x6]), 
+                               Bar(x=:x7, group=:x8),
+                               nominal = [:x8],
+                               width = 100,
+                               height = 100,
+                               columns=5
+                     )
+```
+
+![barpanel](assets/barpanel.svg)
