@@ -37,6 +37,8 @@ SGPANEL_DEFAULT = Dict(:layout=>:panel, # it can be :panel, :lattice - panel sho
         :font => "sans-serif",
         :italic=>false,
         :fontweight=>400,
+
+        :clip=>true
         )
 
 

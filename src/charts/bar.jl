@@ -26,7 +26,9 @@ BAR_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0, :group => nothing,
     :baseline=>0,
     :baselineresponse => nothing,  # each bar (or each group when groupped) can have its own baseline 
     :baselinestat => nothing, # same rule as :stat
-    :legend=>nothing
+    :legend=>nothing,
+
+    :clip=>nothing
 )
 mutable struct Bar <: SGMarks
     opts
@@ -58,6 +60,7 @@ function _push_plots!(vspec, plt::Bar, all_args; idx=1)
 
     s_spec = Dict{Symbol,Any}()
     s_spec[:type] = "group"
+    s_spec[:clip] = something(opts[:clip], all_args.opts[:clip])
     s_spec_marks = Dict{Symbol,Any}()
     s_spec_marks[:type] = "rect"
     s_spec_marks[:from] = Dict(:data => "bar_data_$idx")

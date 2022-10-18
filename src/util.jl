@@ -130,7 +130,13 @@ function addto_scale!(all_args, which_scale, ds, col)
         if all_args.scale_type[which_scale] in [:band, :point]
             append!(all_args.scale_ds[which_scale], combine(ds, col => (_temp_fun) => "$(sg_col_prefix)__scale_col__"), promote=true, cols=:union)
         else
-            append!(all_args.scale_ds[which_scale], combine(ds, col => (x -> [IMD.minimum(_fun_, x), IMD.maximum(_fun_, x)]) => "$(sg_col_prefix)__scale_col__"), promote=true, cols=:union)
+            if all_args.axes[which_scale].opts[:range] === nothing
+                append!(all_args.scale_ds[which_scale], combine(ds, col => (x -> [IMD.minimum(_fun_, x), IMD.maximum(_fun_, x)]) => "$(sg_col_prefix)__scale_col__"), promote=true, cols=:union)
+            else
+                _axis_limits=all_args.axes[which_scale].opts[:range]
+                (!(_axis_limits isa AbstractVector) || length(_axis_limits) != 2 ) && throw(ArgumentError("axis range limits must be a vector of min and max values of the axis domain"))
+                append!(all_args.scale_ds[which_scale], combine(ds, col => (x -> [_axis_limits[1], _axis_limits[2]]) => "$(sg_col_prefix)__scale_col__"), promote=true, cols=:union)
+            end
         end
     else
         if all_args.scale_type[which_scale] in [:band, :point]
@@ -158,18 +164,62 @@ function addto_scale!(all_args, which_scale, ds, col)
 end
 function addto_axis!(in_axis, axis, title)
     if !haskey(in_axis, :domain)
-        if !axis.opts[:show]
-            in_axis[:labels] = false
-        end
+        # domain
         in_axis[:domain] = axis.opts[:show] ? axis.opts[:domain] : false
+        in_axis[:domainColor] = something(axis.opts[:domaincolor], axis.opts[:color])
+        if axis.opts[:domaindash] != [0] # due to bug in vega we should check this
+            in_axis[:domainDash] = axis.opts[:domaindash]
+        end
+        in_axis[:domainWidth] = axis.opts[:domainthickness]
+        #grid
         in_axis[:grid] = axis.opts[:grid]
         in_axis[:gridWidth] = axis.opts[:gridthickness]
+        in_axis[:gridDash] = axis.opts[:griddash]
+        in_axis[:gridColor] = something(axis.opts[:gridcolor], axis.opts[:color])
+        #ticks
+        if axis.opts[:tickcount] !== nothing
+            in_axis[:tickCount] = axis.opts[:tickcount]
+        else
+            signal_text = contains(in_axis[:scale], "y") ? "ceil(height/40)" : "ceil(width/40)"
+            in_axis[:tickCount] = Dict{Symbol,Any}(:signal => signal_text)
+        end
         in_axis[:ticks] = axis.opts[:show] ? axis.opts[:ticks] : false
         in_axis[:tickSize] = axis.opts[:ticksize]
-        if in_axis[:title] === nothing && axis.opts[:show]
+        in_axis[:tickColor] = something(axis.opts[:tickcolor], axis.opts[:color])
+        in_axis[:tickWidth] =axis.opts[:tickthickness]
+        if axis.opts[:tickdash] !=[0] # due to bug in vega
+            in_axis[:tickDash] = axis.opts[:tickdash]
+        end
+        #title
+        if in_axis[:title] === nothing
             in_axis[:title] = title
         end
+        if !axis.opts[:show]
+            delete!(in_axis, :title)
+        end
+
+        in_axis[:titleColor] = something(axis.opts[:titlecolor], axis.opts[:color])
+        in_axis[:titleAnchor] = axis.opts[:titleloc]
+        axis.opts[:titlealign] !== nothing ? in_axis[:titleAlign] = axis.opts[:titlealign] : nothing
+        axis.opts[:titleangle] !== nothing ? in_axis[:titleAngle] = axis.opts[:titleangle] : nothing
+        axis.opts[:titlebaseline] !== nothing ? in_axis[:titleBaseline] = axis.opts[:titlebaseline] : nothing
+        if axis.opts[:titlepos] !== nothing 
+            in_axis[:titleX] = axis.opts[:titlepos][1]
+            in_axis[:titleY] = axis.opts[:titlepos][2]
+        end
+        if axis.opts[:titlesize] !== nothing
+            in_axis[:titleFontSize] = axis.opts[:titlesize]
+        end
+
+
+        #offset
         in_axis[:offset] = axis.opts[:offset]
+        
+        #labels
+        
+        if axis.opts[:show]
+            in_axis[:labels] = axis.opts[:showlabels]
+        end
         in_axis[:labelAngle] = axis.opts[:angle]
         if axis.opts[:baseline] !== nothing
             in_axis[:labelBaseline] = axis.opts[:baseline]
@@ -178,29 +228,31 @@ function addto_axis!(in_axis, axis, title)
             in_axis[:labelAlign] = axis.opts[:align]
         end
         in_axis[:labelOverlap] = axis.opts[:labeloverlap]
-        in_axis[:domainColor] = axis.opts[:color]
-        in_axis[:gridDash] = axis.opts[:griddash]
-        in_axis[:gridColor] = axis.opts[:gridcolor]
-        if axis.opts[:tickcount] !== nothing
-            in_axis[:tickCount] = axis.opts[:tickcount]
-        else
-            signal_text = contains(in_axis[:scale], "y") ? "ceil(height/40)" : "ceil(width/40)"
-            in_axis[:tickCount] = Dict{Symbol,Any}(:signal => signal_text)
+        in_axis[:labelColor] = something(axis.opts[:labelcolor], axis.opts[:color])
+        if axis.opts[:labelpadding] !== nothing
+            in_axis[:labelPadding] = axis.opts[:labelpadding]
         end
+        if axis.opts[:labelsize] !== nothing
+            in_axis[:labelFontSize] = axis.opts[:labelsize]
+        end
+
         if axis.opts[:d3format] !== nothing
             in_axis[:format] = axis.opts[:d3format]
         end
+
         if axis.opts[:values] !== nothing
             in_axis[:values] = axis.opts[:values]
         end
 
+        #fonts
        in_axis[:titleFont]=axis.opts[:titlefont]
        in_axis[:titleFontStyle]=axis.opts[:titleitalic] ? "italic" : "normal"
        in_axis[:titleFontWeight]=axis.opts[:titlefontweight]
        in_axis[:labelFont]=axis.opts[:labelfont]
        in_axis[:labelFontStyle]=axis.opts[:labelitalic] ? "italic" : "normal"
        in_axis[:labelFontWeight]=axis.opts[:labelfontweight]
-
+        #misc
+       in_axis[:zindex] = axis.opts[:zindex]
 
     end
 end

@@ -8,7 +8,8 @@ BAND_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0, :lower => 0, :upper => 0,
     :colormodel => ["#2f6790", "#bed8ec"],
     :interpolate => :linear,
     :breaks => false, # see Line
-    :legend => nothing
+    :legend => nothing,
+    :clip=>nothing
 )
 mutable struct Band <: SGMarks
     opts
@@ -33,6 +34,7 @@ function _push_plots!(vspec,plt::Band, all_args; idx=1)
 
     s_spec = Dict{Symbol,Any}()
     s_spec[:type] = "group"
+    s_spec[:clip] = something(opts[:clip], all_args.opts[:clip])
     s_spec_marks = Dict{Symbol,Any}()
     s_spec_marks[:type] = "area"
     s_spec_marks[:from] = Dict(:data => "source_0_$idx")

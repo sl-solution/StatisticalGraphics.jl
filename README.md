@@ -62,7 +62,7 @@ julia> sgplot(dubai_weather, [
   xaxis=Axis(title="Month"),
   yaxis=Axis(title="Temperature"),
   y2axis=Axis(title="Pressure", d3format="f"),
-  x2axis=Axis(values=[1; 10:10:50]),
+  x2axis=Axis(values=3:4:53),
   height=600
 )
 ```
@@ -144,7 +144,7 @@ julia> sgplot(music, [
               ],
               nominal = [:Format],
               groupcolormodel = reverse!(color_ds[:, :Color]),
-              yaxis = Axis(title = "Revenue (billion, adj.)", domain = false),
+              yaxis = Axis(title = "Revenue (billion, adj.)", domain = false, titlepos=[5,5], titleangle=0, titlealign=:left, titlesize=10),
               xaxis = Axis(values = 1975:5:2015),
               legend = Legend(name = :music_leg, rowspace=0, gridalign = :all, columns = 4, orient = :top, values = color_ds[:, :Format]),
               width = 700

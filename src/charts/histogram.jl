@@ -85,7 +85,9 @@ HISTOGRAM_DEFAULT = Dict{Symbol, Any}(:x=>0, :y=>0, :group=>nothing,
                                     :scale => :pdf,
                                     :space => 1,
                                     :outlinecolor=>:white,
-                                    :legend=>nothing
+                                    :legend=>nothing,
+
+                                    :clip=>nothing
                                     )
 mutable struct Histogram <: SGMarks
     opts
@@ -113,6 +115,7 @@ function _push_plots!(vspec, plt::Histogram, all_args; idx = 1)
 
     s_spec = Dict{Symbol,Any}()
     s_spec[:type] = "group"
+    s_spec[:clip] = something(opts[:clip], all_args.opts[:clip])
     s_spec_marks = Dict{Symbol,Any}()
     s_spec_marks[:type] = "rect"
     s_spec_marks[:from] = Dict(:data => "hist_data_$idx")
@@ -160,14 +163,14 @@ function _push_plots!(vspec, plt::Histogram, all_args; idx = 1)
             s_spec_marks[:encode][:enter][:y2][:scale] = "y2"
             s_spec_marks[:encode][:enter][:y2][:value] = 0
             addto_scale!(all_args, 4, new_ds, "__weight")
-            addto_axis!(vspec[:axes][4], all_args.axes[4], string(opts[:scale], " of ", opts[:x]))
+            addto_axis!(vspec[:axes][4], all_args.axes[4], string(opts[:scale]))
             vspec[:scales][4][:zero] = true
         else
             s_spec_marks[:encode][:enter][:y][:scale] = "y1"
             s_spec_marks[:encode][:enter][:y2][:scale] = "y1"
             s_spec_marks[:encode][:enter][:y2][:value] = 0
             addto_scale!(all_args, 3, new_ds, "__weight")
-            addto_axis!(vspec[:axes][3], all_args.axes[3], string(opts[:scale], " of ", opts[:x]))
+            addto_axis!(vspec[:axes][3], all_args.axes[3], string(opts[:scale]))
             vspec[:scales][3][:zero] = true
         end
         s_spec_marks[:encode][:enter][:x][:offset] = opts[:space]
@@ -197,14 +200,14 @@ function _push_plots!(vspec, plt::Histogram, all_args; idx = 1)
             s_spec_marks[:encode][:enter][:x2][:scale] = "x2"
             s_spec_marks[:encode][:enter][:x2][:value] = 0
             addto_scale!(all_args, 2, new_ds, "__weight")
-            addto_axis!(vspec[:axes][2], all_args.axes[2], string(opts[:scale], " of ", opts[:y]))
+            addto_axis!(vspec[:axes][2], all_args.axes[2], string(opts[:scale]))
             vspec[:scales][2][:zero] = true
         else
             s_spec_marks[:encode][:enter][:x][:scale] = "x1"
             s_spec_marks[:encode][:enter][:x2][:scale] = "x1"
             s_spec_marks[:encode][:enter][:x2][:value] = 0
             addto_scale!(all_args, 1, new_ds, "__weight")
-            addto_axis!(vspec[:axes][1], all_args.axes[1], string(opts[:scale], " of ", opts[:y]))
+            addto_axis!(vspec[:axes][1], all_args.axes[1], string(opts[:scale]))
             vspec[:scales][1][:zero] = true
         end
         s_spec_marks[:encode][:enter][:y2][:offset] = opts[:space]

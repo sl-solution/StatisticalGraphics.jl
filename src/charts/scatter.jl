@@ -16,7 +16,9 @@ SCATTER_DEFAULT = Dict{Symbol, Any}(:x => 0, :y => 0,
                                     :colorresponse => nothing,
                                     :colormodel=>["#2f6790", "#bed8ec"],
                                     :legend => nothing , #user must give a name to this if further customisation is needed for the legend
-                                    :jitter=>[0,0] # jitter strength, the first one is the horizontal strength and the second number is the vertical strength
+                                    :jitter=>[0,0], # jitter strength, the first one is the horizontal strength and the second number is the vertical strength
+
+                                    :clip=>nothing
                                     )
 mutable struct Scatter <: SGMarks
     opts
@@ -53,6 +55,7 @@ function _push_plots!(vspec, plt::Scatter, all_args; idx = 1)
 
     s_spec = Dict{Symbol,Any}()
     s_spec[:type] = "group"
+    s_spec[:clip] = something(opts[:clip], all_args.opts[:clip])
     s_spec_marks = Dict{Symbol,Any}()
     s_spec_marks[:type] = "symbol"
     s_spec_marks[:style] = ["point"]

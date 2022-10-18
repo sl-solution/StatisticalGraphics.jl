@@ -16,10 +16,10 @@ LEGEND_DEFAULT = Dict{Symbol, Any}(
                                  :fontweight=>nothing,
                                  :titlefont=>nothing,
                                  :titleitalic=>nothing,
-                                 :titlefontweight=>900,
+                                 :titlefontweight=>nothing,
                                  :labelfont=>nothing,
                                  :labelitalic=>nothing,
-                                 :labelfontweight=>400,     
+                                 :labelfontweight=>nothing,     
                                 )
 
 

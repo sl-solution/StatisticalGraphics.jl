@@ -36,7 +36,10 @@ SGPLOT_DEFAULT = Dict(:width => 600,
                       :fontweight=>400,
 
                       :groupcolormodel => "category",
-                      :autolegend => true
+                      
+                      :clip => true,
+
+
                       )
 
 function sgplot(ds::Union{AbstractDataset, IMD.GroupBy, IMD.GatherBy}, plts::Vector{<:SGMarks}; mapformats=true, nominal::Union{Nothing,IMD.ColumnIndex, IMD.MultiColumnIndex}=nothing, xaxis=Axis(), x2axis=Axis(), yaxis=Axis(), y2axis=Axis(), legend::Union{Bool, Legend, Vector{Legend}}=true, threads=nrow(ds) > 10^6, opts...)

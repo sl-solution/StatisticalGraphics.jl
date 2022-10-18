@@ -3,7 +3,9 @@ REFLINE_DEFAULT = Dict{Symbol, Any}(:values => 0,  # the position of refline, it
                                     :opacity=>1,
                                     :thickness=>1,
                                     :color=>"gray",
-                                    :dash=>[0]
+                                    :dash=>[0],
+
+                                    :clip=>nothing
                                     )
 mutable struct RefLine <: SGMarks
     opts

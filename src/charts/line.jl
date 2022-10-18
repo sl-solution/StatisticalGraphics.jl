@@ -10,7 +10,9 @@ LINE_DEFAULT = Dict{Symbol, Any}(:x => 0, :y=>0, :group=>nothing,
                                     :color=>"#4682b4",
                                     :interpolate => :linear,
                                     :breaks=>false, # false means remove missing values - true means create a break
-                                    :legend=>nothing
+                                    :legend=>nothing,
+
+                                    :clip=>nothing
                                     )
 mutable struct Line <: SGMarks
     opts
@@ -35,6 +37,7 @@ function _push_plots!(vspec, plt::Line, all_args; idx=1)
 
     s_spec = Dict{Symbol,Any}()
     s_spec[:type] = "group"
+    s_spec[:clip] = something(opts[:clip], all_args.opts[:clip])
     s_spec_marks = Dict{Symbol,Any}()
     s_spec_marks[:type] = "line"
     s_spec_marks[:from] = Dict(:data => "source_0_$idx")

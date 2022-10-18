@@ -30,7 +30,9 @@ BOXPLOT_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0, :category => nothing, # x o
     :outlierjitter=>0,
     :outliersymbol=>:circle,
     :outlieropacity=>1,
-    :legend => nothing
+    :legend => nothing,
+
+    :clip=>nothing
 
 )
 mutable struct BoxPlot <: SGMarks
@@ -99,6 +101,7 @@ function _push_boxplot_box!(vspec, plt, all_args, cols, new_ds; idx=1)
 
     s_spec = Dict{Symbol,Any}()
     s_spec[:type] = "group"
+    s_spec[:clip] = something(opts[:clip], all_args.opts[:clip])
     s_spec_marks = Dict{Symbol,Any}()
     s_spec_marks[:type] = "rect"
     s_spec_marks[:from] = Dict{Symbol, Any}(:data => "box_data_$idx")
@@ -293,6 +296,7 @@ function _push_boxplot_outliers!(vspec, plt, all_args, cols, outlier_ds; idx=1)
 
     s_spec = Dict{Symbol,Any}()
     s_spec[:type] = "group"
+    s_spec[:clip] = something(opts[:clip], all_args.opts[:clip])
     s_spec_marks = Dict{Symbol,Any}()
     s_spec_marks[:type] = "symbol"
     s_spec_marks[:from] = Dict(:data => "box_data_outlier_$idx")
