@@ -219,6 +219,8 @@ function addto_axis!(in_axis, axis, title)
         
         if axis.opts[:show]
             in_axis[:labels] = axis.opts[:showlabels]
+        else
+            in_axis[:labels] = false
         end
         in_axis[:labelAngle] = axis.opts[:angle]
         if axis.opts[:baseline] !== nothing
