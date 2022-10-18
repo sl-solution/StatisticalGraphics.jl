@@ -258,7 +258,7 @@ julia> sgplot(gatherby(panel_example, [:x3, :x4]),
 **panel**
 
 ```julia
-julia> sgplot(gatherby(panel_example, [:x5, :x6]), 
+julia> sgplot(groupby(panel_example, [:x5, :x6]), 
                                Bar(x=:x7, group=:x8),
                                nominal = [:x8],
                                width = 100,
