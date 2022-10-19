@@ -29,6 +29,7 @@ module StatisticalGraphics
     include("charts/line.jl")
     include("charts/band.jl")
     include("charts/histogram.jl")
+    include("charts/hist2d.jl")
     include("charts/bar.jl")
     include("charts/boxplot.jl")
     include("charts/refline.jl")
