@@ -24,6 +24,7 @@ AXES_DEFAULT = Dict{Symbol, Any}(:type => :linear,
                                  :titlebaseline=>nothing,
                                  :titlepos=>nothing, # in the form of [x,y]
                                  :titlesize=>nothing,
+                                 :titlepadding=>nothing,
 
                                  :tickcount=>nothing,
                                  :ticks => true, #due to a bug in vega, setting this to false can cause some issues-workaround ticksize=0
