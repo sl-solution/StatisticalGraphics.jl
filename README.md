@@ -228,8 +228,6 @@ julia> sgplot(groupby(cars, :Cylinders),
                           colormodel=["#d53e4f", "#fc8d59", "#fee08b", "#e6f598", "#99d594"]
                         ),
                         
-                     nominal = [:Cylinders],
-
                      layout = :row,
                      columnspace = 5,
                      linkaxis=:y,
