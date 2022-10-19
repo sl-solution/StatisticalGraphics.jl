@@ -1,4 +1,4 @@
-# we use this name prefix for internal column names to minimise risk of duplicate names
+# we use this name prefix for internal column names to minimise the risk of duplicate names
 sg_col_prefix = "__sg__129834__"
 
 function freq(f, x)
@@ -210,6 +210,9 @@ function addto_axis!(in_axis, axis, title)
         if axis.opts[:titlesize] !== nothing
             in_axis[:titleFontSize] = axis.opts[:titlesize]
         end
+        if axis.opts[:titlepadding] !== nothing
+            in_axis[:titlePadding] = axis.opts[:titlepadding]
+        end
 
 
         #offset
@@ -417,12 +420,7 @@ function column_add_height_width_x_y!(panel_info, all_args)
     insertcols!(panel_info, "$(sg_col_prefix)yaxis" => true)
     insertcols!(panel_info, "$(sg_col_prefix)y2axis" => true)
     # if header are requested we create their values
-    if all_args.opts[:showheaders]
-        insertcols!(panel_info, "$(sg_col_prefix)__row__title__" => getindex.(panel_info[:, "$(sg_col_prefix)__title_info_for_each_panel__"], Symbol(all_args.panelby[1])))
-    else
-        insertcols!(panel_info, "$(sg_col_prefix)__row__title__" => missing)
-    end
-    insertcols!(panel_info, "$(sg_col_prefix)__column__title__" => missing)
+    insertcols!(panel_info, "$(sg_col_prefix)cell_title_$(all_args.opts[:headerorient])"=>_how_to_print.(panel_info[:, "$(sg_col_prefix)__title_info_for_each_panel__"], all_args.opts[:headercolname]))
 
 end
 function row_add_height_width_x_y!(panel_info, all_args)
@@ -430,7 +428,7 @@ function row_add_height_width_x_y!(panel_info, all_args)
     _find_width_proportion!(panel_info, all_args)
     insertcols!(panel_info, "$(sg_col_prefix)height" => all_args.opts[:height])
     insertcols!(panel_info, "$(sg_col_prefix)x" => panel_info[:, "$(sg_col_prefix)width"] .+ all_args.opts[:columnspace])
-    modify!(panel_info, "$(sg_col_prefix)x" => cumsum, "$(sg_col_prefix)x" => (x->lag(x,1, default=0)))
+    modify!(panel_info, "$(sg_col_prefix)x" => cumsum, "$(sg_col_prefix)x" => (x -> lag(x, 1, default=0)))
     insertcols!(panel_info, "$(sg_col_prefix)yaxis" => false)
     panel_info[1, "$(sg_col_prefix)yaxis"] = true
     insertcols!(panel_info, "$(sg_col_prefix)y2axis" => false)
@@ -438,12 +436,9 @@ function row_add_height_width_x_y!(panel_info, all_args)
     insertcols!(panel_info, "$(sg_col_prefix)xaxis" => true)
     insertcols!(panel_info, "$(sg_col_prefix)x2axis" => true)
 
-    if all_args.opts[:showheaders]
-        insertcols!(panel_info, "$(sg_col_prefix)__column__title__" => getindex.(panel_info[:, "$(sg_col_prefix)__title_info_for_each_panel__"], Symbol(all_args.panelby[1])))
-    else
-        insertcols!(panel_info, "$(sg_col_prefix)__column__title__" => missing)
-    end
-    insertcols!(panel_info, "$(sg_col_prefix)__row__title__" => missing)
+    # if header are requested we create their values
+    insertcols!(panel_info, "$(sg_col_prefix)cell_title_$(all_args.opts[:headerorient])" => _how_to_print.(panel_info[:, "$(sg_col_prefix)__title_info_for_each_panel__"], all_args.opts[:headercolname]))
+  
 end
 
 function _bool_first_true(x)
@@ -454,6 +449,17 @@ end
 function _bool_last_true(x)
     res = zeros(Bool, length(x))
     res[end] = true
+    res
+end
+
+function _first_not_missing(x)
+    res = copy(x)
+    res[2:end] .= missing
+    res
+end
+function _last_not_missing(x)
+    res = copy(x)
+    res[1:end-1] .= missing
     res
 end
 
@@ -473,22 +479,20 @@ function lattice_add_height_width_x_y!(panel_info, all_args)
     modify!(groupby(panel_info, 2, mapformats = all_args.mapformats, threads = false), 1 => _bool_first_true => "$(sg_col_prefix)x2axis")
     modify!(groupby(panel_info, 2, mapformats = all_args.mapformats, threads = false), 1 => _bool_last_true => "$(sg_col_prefix)xaxis")
 
-    if all_args.opts[:showheaders] && all_args.opts[:layout] == :lattice # for :panel we like to produce missing values
-        insertcols!(panel_info, "$(sg_col_prefix)__column__title__" => getindex.(panel_info[:, "$(sg_col_prefix)__title_info_for_each_panel__"], Symbol(all_args.panelby[1])))
+    if all_args.opts[:layout] == :panel
+        insertcols!(panel_info, "$(sg_col_prefix)cell_title_$(all_args.opts[:headerorient])" => _how_to_print.(panel_info[:, "$(sg_col_prefix)__title_info_for_each_panel__"], all_args.opts[:headercolname]))
     else
-        insertcols!(panel_info, "$(sg_col_prefix)__column__title__" => missing)
-    end
-    # if there is only one panelby column we still like to have __column__title__ column in the output data set
-    if length(all_args.panelby)>1
-        if all_args.opts[:showheaders] && all_args.opts[:layout] == :lattice
-            insertcols!(panel_info, "$(sg_col_prefix)__row__title__" => getindex.(panel_info[:, "$(sg_col_prefix)__title_info_for_each_panel__"], Symbol(all_args.panelby[2])))
-        else
-            insertcols!(panel_info, "$(sg_col_prefix)__row__title__" => missing)
-        end
-    else
-        insertcols!(panel_info, "$(sg_col_prefix)__row__title__" => missing)
-    end
+        _cols_orient = all_args.opts[:headerorient] in (:topleft, :topright) ? :top : :bottom
+        _rows_orient = all_args.opts[:headerorient] in (:topleft, :bottomleft) ? :left : :right 
+        which_have_header_cols = _cols_orient == :top ? _first_not_missing : _last_not_missing
+        which_have_header_rows = _rows_orient == :left ? _first_not_missing : _last_not_missing
+        
+        insertcols!(panel_info, "$(sg_col_prefix)cell_title_$(_cols_orient)" => _how_to_print.(panel_info[:, "$(sg_col_prefix)__title_info_for_each_panel__"], all_args.opts[:headercolname], idx=1))
+        modify!(groupby(panel_info, 2, mapformats = all_args.mapformats, threads = false), "$(sg_col_prefix)cell_title_$(_cols_orient)" => which_have_header_cols)
 
+        insertcols!(panel_info, "$(sg_col_prefix)cell_title_$(_rows_orient)" => _how_to_print.(panel_info[:, "$(sg_col_prefix)__title_info_for_each_panel__"], all_args.opts[:headercolname], idx=2))
+         modify!(groupby(panel_info, 3, mapformats = all_args.mapformats, threads = false), "$(sg_col_prefix)cell_title_$(_rows_orient)" => which_have_header_rows)
+    end
 end
 function panel_add_height_width_x_y!(panel_info, all_args)
     if all_args.opts[:rows] === nothing
@@ -538,11 +542,7 @@ function _modify_axes_for_panel(all_args, axes, info)
             axes[x1loc][:labels] = false
         end
         if lattice_type
-            if !ismissing(info["$(sg_col_prefix)__column__title__"]) && info["$(sg_col_prefix)xaxis"]
-                _add_title_for_lattice!(axes[x1loc], info, all_args, true)
-            else
-                delete!(axes[x1loc], :title)
-            end
+            delete!(axes[x1loc], :title)
         end
         if all_args.axes[1].opts[:tickcount] === nothing
             axes[x1loc][:tickCount] = ceil(info["$(sg_col_prefix)width"] / 40)
@@ -556,12 +556,8 @@ function _modify_axes_for_panel(all_args, axes, info)
             axes[x2loc][:domain] = false
             axes[x2loc][:labels] = false
         end
-        if lattice_type
-            if !ismissing(info["$(sg_col_prefix)__column__title__"]) && info["$(sg_col_prefix)x2axis"]
-                _add_title_for_lattice!(axes[x2loc], info, all_args, true)
-            else
-                delete!(axes[x1loc], :title)
-            end
+         if lattice_type
+            delete!(axes[x2loc], :title)
         end
         if all_args.axes[2].opts[:tickcount] === nothing
             axes[x2loc][:tickCount] = ceil(info["$(sg_col_prefix)width"] / 40)
@@ -575,12 +571,8 @@ function _modify_axes_for_panel(all_args, axes, info)
             axes[y1loc][:domain] = false
             axes[y1loc][:labels] = false
         end
-        if lattice_type
-            if !ismissing(info["$(sg_col_prefix)__row__title__"]) && info["$(sg_col_prefix)yaxis"]
-                _add_title_for_lattice!(axes[y1loc], info, all_args, false)
-            else
-                delete!(axes[y1loc], :title)
-            end
+         if lattice_type
+            delete!(axes[y1loc], :title)
         end
         if all_args.axes[3].opts[:tickcount] === nothing
             axes[y1loc][:tickCount] = ceil(info["$(sg_col_prefix)height"] / 40)
@@ -595,11 +587,7 @@ function _modify_axes_for_panel(all_args, axes, info)
             axes[y2loc][:labels] = false
         end
         if lattice_type
-            if !ismissing(info["$(sg_col_prefix)__row__title__"]) && info["$(sg_col_prefix)y2axis"]
-                _add_title_for_lattice!(axes[y2loc], info, all_args, false)
-            else
-                delete!(axes[y2loc], :title)
-            end
+            delete!(axes[y2loc], :title)
         end
         if all_args.axes[4].opts[:tickcount] === nothing
             axes[y2loc][:tickCount] = ceil(info["$(sg_col_prefix)height"] / 40)
@@ -754,71 +742,81 @@ function _find_width_proportion!(panel_info, all_args)
     end
 end
 
-function _how_to_print(nt, colname)
+function _how_to_print(nt, colname; idx = nothing)
     k = keys(nt)
     val = values(nt)
     if colname
-        join(string.(k, "=", val), ", ")
+        if idx === nothing
+            join(string.(k, "=", val), ", ")
+        else
+            string(k[idx], "=", val[idx])
+        end
     else
-        join(string.(val), ", ")
+        if idx === nothing
+            join(string.(val), ", ")
+        else
+            string(val[idx])
+        end
     end
 end
 
 
 function _add_title_for_panel!(newmark, info, all_args, all_axes)
-    # yaxis_exist = any(x->x[:scale]=="y1", all_axes)
-    # y2axis_exist = any(x->x[:scale]=="y2", all_axes)
+    the_existing_orients = [haskey(IMD.index(info), "$(sg_col_prefix)cell_title_$(orient)")  for orient in [:top, :bottom, :left, :right]]
     
-    if Symbol(all_args.opts[:headerorient]) in (:top, :bottom)
-        _range = [0, info["$(sg_col_prefix)width"]]
-        _limit=info["$(sg_col_prefix)width"]
-    elseif Symbol(all_args.opts[:headerorient]) in (:left, :right)
-        _range = [info["$(sg_col_prefix)height"],0]
-        _limit=info["$(sg_col_prefix)height"]
-    end
+    
+    for orient in [:top, :bottom, :left, :right][the_existing_orients]
+        if orient in (:top, :bottom)
+            _range = [0, info["$(sg_col_prefix)width"]]
+            _limit=info["$(sg_col_prefix)width"]
+        else 
+            _range = [info["$(sg_col_prefix)height"],0]
+            _limit=info["$(sg_col_prefix)height"]
+        end
+        ismissing(info["$(sg_col_prefix)cell_title_$(orient)"]) && continue
 
 
-    _font = something(all_args.opts[:headerfont], all_args.opts[:font])
-    _fweight = something(all_args.opts[:headerfontweight], all_args.opts[:fontweight])
-    _fitalic = something(all_args.opts[:headeritalic], all_args.opts[:italic])
+        _font = something(all_args.opts[:headerfont], all_args.opts[:font])
+        _fweight = something(all_args.opts[:headerfontweight], all_args.opts[:fontweight])
+        _fitalic = something(all_args.opts[:headeritalic], all_args.opts[:italic])
 
-    dummy_scale = Dict{Symbol, Any}(:name=>"title_panel_scale", :range=>_range)
-    dummy_axis = Dict{Symbol, Any}(:ticks => false,
+        dummy_scale = Dict{Symbol, Any}(:name=>"title_panel_scale_$(orient)", :range=>_range)
+        dummy_axis = Dict{Symbol, Any}(:ticks => false,
                                    :labels=>false,
                                    :domain=>false,
-                                   :scale => "title_panel_scale",
-                                   :orient => all_args.opts[:headerorient],
-                                   :title=>_how_to_print(info["$(sg_col_prefix)__title_info_for_each_panel__"], all_args.opts[:headercolname]),
+                                   :scale => "title_panel_scale_$(orient)",
+                                   :orient => orient,
+                                   :title=> info["$(sg_col_prefix)cell_title_$(orient)"],
                                    :titleFontSize=>all_args.opts[:headersize],
                                    :titleFont=>_font,
                                    :titleFontStyle=>_fitalic ? "italic" : "normal",
                                    :titleFontWeight=>_fweight,
-                                   :titleLimit=>_limit,
-                                   :titlePadding=>all_args.opts[:headeroffset])
+                                   :titlePadding=>orient in (:top, :bottom) ? all_args.opts[:headeroffset][1] : all_args.opts[:headeroffset][2])
+        if all_args.opts[:headerangle] !== nothing
+            dummy_axis[:titleAngle] = all_args.opts[:headerangle]
+        else
+            dummy_axis[:titleLimit] = _limit
+        end
+        if all_args.opts[:headerbaseline] !== nothing
+            dummy_axis[:titleBaseline] = all_args.opts[:headerbaseline]
+        end
+        if all_args.opts[:headeralign] !== nothing
+            dummy_axis[:titleAlign] = all_args.opts[:headeralign]
+        end
+        if all_args.opts[:headercolor] !== nothing
+            dummy_axis[:titleColor] = all_args.opts[:headercolor]
+        end
+        if all_args.opts[:headerloc] !== nothing
+            dummy_axis[:titleAnchor] = all_args.opts[:headerloc]
+        end
 
-    push!(newmark[:scales], dummy_scale)
-    push!(newmark[:axes], dummy_axis)
+        push!(newmark[:scales], dummy_scale)
+        push!(newmark[:axes], dummy_axis)
+    end
    
 end
-function _add_title_for_lattice!(axis, info, all_args, iscolumn)
-    axis[:encode] = Dict{Symbol, Any}()
-    axis[:encode][:title] = Dict{Symbol, Any}()
-    axis[:encode][:title][:update] = Dict{Symbol, Any}()
-    n_title = axis[:encode][:title][:update]
-
-    _font = something(all_args.opts[:headerfont], all_args.opts[:font])
-    _fweight = something(all_args.opts[:headerfontweight], all_args.opts[:fontweight])
-    _fitalic = something(all_args.opts[:headeritalic], all_args.opts[:italic])
-
-    n_title[:text] = Dict{Symbol, Any}(:value => iscolumn ? string(info["$(sg_col_prefix)__column__title__"]) : string(info["$(sg_col_prefix)__row__title__"]))
-    n_title[:limit] = Dict{Symbol, Any}(:value => iscolumn ? info["$(sg_col_prefix)width"] : info["$(sg_col_prefix)height"])
-    n_title[:fontSize] = Dict{Symbol, Any}(:value => all_args.opts[:headersize])
-    n_title[:fontWeight] = Dict{Symbol, Any}(:value => _fweight)
-    n_title[:fontStyle] = Dict{Symbol, Any}(:value => _fitalic ? "italic" : "normal")
-end
-
 # we cannot use title marks for this, because we need to be able to add title to more than one orient
-# so we create scale and axes for the outer group mark
+# so we create dummy scale and dummy axes for the outer group mark
 function _add_axes_title_for_lattice!(inmk, panel_info, vspec, all_args)
     arg_max_width = argmax(panel_info[:, "$(sg_col_prefix)x"])
     _width = panel_info[arg_max_width, "$(sg_col_prefix)x"] + panel_info[arg_max_width, "$(sg_col_prefix)width"]
@@ -838,17 +836,28 @@ function _add_axes_title_for_lattice!(inmk, panel_info, vspec, all_args)
             
     push!(inmk[:scales], Dict{Symbol, Any}(:name => "xax", :range => [0, _width]))
     push!(inmk[:scales], Dict{Symbol, Any}(:name => "yax", :range => [_height, 0]))
-    if _titles[2] !== nothing
-        push!(inmk[:axes], Dict{Symbol, Any}(:orient => "top", :scale => "xax", :labels => false, :ticks => false, :domain => false, :offset => all_args.opts[:axistitleoffset], :title => _titles[2] ))
-    end
-    if _titles[1] !== nothing
-        push!(inmk[:axes], Dict{Symbol, Any}(:orient => "bottom", :scale => "xax", :labels => false, :ticks => false, :domain => false, :offset => _height + all_args.opts[:axistitleoffset], :title => _titles[1] ))
-    end
-    if _titles[4] !== nothing
-        push!(inmk[:axes], Dict{Symbol, Any}(:orient => "right", :scale => "yax", :labels => false, :ticks => false, :domain => false, :offset => _width + all_args.opts[:axistitleoffset], :title => _titles[4] ))
-    end
-    if _titles[3] !== nothing
-        push!(inmk[:axes], Dict{Symbol, Any}(:orient => "left", :scale => "yax", :labels => false, :ticks => false, :domain => false, :offset => all_args.opts[:axistitleoffset], :title => _titles[3]))
+    for i in 1:4
+        _titles[i] === nothing && continue
+
+        new_axis_mark = Dict{Symbol, Any}()
+        new_axis_mark[:orient] = [:bottom, :top, :left, :right][i]
+        new_axis_mark[:scale] = i < 3 ? "xax" : "yax"
+        new_axis_mark[:labels] = false
+        new_axis_mark[:ticks] = false
+        new_axis_mark[:domain] = false
+        new_axis_mark[:offset] = i == 1  ? _height : i == 4 ? _width : 0
+        new_axis_mark[:offset] += 30
+        new_axis_mark[:title] = _titles[i]
+
+        #find the right axis and copy title style
+        index_of_ax = findfirst(x-> isequal(x[:scale], ["x1", "x2", "y1", "y2"][i]), vspec[:axes])
+        for prop in [:titleFont, :titleColor, :titleAngle, :titleBaseline, :titleAnchor, :titleAlign, :titleX, :titleY, :titleFontSize, :titleFontWeight, :titleFontStyle, :titlePadding]
+            if haskey(vspec[:axes][index_of_ax], prop)
+                new_axis_mark[prop] = vspec[:axes][index_of_ax][prop]
+            end
+        end
+        push!(inmk[:axes], new_axis_mark)
+
     end
 end
 

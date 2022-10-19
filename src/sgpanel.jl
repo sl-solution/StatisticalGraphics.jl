@@ -27,11 +27,14 @@ SGPANEL_DEFAULT = Dict(:layout=>:panel, # it can be :panel, :lattice - panel sho
         :headerfontweight=>nothing,
         :headeritalic=>nothing,
         :headerfont=>nothing,
+        :headerangle=>nothing,
+        :headerbaseline=>nothing,
+        :headeralign=>nothing,
+        :headercolor=>nothing,
+        :headerloc=>nothing,
         
-        :headerorient=>:top,
-        :headeroffset=>0,
-
-        :axistitleoffset => 40,
+        :headerorient=>nothing, # :top, :bottom, :left, :right,/ for lattice :topleft, :topright, :bottomleft, :bottomright
+        :headeroffset=>[0,0], # [top/bottom, left/right]
 
         # the global font specification
         :font => "sans-serif",
@@ -42,26 +45,54 @@ SGPANEL_DEFAULT = Dict(:layout=>:panel, # it can be :panel, :lattice - panel sho
         )
 
 
-function _sgpanel(ds, panelby::IMD.MultiColumnIndex, plts::Vector{<:SGMarks}; mapformats=true, nominal::Union{Nothing,IMD.ColumnIndex,IMD.MultiColumnIndex}=nothing, xaxis=Axis(), x2axis=Axis(), yaxis=Axis(), y2axis=Axis(), legend::Union{Bool, Legend, Vector{Legend}} = true, threads=nrow(ds) > 10^6, opts...)
+function _sgpanel(ds, panelby::IMD.MultiColumnIndex, plts::Vector{<:SGMarks}; mapformats=true, nominal::Union{Nothing,IMD.ColumnIndex,IMD.MultiColumnIndex}=nothing, xaxis=Axis(), x2axis=Axis(), yaxis=Axis(), y2axis=Axis(), legend::Union{Bool,Legend,Vector{Legend}}=true, threads=nrow(ds) > 10^6, opts...)
     IMD._get_fmt(ds) != mapformats && throw(ArgumentError("the input data set uses mapformats = $(IMD._get_fmt(ds)), but the sgplot is called with mapformats = $(mapformats)"))
-    starts_of_each_group = view(IMD._get_perms(ds), view(IMD._group_starts(ds),1:IMD._ngroups(ds)))
-    ds = parent(ds)
-    first_unique = ds[starts_of_each_group, panelby]
+
     # read opts
     optsd = val_opts(opts)
     global_opts = update_default_opts!(deepcopy(SGPANEL_DEFAULT), optsd)
+
+    if global_opts[:layout] == :lattice
+        if global_opts[:headerorient] === nothing
+            global_opts[:headerorient] = :topright
+        else
+            !(global_opts[:headerorient] in (:topleft, :topright, :bottomleft, :bottomright)) && throw(ArgumentError("for :lattice layout the headerorient keyword must be one of (:topleft, :topright, :bottomleft, :bottomright)"))
+        end
+    elseif global_opts[:layout] == :column
+        if global_opts[:headerorient] === nothing
+            global_opts[:headerorient] = :right 
+        else
+            !(global_opts[:headerorient] in (:top, :bottom, :right, :left)) && throw(ArgumentError("for :column layout the headerorient keyword must be one of (:top, :bottom, :right, :left)"))
+        end
+    elseif global_opts[:layout] in (:row, :panel)
+        if global_opts[:headerorient] === nothing
+            global_opts[:headerorient] = :top 
+        else
+            !(global_opts[:headerorient] in (:top, :bottom, :right, :left)) && throw(ArgumentError("for :panel or :row layout the headerorient must be one of (:top, :bottom, :right, :left)"))
+        end
+    else
+        throw(ArgumentError("layout is unknown"))
+    end
+    if !(global_opts[:headeroffset] isa AbstractVector)
+        global_opts[:headeroffset] = [global_opts[:headeroffset], global_opts[:headeroffset]]
+    end
+
+    starts_of_each_group = view(IMD._get_perms(ds), view(IMD._group_starts(ds), 1:IMD._ngroups(ds)))
+    ds = parent(ds)
+    first_unique = ds[starts_of_each_group, panelby]
+
     panelby = names(ds)[IMD.index(ds)[panelby]]
     if global_opts[:layout] == :lattice
         length(panelby) != 2 && throw(ArgumentError(":lattice layout needs exactly two classification columns"))
-        columns_id = unique(first_unique[!, [panelby[2]]], mapformats=mapformats, threads = threads)
-        rows_id = unique(first_unique[!, [panelby[1]]], mapformats=mapformats, threads = threads)
+        columns_id = unique(first_unique[!, [panelby[2]]], mapformats=mapformats, threads=threads)
+        rows_id = unique(first_unique[!, [panelby[1]]], mapformats=mapformats, threads=threads)
         panel_info = _crossprod(rows_id, columns_id)
     elseif global_opts[:layout] == :panel
-        panel_info = unique(first_unique[!, IMD.index(first_unique)[panelby]], mapformats=mapformats, threads = threads)
+        panel_info = unique(first_unique[!, IMD.index(first_unique)[panelby]], mapformats=mapformats, threads=threads)
     else
-        panel_info = unique(first_unique[!, panelby], mapformats=mapformats, threads = threads)
+        panel_info = unique(first_unique[!, panelby], mapformats=mapformats, threads=threads)
     end
-   
+
 
 
     # add a column to panel_info to make sure there is at least one column
@@ -86,10 +117,10 @@ function _sgpanel(ds, panelby::IMD.MultiColumnIndex, plts::Vector{<:SGMarks}; ma
 
 
     # we can run sgplot to get information about the scale for each panel
-    scale_ds = [Dataset("$(sg_col_prefix)__scale_col__"=>Any[]), Dataset("$(sg_col_prefix)__scale_col__"=>Any[]), Dataset("$(sg_col_prefix)__scale_col__"=>Any[]), Dataset("$(sg_col_prefix)__scale_col__"=>Any[])]
+    scale_ds = [Dataset("$(sg_col_prefix)__scale_col__" => Any[]), Dataset("$(sg_col_prefix)__scale_col__" => Any[]), Dataset("$(sg_col_prefix)__scale_col__" => Any[]), Dataset("$(sg_col_prefix)__scale_col__" => Any[])]
     referred_cols_in_ds = Int[]
     scale_type = Any[nothing, nothing, nothing, nothing]
-    all_args = SGPlot_Args(ds, scale_ds, scale_type, referred_cols_in_ds, plts, [xaxis, x2axis, yaxis, y2axis], legend isa Legend ? [legend] : legend,Dict{Symbol, Any}[], mapformats, nominal, threads, names(ds)[IMD.index(ds)[panelby]], IMD.index(ds)[panelby], uniscale_col, independent_axes, global_opts)
+    all_args = SGPlot_Args(ds, scale_ds, scale_type, referred_cols_in_ds, plts, [xaxis, x2axis, yaxis, y2axis], legend isa Legend ? [legend] : legend, Dict{Symbol,Any}[], mapformats, nominal, threads, names(ds)[IMD.index(ds)[panelby]], IMD.index(ds)[panelby], uniscale_col, independent_axes, global_opts)
 
 
     sgplot_result = _sgplot!(all_args).json_spec
@@ -101,11 +132,10 @@ function _sgpanel(ds, panelby::IMD.MultiColumnIndex, plts::Vector{<:SGMarks}; ma
     vspec = Dict{Symbol,Any}()
     vspec[:data] = Dict{Symbol,Any}[]
     # vspec[:scales] = Dict{Symbol,Any}[]
-    vspec[:marks] = Dict{Symbol, Any}[]
-    sgpanel_marks = Dict{Symbol,Any}(:marks=>Dict{Symbol, Any}[]) # we use the a layer of mark for assigning graph axes labels in the case of lattice type layouts
+    vspec[:marks] = Dict{Symbol,Any}[]
+    sgpanel_marks = Dict{Symbol,Any}(:marks => Dict{Symbol,Any}[]) # we use the a layer of mark for assigning graph axes labels in the case of lattice type layouts
     sgpanel_marks[:type] = "group"
     # vspec[:axes] = Dict{Symbol,Any}[]
-    
     for i in 1:nrow(panel_info)
         newmark = Dict{Symbol,Any}()
         newmark[:type] = :group
@@ -115,23 +145,23 @@ function _sgpanel(ds, panelby::IMD.MultiColumnIndex, plts::Vector{<:SGMarks}; ma
         # end
 
         # update "height" and "width" signals within each cell
-        newmark[:signals] = Dict{Symbol, Any}[]
-        push!(newmark[:signals], Dict{Symbol, Any}(:name => "height", :update => string(panel_info[i, "$(sg_col_prefix)height"])))
-        push!(newmark[:signals], Dict{Symbol, Any}(:name => "width", :update => string(panel_info[i, "$(sg_col_prefix)width"])))
-        
+        newmark[:signals] = Dict{Symbol,Any}[]
+        push!(newmark[:signals], Dict{Symbol,Any}(:name => "height", :update => string(panel_info[i, "$(sg_col_prefix)height"])))
+        push!(newmark[:signals], Dict{Symbol,Any}(:name => "width", :update => string(panel_info[i, "$(sg_col_prefix)width"])))
+
         newmark[:encode] = Dict{Symbol,Any}()
         newmark[:encode][:enter] = Dict{Symbol,Any}()
         newmark[:encode][:enter][:x] = Dict{Symbol,Any}(:value => panel_info[i, "$(sg_col_prefix)x"])
         newmark[:encode][:enter][:y] = Dict{Symbol,Any}(:value => panel_info[i, "$(sg_col_prefix)y"])
         newmark[:encode][:enter][:height] = Dict{Symbol,Any}(:value => panel_info[i, "$(sg_col_prefix)height"])
         newmark[:encode][:enter][:width] = Dict{Symbol,Any}(:value => panel_info[i, "$(sg_col_prefix)width"])
-    
+
         if all_args.opts[:panelborder]
             newmark[:encode][:enter][:stroke] = Dict{Symbol,Any}(:value => all_args.opts[:panelbordercolor])
             newmark[:encode][:enter][:strokeWidth] = Dict{Symbol,Any}(:value => all_args.opts[:panelborderthickness])
-    
+
         end
-    
+
         newmark[:marks] = deepcopy(sgplot_result[:marks])
         new_scales = _modify_scales_for_panel(deepcopy(sgplot_result[:scales]), panel_info[i, :])
         newmark[:scales] = new_scales[1:4]
@@ -139,7 +169,7 @@ function _sgpanel(ds, panelby::IMD.MultiColumnIndex, plts::Vector{<:SGMarks}; ma
         newmark[:axes] = new_axes
 
         # put panel or lattice headers
-        if all_args.opts[:showheaders] && all_args.opts[:layout] == :panel
+        if all_args.opts[:showheaders]
             _add_title_for_panel!(newmark, panel_info[i, :], all_args, sgplot_result[:axes])
         end
         # i is send to create unique name for filtered data
@@ -148,18 +178,18 @@ function _sgpanel(ds, panelby::IMD.MultiColumnIndex, plts::Vector{<:SGMarks}; ma
     end
 
     if all_args.opts[:layout] in (:row, :column, :lattice)
-        # add axes title once for the whole graph
+    #     # add axes title once for the whole graph
         _add_axes_title_for_lattice!(sgpanel_marks, panel_info, sgplot_result, all_args)
     end
 
     push!(vspec[:marks], sgpanel_marks)
-    if length(sgplot_result[:scales])>4
+    if length(sgplot_result[:scales]) > 4
         vspec[:scales] = sgplot_result[:scales][5:end]
     end
     vspec[:legends] = sgplot_result[:legends]
     vspec[Symbol("\$schema")] = "https://vega.github.io/schema/vega/v5.json"
     prepend!(vspec[:data], sgplot_result[:data])
-    
+
     SGPanel(vspec)
 end
 
