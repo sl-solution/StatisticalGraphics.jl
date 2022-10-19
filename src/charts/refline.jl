@@ -34,6 +34,7 @@ function _push_plots!(vspec, plt::RefLine, all_args; idx=1)
     for val in vals
         s_spec = Dict{Symbol,Any}()
         s_spec[:type] = "rule"
+        s_spec[:clip] = something(opts[:clip], all_args.opts[:clip])
         s_spec[:encode] = Dict{Symbol,Any}()
         s_spec[:encode][:enter] = Dict{Symbol,Any}()
         
