@@ -135,7 +135,7 @@ function addto_scale!(all_args, which_scale, ds, col)
             else
                 _axis_limits=all_args.axes[which_scale].opts[:range]
                 (!(_axis_limits isa AbstractVector) || length(_axis_limits) != 2 ) && throw(ArgumentError("axis range limits must be a vector of min and max values of the axis domain"))
-                append!(all_args.scale_ds[which_scale], combine(ds, col => (x -> [_axis_limits[1], _axis_limits[2]]) => "$(sg_col_prefix)__scale_col__"), promote=true, cols=:union)
+                append!(all_args.scale_ds[which_scale], combine(ds, col => (x -> _convert_values_for_js.([_axis_limits[1], _axis_limits[2]])) => "$(sg_col_prefix)__scale_col__"), promote=true, cols=:union)
             end
         end
     else
@@ -328,10 +328,12 @@ function _fill_scales!(vspec, all_args)
                     in_scale[:domain] = [in_scale[:domain]]
                 end
             else
-                all_args.scale_ds[i] = combine(all_args.scale_ds[i], "$(sg_col_prefix)__scale_col__" => (x -> [[minimum(vcat(x...)), maximum(vcat(x...))]]) => "$(sg_col_prefix)__scale_col__")
-                in_scale[:domain] = combine(all_args.scale_ds[i], "$(sg_col_prefix)__scale_col__" => (x -> [minimum(vcat(x...)), maximum(vcat(x...))]) => "$(sg_col_prefix)__scale_col__")[:, "$(sg_col_prefix)__scale_col__"]
+                all_args.scale_ds[i] = combine(all_args.scale_ds[i], "$(sg_col_prefix)__scale_col__" => (x -> [[IMD.minimum(vcat(x...)), IMD.maximum(vcat(x...))]]) => "$(sg_col_prefix)__scale_col__")
+                # in_scale[:domain] = combine(all_args.scale_ds[i], "$(sg_col_prefix)__scale_col__" => (x -> [IMD.minimum(vcat(x...)), IMD.maximum(vcat(x...))]) => "$(sg_col_prefix)__scale_col__")[:, "$(sg_col_prefix)__scale_col__"]
+                in_scale[:domain] = all_args.scale_ds[i][:, "$(sg_col_prefix)__scale_col__"][1]
             end
         end
+        
     end
     if !isempty(independent_axes)
         uniscale_col = all_args.uniscale_col
@@ -342,7 +344,7 @@ function _fill_scales!(vspec, all_args)
             if in_scale[:type] in [:band, :point]
                 all_args.scale_ds[i] = combine(gatherby(all_args.scale_ds[i], uniscale_col, mapformats = all_args.mapformats), "$(sg_col_prefix)__scale_col__" => (x -> unique(vcat(x...))) => "$(sg_col_prefix)__scale_col__")
             else
-                all_args.scale_ds[i] = in_scale[:domain] = combine(gatherby(all_args.scale_ds[i], uniscale_col, mapformats = all_args.mapformats), "$(sg_col_prefix)__scale_col__" => (x -> [[minimum(x), maximum(x)]]) => "$(sg_col_prefix)__scale_col__")
+                all_args.scale_ds[i] = in_scale[:domain] = combine(gatherby(all_args.scale_ds[i], uniscale_col, mapformats = all_args.mapformats), "$(sg_col_prefix)__scale_col__" => (x -> [[IMD.minimum(x), IMD.maximum(x)]]) => "$(sg_col_prefix)__scale_col__")
             end
             setformat!(all_args.scale_ds[i], uniscale_col => getformat(all_args.ds, uniscale_col))
         end

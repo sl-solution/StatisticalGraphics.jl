@@ -346,7 +346,7 @@ function _check_and_normalize!(plt::Bar, all_args)
         if opts[:stat] === nothing
             opts[:stat] = IMD.sum
         end
-        bar_ds = combine(gatherby(ds, g_col, mapformats=all_args.mapformats, threads=threads), opts[:response] => (x->opts[:stat](_f_response, x)) => :__height__bar__, color_response => (x->color_stat(_f_color, x)) => :__color__value__ )
+        bar_ds = combine(gatherby(ds, g_col, mapformats=all_args.mapformats, threads=threads), opts[:response] => (x->opts[:stat](_f_response, x)) => :__height__bar__, color_response => (x->color_stat(_f_color, x)) => :__color__value__ , threads=threads)
         if opts[:normalize] && opts[:group] !== nothing
             modify!(groupby(bar_ds, [col; _extra_col_for_panel_names_], mapformats = all_args.mapformats, threads = false), :__height__bar__ => opts[:normalizer])
         elseif opts[:normalize] && opts[:group] === nothing
