@@ -227,14 +227,21 @@ julia> sgplot(groupby(cars, :Cylinders),
                           orderresponse=:Horsepower, orderstat=IMD.maximum,
                           colormodel=["#d53e4f", "#fc8d59", "#fee08b", "#e6f598", "#99d594"]
                         ),
+                        
                      nominal = [:Cylinders],
+
                      layout = :row,
+                     columnspace = 5,
                      linkaxis=:y,
                      proportional=true,
+
                      stepsize=15,
-                     xaxis=Axis(title="Make", angle=-90, baseline=:center, align=:right, ticksize=0, domain=false),
+                     xaxis=Axis(title="Make", angle=-90, baseline=:middle, align=:right, ticksize=0, domain=false, titlepadding=20),
                      yaxis=Axis(title="Horsepower", domain=false),
-                     columnspace = 5
+                     
+                     headercolname = false,
+                     headersize=12,
+                     headerfontweight=900,                     
               )
 ```
 
