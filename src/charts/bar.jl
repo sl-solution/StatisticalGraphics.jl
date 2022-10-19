@@ -28,6 +28,8 @@ BAR_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0, :group => nothing,
     :baselinestat => nothing, # same rule as :stat
     :legend=>nothing,
 
+    :barcorner => [0,0,0,0], #corner radius (cornerRadiusTopLeft, cornerRadiusTopRight, cornerRadiusBottomLeft, cornerRadiusBottomRight)
+
     :clip=>nothing
 )
 mutable struct Bar <: SGMarks
@@ -38,6 +40,12 @@ mutable struct Bar <: SGMarks
         if (cp_BAR_DEFAULT[:x] == 0 && cp_BAR_DEFAULT[:y] == 0)
             throw(ArgumentError("Bar plot needs one of x or y keyword arguments"))
         end
+        if !(cp_BAR_DEFAULT[:barcorner] isa AbstractVector)
+            cp_BAR_DEFAULT[:barcorner] = fill(cp_BAR_DEFAULT[:barcorner], 4)
+        else
+            length(cp_BAR_DEFAULT[:barcorner]) != 4 && throw(ArgumentError("the barcorner option must be a single value or a vector of length four of values"))
+        end
+
         new(cp_BAR_DEFAULT)
     end
 end
@@ -66,15 +74,19 @@ function _push_plots!(vspec, plt::Bar, all_args; idx=1)
     s_spec_marks[:from] = Dict(:data => "bar_data_$idx")
     s_spec_marks[:encode] = Dict{Symbol,Any}()
     s_spec_marks[:encode][:enter] = Dict{Symbol,Any}()
-    s_spec_marks[:encode][:enter][:opacity] = Dict(:value => opts[:opacity])
-    s_spec_marks[:encode][:enter][:stroke] = Dict(:value => opts[:outlinecolor])
-    s_spec_marks[:encode][:enter][:strokeWidth] = Dict(:value => opts[:outlinethickness])
+    s_spec_marks[:encode][:enter][:cornerRadiusTopLeft] = Dict{Symbol, Any}(:value => opts[:barcorner][1])
+    s_spec_marks[:encode][:enter][:cornerRadiusTopRight]= Dict{Symbol, Any}(:value => opts[:barcorner][2])
+    s_spec_marks[:encode][:enter][:cornerRadiusBottomLeft]= Dict{Symbol, Any}(:value => opts[:barcorner][3])
+    s_spec_marks[:encode][:enter][:cornerRadiusBottomRight]= Dict{Symbol, Any}(:value => opts[:barcorner][4])
+    s_spec_marks[:encode][:enter][:opacity] = Dict{Symbol, Any}(:value => opts[:opacity])
+    s_spec_marks[:encode][:enter][:stroke] = Dict{Symbol, Any}(:value => opts[:outlinecolor])
+    s_spec_marks[:encode][:enter][:strokeWidth] = Dict{Symbol, Any}(:value => opts[:outlinethickness])
     s_spec_marks[:encode][:enter][:fill] = Dict{Symbol,Any}()
 
     if opts[:colorresponse] !== nothing
         s_spec_marks[:encode][:enter][:fill][:scale] = "color_scale_$idx"
         s_spec_marks[:encode][:enter][:fill][:field] = "__color__value__"
-        addto_color_scale!(vspec, "bar_data_$idx", "color_scale_$idx", "__color__value__", false; color_model = opts[:colormodel])
+        addto_color_scale!(vspec, "bar_data_$idx", "color_scale_$idx", "__color__value__", false; color_model=opts[:colormodel])
     end
 
 
@@ -160,7 +172,7 @@ function _push_plots!(vspec, plt::Bar, all_args; idx=1)
         # group is the 5th element of scales
         addto_group_scale!(vspec[:scales][5], "bar_data_$idx", opts[:group], all_args)
         # for cluster we need to define y value and add a new scale
-        if opts[:groupdisplay]  in (:cluster, :step)
+        if opts[:groupdisplay] in (:cluster, :step)
             s_spec[:encode] = Dict{Symbol,Any}()
             s_spec[:encode][:enter] = Dict{Symbol,Any}()
             if _orient_ == :vertical
@@ -332,7 +344,7 @@ function _check_and_normalize!(plt::Bar, all_args)
             _f_response = getformat(ds, opts[:response])
         end
         if opts[:stat] === nothing
-            opts[:stat] = sum
+            opts[:stat] = IMD.sum
         end
         bar_ds = combine(gatherby(ds, g_col, mapformats=all_args.mapformats, threads=threads), opts[:response] => (x->opts[:stat](_f_response, x)) => :__height__bar__, color_response => (x->color_stat(_f_color, x)) => :__color__value__ )
         if opts[:normalize] && opts[:group] !== nothing
