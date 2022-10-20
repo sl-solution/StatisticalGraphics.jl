@@ -35,4 +35,8 @@ module StatisticalGraphics
     include("charts/refline.jl")
     include("sgplot.jl")
     include("sgpanel.jl")
+    include("precompile/warmup.jl")
+    if VERSION >= v"1.8"
+        SG.warmup()
+    end
 end
