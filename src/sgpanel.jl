@@ -20,6 +20,10 @@ SGPANEL_DEFAULT = Dict(:layout=>:panel, # it can be :panel, :lattice - panel sho
         :columnspace => 30,
         :groupcolormodel => "category", #default color model for groupspace
 
+        :backcolor => :transparent, # the background color for the whole graph area
+        :wallcolor => :transparent, # the background of the plot area / or panel area
+
+
         :showheaders => true,
         :headercolname=>true,
 
@@ -51,7 +55,6 @@ function _sgpanel(ds, panelby::IMD.MultiColumnIndex, plts::Vector{<:SGMarks}; ma
     # read opts
     optsd = val_opts(opts)
     global_opts = update_default_opts!(deepcopy(SGPANEL_DEFAULT), optsd)
-
     if global_opts[:layout] == :lattice
         if global_opts[:headerorient] === nothing
             global_opts[:headerorient] = :topright
@@ -130,6 +133,7 @@ function _sgpanel(ds, panelby::IMD.MultiColumnIndex, plts::Vector{<:SGMarks}; ma
     join_scale_info!(panel_info, all_args)
     add_height_width_x_y!(panel_info, all_args)
     vspec = Dict{Symbol,Any}()
+    vspec[:background] = global_opts[:backcolor]
     vspec[:data] = Dict{Symbol,Any}[]
     # vspec[:scales] = Dict{Symbol,Any}[]
     vspec[:marks] = Dict{Symbol,Any}[]
@@ -155,6 +159,9 @@ function _sgpanel(ds, panelby::IMD.MultiColumnIndex, plts::Vector{<:SGMarks}; ma
         newmark[:encode][:enter][:y] = Dict{Symbol,Any}(:value => panel_info[i, "$(sg_col_prefix)y"])
         newmark[:encode][:enter][:height] = Dict{Symbol,Any}(:value => panel_info[i, "$(sg_col_prefix)height"])
         newmark[:encode][:enter][:width] = Dict{Symbol,Any}(:value => panel_info[i, "$(sg_col_prefix)width"])
+        if global_opts[:wallcolor] != :transparent
+            newmark[:encode][:enter][:fill] = Dict{Symbol, Any}(:value => global_opts[:wallcolor])
+        end
 
         if all_args.opts[:panelborder]
             newmark[:encode][:enter][:stroke] = Dict{Symbol,Any}(:value => all_args.opts[:panelbordercolor])

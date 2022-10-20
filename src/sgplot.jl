@@ -38,6 +38,8 @@ SGPLOT_DEFAULT = Dict(:width => 600,
                       :groupcolormodel => "category",
                       
                       :clip => true,
+                      :backcolor => :transparent, # the background color for the whole graph area
+                      :wallcolor => :transparent, # the background of the plot area / or panel area
 
 
                       )
@@ -104,13 +106,17 @@ function _sgplot!(all_args)
 
     vspec = Dict{Symbol,Any}()
 
-
+    
     # add sgplot global specification
     # every specification must be hard code - since we are not going to use the default names of options in vega/ we are using our own naming convention
     vspec[:width] = global_opts[:width]
     vspec[:height] = global_opts[:height]
+    vspec[:background] = global_opts[:backcolor]
     vspec[Symbol("\$schema")] = "https://vega.github.io/schema/vega/v5.json"
-
+    vspec[:config] = Dict{Symbol, Any}()
+    if global_opts[:wallcolor] != :transparent
+        vspec[:config][:group] = Dict{Symbol, Any}(:fill => global_opts[:wallcolor])
+    end
 
     # add vspec components - later we modify them accordingly
     vspec[:marks] = Dict{Symbol,Any}[]
