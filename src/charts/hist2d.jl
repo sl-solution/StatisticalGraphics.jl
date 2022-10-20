@@ -1,6 +1,14 @@
 
 # TODO this is a first draft - should be optimised later
-function _hist2d_counts(x::AbstractVector{Union{T,Missing}}, y::AbstractVector{Union{S,Missing}}, k_x, k_y, _f_x, _f_y)::Vector{Tuple} where {T<:Real} where {S<:Real}
+function _hist2d_counts(x::AbstractVector{Union{T,Missing}}, y::AbstractVector{Union{S,Missing}}, k_x, k_y, _f_x, _f_y; default_method)::Vector{Tuple} where {T<:Real} where {S<:Real}
+    if k_x === nothing || k_y === nothing
+        count_missing = count(val->ismissing(coalesce(val)), zip(x,y))
+        count_nonmissing = length(x) - count_missing
+        k_x = something(k_x, default_method(count_nonmissing))
+        k_y =something(k_y, default_method(count_nonmissing))
+    end
+
+
     max_val_x = IMD.maximum(_f_x, x)
     min_val_x = IMD.minimum(_f_x, x)
 
@@ -61,6 +69,7 @@ HEAT_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0,
     :colormodel => ["#2f6790", "#bed8ec"],
     :xbincount => nothing,
     :ybincount=> nothing,
+    :bincountmethod => x -> max(2, Int(ceil(log2(x)) + 1)), # x is the length - later we can change this default function 
     # :outlinecolor => :white,
     :legend => nothing, :clip => nothing
 )
@@ -186,20 +195,7 @@ function _check_and_normalize!(plt::Heatmap, all_args)
 
     g_col = _extra_col_for_panel
 
-    # in case of if any of xbincount or ybincount is not specified - TODO we do not need this when values are specified
-    modify!(groupby(ds, g_col,threads=threads, mapformats=all_args.mapformats), [opts[:x],opts[:y]] .=> (x->max(2, Int(ceil(log2(IMD.n(x))) + 1))) .=>["$(sg_col_prefix)__xbincount__for__hist2d__", "$(sg_col_prefix)__ybincount__for__hist2d__"])
-    # if user passed bincount we use them  - TODO can this be optimised?
-    if plt.opts[:xbincount] !== nothing 
-        ds[!, "$(sg_col_prefix)__xbincount__for__hist2d__"] .= plt.opts[:xbincount]
-    end
-    if plt.opts[:ybincount] !== nothing 
-        ds[!, "$(sg_col_prefix)__ybincount__for__hist2d__"] .= plt.opts[:ybincount]
-    end
-
-    heatmap_ds = combine(gatherby(ds, g_col, threads=threads, mapformats=all_args.mapformats), (opts[:x], opts[:y], "$(sg_col_prefix)__xbincount__for__hist2d__", "$(sg_col_prefix)__ybincount__for__hist2d__") => ((x, y, z, k) -> _hist2d_counts(x, y, first(z), first(k), _f_x, _f_y)) => :__bin__information__, threads=threads)
-
-    # remove temporary variables that we created
-    select!(ds, Not(["$(sg_col_prefix)__xbincount__for__hist2d__", "$(sg_col_prefix)__ybincount__for__hist2d__"]))
+    heatmap_ds = combine(gatherby(ds, g_col, threads=threads, mapformats=all_args.mapformats), (opts[:x], opts[:y]) => ((x, y) -> _hist2d_counts(x, y, opts[:xbincount], opts[:ybincount], _f_x, _f_y; default_method = opts[:bincountmethod])) => :__bin__information__, threads=threads)
 
     modify!(heatmap_ds, :__bin__information__ => splitter => [:__bin__x__start__, :__bin__x__end__, :__bin__y__start__, :__bin__y__end__, :__bin__counts__], threads=threads)
     filter!(heatmap_ds, :__bin__counts__, by=(>(0)))
