@@ -56,10 +56,11 @@ HEAT_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0,
     :x2axis => false,
     :y2axis => false,
     :opacity => 1,
+    :tooltip=>false, #show frequency on mouseover
     # :outlinethickness => 0.1,
     :colormodel => ["#2f6790", "#bed8ec"],
-    :xbincount => 10,
-    :ybincount=>10,
+    :xbincount => nothing,
+    :ybincount=> nothing,
     # :outlinecolor => :white,
     :legend => nothing, :clip => nothing
 )
@@ -95,14 +96,17 @@ function _push_plots!(vspec, plt::Heatmap, all_args; idx=1)
     s_spec_marks[:from] = Dict(:data => "heatmap_data_$idx")
     s_spec_marks[:encode] = Dict{Symbol,Any}()
     s_spec_marks[:encode][:enter] = Dict{Symbol,Any}()
-    s_spec_marks[:encode][:enter][:opacity] = Dict(:value => opts[:opacity])
+    s_spec_marks[:encode][:enter][:opacity] = Dict{Symbol, Any}(:value => opts[:opacity])
+    if opts[:tooltip]
+        s_spec_marks[:encode][:enter][:tooltip] = Dict{Symbol, Any}(:field=>:__bin__counts__)
+    end
     # s_spec_marks[:encode][:enter][:stroke] = Dict(:value => opts[:outlinecolor])
     # s_spec_marks[:encode][:enter][:strokeWidth] = Dict(:value => opts[:outlinethickness])
     s_spec_marks[:encode][:enter][:fill] = Dict{Symbol,Any}()
 
     s_spec_marks[:encode][:enter][:fill][:scale] = "color_scale_$idx"
     s_spec_marks[:encode][:enter][:fill][:field] = :__bin__counts__
-    addto_color_scale!(vspec, "heatmap_data_$idx", "color_scale_$idx", :__bin__counts__, false)
+    addto_color_scale!(vspec, "heatmap_data_$idx", "color_scale_$idx", :__bin__counts__, false; color_model=opts[:colormodel])
 
     if opts[:x2axis]
         _scale_x = "x2"
@@ -145,7 +149,7 @@ function _push_plots!(vspec, plt::Heatmap, all_args; idx=1)
     s_spec_marks[:encode][:enter][:y][:field] = "__bin__y__start__"
     s_spec_marks[:encode][:enter][:y2][:field] = "__bin__y__end__"
 
-   
+
 
 
     s_spec[:marks] = [s_spec_marks]
@@ -181,10 +185,24 @@ function _check_and_normalize!(plt::Heatmap, all_args)
     end
 
     g_col = _extra_col_for_panel
-    heatmap_ds = combine(gatherby(ds, g_col, threads=threads, mapformats=all_args.mapformats), (opts[:x], opts[:y]) => ((x, y) -> _hist2d_counts(x, y, plt.opts[:xbincount], plt.opts[:ybincount], _f_x, _f_y)) => :__bin__information__, threads=threads)
+
+    # in case of if any of xbincount or ybincount is not specified - TODO we do not need this when values are specified
+    modify!(groupby(ds, g_col,threads=threads, mapformats=all_args.mapformats), [opts[:x],opts[:y]] .=> (x->max(2, Int(ceil(log2(IMD.n(x))) + 1))) .=>["$(sg_col_prefix)__xbincount__for__hist2d__", "$(sg_col_prefix)__ybincount__for__hist2d__"])
+    # if user passed bincount we use them  - TODO can this be optimised?
+    if plt.opts[:xbincount] !== nothing 
+        ds[!, "$(sg_col_prefix)__xbincount__for__hist2d__"] .= plt.opts[:xbincount]
+    end
+    if plt.opts[:ybincount] !== nothing 
+        ds[!, "$(sg_col_prefix)__ybincount__for__hist2d__"] .= plt.opts[:ybincount]
+    end
+
+    heatmap_ds = combine(gatherby(ds, g_col, threads=threads, mapformats=all_args.mapformats), (opts[:x], opts[:y], "$(sg_col_prefix)__xbincount__for__hist2d__", "$(sg_col_prefix)__ybincount__for__hist2d__") => ((x, y, z, k) -> _hist2d_counts(x, y, first(z), first(k), _f_x, _f_y)) => :__bin__information__, threads=threads)
+
+    # remove temporary variables that we created
+    select!(ds, Not(["$(sg_col_prefix)__xbincount__for__hist2d__", "$(sg_col_prefix)__ybincount__for__hist2d__"]))
 
     modify!(heatmap_ds, :__bin__information__ => splitter => [:__bin__x__start__, :__bin__x__end__, :__bin__y__start__, :__bin__y__end__, :__bin__counts__], threads=threads)
-    filter!(heatmap_ds, :__bin__counts__, by = >(0))
+    filter!(heatmap_ds, :__bin__counts__, by=(>(0)))
 
     return heatmap_ds
     @label argerr
