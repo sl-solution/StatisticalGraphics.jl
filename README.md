@@ -3,6 +3,8 @@
 The idea of the `StatisticalGraphics` package is to create a powerful, yet easy-to-use solution for creating statistical graphics. 
 The package uses [`vega`](https://vega.github.io/vega/) (see also [D3](https://d3js.org/)) for producing the final outputs.
 
+![siteexamples](assets/site.png)
+
 # Examples
 
 ```julia
@@ -18,7 +20,7 @@ julia> sgplot(ds, [
                   yaxis = Axis(grid=true))
 ```
 
-![output](/assets/visualization.svg)
+![output](assets/visualization.svg)
 
 ```julia
 julia> ds = Dataset(x=randn(10^7));
@@ -28,7 +30,7 @@ julia> sgplot(ds, Histogram(x=:x, color=:steelblue, outlinethickness=0.5, space=
                )
 ```
 
-![hist_ex](/assets/hist_ex.svg)
+![hist_ex](assets/hist_ex.svg)
 
 **Dubai Weather**
 
@@ -47,7 +49,7 @@ julia> sgplot(dubai_weather, [
     y2axis=Axis(offset=10, title="Pressure"))
 ```
 
-![dubai_ex](/assets/dubai.svg)
+![dubai_ex](assets/dubai.svg)
 
 Using `BoxPlot` to plot monthly temperature (minimum and maximum), and add second axes for plotting weekly pressure.
 
@@ -67,7 +69,7 @@ julia> sgplot(dubai_weather, [
 )
 ```
 
-![dubai_boxplot](/assets/dubai_boxplot.svg)
+![dubai_boxplot](assets/dubai_boxplot.svg)
 
 
 **[Box Plot](https://observablehq.com/@d3/box-plot)**
@@ -107,7 +109,7 @@ julia> sgplot(bar_ds, Bar(x=2, response=3, group=1), # refer columns by their in
                         legend = false)
 ```
 
-![bar_random](/assets/bar_random.svg)
+![bar_random](assets/bar_random.svg)
 
 **unemployment stacked area plot across industries** 
 
@@ -126,7 +128,7 @@ julia> sgplot(unemployment, Band(x=:date, lower=0.0, upper=:cum_sum, group=:seri
                             )
 ```
 
-![unemployment](/assets/unemployment.svg)
+![unemployment](assets/unemployment.svg)
 
 **[Revenue by Music Format, 1973–2018](https://observablehq.com/@mbostock/revenue-by-music-format-1973-2018)**
 
@@ -151,7 +153,7 @@ julia> sgplot(music, [
               )
 ```
 
-![music](/assets/music.svg)
+![music](assets/music.svg)
 
 **Normalised bar chart**
 
@@ -273,3 +275,25 @@ julia> sgplot(groupby(panel_example, [:x5, :x6]),
 ```
 
 ![barpanel](assets/barpanel.svg)
+
+
+```julia
+julia> fun_example = Dataset(rand(1:4, 1000, 4), :auto)
+julia> sgplot(gatherby(fun_example, [:x3, :x4]), 
+                        Bar(x=:x1, group=:x2, barcorner=15),
+                        nominal = :x2,
+                        layout = :lattice,
+                        rowspace=5,
+                        columnspace=5,
+                        width = 100,
+                        height = 100,
+                        wallcolor=:lightgray,
+                        showheaders = false,
+                        xaxis=Axis(show=false),
+                        yaxis=Axis(show=false),
+                        legend=false,
+                        clip=false
+                )
+```
+
+![fun_example](assets/for_fun.svg)
