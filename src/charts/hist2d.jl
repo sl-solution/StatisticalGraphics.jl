@@ -57,7 +57,7 @@ function _hist2d_counts(x::AbstractVector{Union{T,Missing}}, y::AbstractVector{U
     ly = length(binsy_end)
 
 
-    tuple.(repeat(binsx_start, inner=ly), repeat(binsx_end, inner=ly), repeat(binsy_start, outer=lx), repeat(binsy_end, outer=lx), vec(counts[2:end, 2:end]))
+    tuple.(repeat(binsx_start, outer=ly), repeat(binsx_end, outer=ly), repeat(binsy_start, inner=lx), repeat(binsy_end, inner=lx), vec(counts[2:end, 2:end]))
 end
 
 HEAT_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0,
@@ -66,7 +66,7 @@ HEAT_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0,
     :opacity => 1,
     :tooltip=>false, #show frequency on mouseover
     # :outlinethickness => 0.1,
-    :colormodel => ["#2f6790", "#bed8ec"],
+    :colormodel => Dict{Symbol, Any}(:scheme=>:viridis),
     :xbincount => nothing,
     :ybincount=> nothing,
     :bincountmethod => x -> max(2, Int(ceil(log2(x)) + 1)), # x is the length - later we can change this default function 
