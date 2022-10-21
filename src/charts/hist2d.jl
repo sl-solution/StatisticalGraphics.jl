@@ -2,7 +2,7 @@
 # TODO this is a first draft - should be optimised later
 function _hist2d_counts(x::AbstractVector{Union{T,Missing}}, y::AbstractVector{Union{S,Missing}}, k_x, k_y, _f_x, _f_y; default_method)::Vector{Tuple} where {T<:Real} where {S<:Real}
     if k_x === nothing || k_y === nothing
-        count_missing = count(val->ismissing(coalesce(val)), zip(x,y))
+        count_missing = count(val->ismissing(coalesce(_f_x(val[1]), _f_y(val[2]))), zip(x,y))
         count_nonmissing = length(x) - count_missing
         k_x = something(k_x, default_method(count_nonmissing))
         k_y =something(k_y, default_method(count_nonmissing))
