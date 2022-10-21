@@ -102,7 +102,7 @@ julia> sgplot(diamond,
 ```julia
 julia> bar_ds = Dataset(x = repeat(1:50, outer=50), group = repeat(1:50, inner = 50))
 julia> insertcols!(bar_ds, :y => rand(nrow(bar_ds)))
-julia> sgplot(bar_ds, Bar(x=2, response=3, group=1), # refer columns by their index
+julia> sgplot(bar_ds, Bar(x=2, response=3, group=1), # refer columns by their indices
                         groupcolormodel = Dict(:scheme=>"turbo"),
                         xaxis=Axis(show=false),
                         yaxis=Axis(show=false),
@@ -138,7 +138,7 @@ julia> color_ds = filereader("assets/color_ds.csv")
 julia> leftjoin!(music, color_ds, on = :Format)# sort data based on d3js example
 julia> sort!(music, [:Year, :order], rev = [false, true]) # rev = true for :order to make the color similar to d3js example
 
-julia> inbillion(x) = x/10^9 # make the yaxis values in billion $
+julia> inbillion(x) = x/10^9 # make the yaxis' values in billion $
 julia> setformat!(music, r"Infla" => inbillion)
 
 julia> sgplot(music, [
