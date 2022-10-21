@@ -198,6 +198,8 @@ function _check_and_normalize!(plt::Heatmap, all_args)
     heatmap_ds = combine(gatherby(ds, g_col, threads=threads, mapformats=all_args.mapformats), (opts[:x], opts[:y]) => ((x, y) -> _hist2d_counts(x, y, opts[:xbincount], opts[:ybincount], _f_x, _f_y; default_method = opts[:bincountmethod])) => :__bin__information__, threads=threads)
 
     modify!(heatmap_ds, :__bin__information__ => splitter => [:__bin__x__start__, :__bin__x__end__, :__bin__y__start__, :__bin__y__end__, :__bin__counts__], threads=threads)
+    # remove :__bin__information__ since we do not need it anymore
+    select!(heatmap_ds, Not(:__bin__information__))
     filter!(heatmap_ds, :__bin__counts__, by=(>(0)))
 
     return heatmap_ds
