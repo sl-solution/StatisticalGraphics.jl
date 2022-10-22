@@ -246,7 +246,8 @@ function addto_axis!(in_axis, axis, title)
         end
 
         if axis.opts[:values] !== nothing
-            in_axis[:values] = axis.opts[:values]
+            !(axis.opts[:values] isa AbstractVector) && throw(ArgumentError("Axis values must be a vector of values"))
+            in_axis[:values] = _convert_values_for_js.(axis.opts[:values])
         end
 
         #fonts
@@ -258,6 +259,9 @@ function addto_axis!(in_axis, axis, title)
        in_axis[:labelFontWeight]=axis.opts[:labelfontweight]
         #misc
        in_axis[:zindex] = axis.opts[:zindex]
+       if axis.opts[:translate] !== nothing
+            in_axis[:translate] = axis.opts[:translate]
+       end
 
     end
 end

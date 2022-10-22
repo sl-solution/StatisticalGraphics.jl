@@ -62,7 +62,8 @@ AXES_DEFAULT = Dict{Symbol, Any}(:type => :linear,
                                  :labelitalic=>nothing,
                                  :labelfontweight=>nothing,    
                                  
-                                 :zindex=>0
+                                 :zindex=>0,
+                                 :translate=>nothing
                                 )
 
 
