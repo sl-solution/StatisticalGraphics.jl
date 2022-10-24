@@ -12,6 +12,8 @@ module StatisticalGraphics
         Scatter,
         Line,
         Histogram,
+        Density,
+        Heatmap,
         Bar,
         BoxPlot,
         RefLine,
@@ -30,6 +32,7 @@ module StatisticalGraphics
     include("charts/band.jl")
     include("charts/histogram.jl")
     include("charts/hist2d.jl")
+    include("charts/density.jl")
     include("charts/bar.jl")
     include("charts/boxplot.jl")
     include("charts/refline.jl")
