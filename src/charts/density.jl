@@ -49,7 +49,7 @@ function fit_density(x, type, kernel, bw, f, npoints, scale)::Vector{Tuple}
         if scale == :pdf
             tuple.(res[1], res[2])
         elseif scale == :count
-            tuple.(res[1], res[2]*_sample_size)
+            tuple.(res[1], res[2] .* _sample_size)
         end
     end
 end
