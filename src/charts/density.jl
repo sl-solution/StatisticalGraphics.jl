@@ -60,7 +60,7 @@ DENSITY_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0, :group => nothing,
     :type => :normal, # :normal or :kernel
     :weights => :gaussian,
     :bw => nothing, # automatically calculate
-    :scale => :pdf, # user can pass any function to this option, the function must be in the form of fun(density; midpoints, npoints, samplesize, binwidth) , for :pdf the function is defined as f(x; args...) = x, for :count we compute the expected counts, f(x; args...) = x .* binwidth .* npoints 
+    :scale => :pdf, # user can pass any function to this option, the function must be in the form of fun(density; midpoints, npoints, samplesize, binwidth) , for :pdf the function is defined as f(x; args...) = x, for :count we compute the expected counts, f(x; args...) = x .* binwidth .* npoints , :cdf (x; binwidth, args...) -> cumsum(x .* binwidth)
 
     :opacity => 1,
     :fillopacity=>0.5,
@@ -200,7 +200,7 @@ function _push_plots!(vspec, plt::Density, all_args; idx=1)
     addto_scale!(all_args, which_scale, new_ds, "$(sg_col_prefix)midpoint__density")
     addto_scale!(all_args, which_scale_2, new_ds, "$(sg_col_prefix)height__density")
     addto_axis!(vspec[:axes][which_scale], all_args.axes[which_scale], opts[_var_])
-    addto_axis!(vspec[:axes][which_scale_2], all_args.axes[which_scale_2], opts[:scale] in (:count, :pdf) ? string(opts[:scale]) : string(nameof(opts[:scale])))
+    addto_axis!(vspec[:axes][which_scale_2], all_args.axes[which_scale_2], opts[:scale] in (:count, :pdf, :cdf) ? string(opts[:scale]) : string(nameof(opts[:scale])))
 
     vspec[:scales][which_scale_2][:zero] = true
 
@@ -257,6 +257,8 @@ function _check_and_normalize!(plt::Density, all_args)
         _scale_fun = (x; args...) -> x
     elseif opts[:scale] == :count # expected count
         _scale_fun = (x; binwidth, npoints, args...) -> x .* binwidth .* npoints
+    elseif opts[:scale] == :cdf
+        _scale_fun = (x; binwidth, args...) -> cumsum(x .* binwidth)
     else
         _scale_fun = opts[:scale]
     end
