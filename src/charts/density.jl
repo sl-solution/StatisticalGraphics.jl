@@ -39,12 +39,14 @@ function fit_density(x, type, kernel, bw, f, npoints, scale)::Vector{Tuple}
        
         tuple.(collect(gridpoints), scale(normal_pdf.(gridpoints, mu, sigma); midpoints=collect(gridpoints), npoints=npoints, samplesize=_sample_size, binwidth = gridpoints[2]-gridpoints[1]))
 
-    else
+    elseif type == :kernel
         bw = something(bw, 1.06*IMD.std(f, x)*_sample_size^(-0.2))
         kernel_type = kernel == :gaussian ? normal_kernel : kernel == :epanechnikov ? epan_kernel : kernel == :triangular ? triangular_kernel : throw(ArgumentError("only :gaussian, :epanechnikov and :triangular kernels are supported"))
         res = _compute_kde(x, npoints; f=f, kernel = kernel_type, bw=bw)
       
         tuple.(res[1],  scale(res[2]; midpoints=res[1], npoints=npoints, samplesize=_sample_size, binwidth = res[1][2]-res[1][1]))
+    else
+        throw(ArgumentError("type can be either :normal or :kernel"))
     end
 end
 
@@ -54,16 +56,16 @@ DENSITY_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0, :group => nothing,
     :y2axis => false,
     :interpolate => :linear,
 
-    :type => :normal, # :normal or :kde
-    :kernel => :gaussian,
+    :type => :normal, # :normal or :kernel
+    :weights => :gaussian,
     :bw => nothing, # automatically calculate
     :scale => :pdf, # user can pass any function to this option, the function must be in the form of fun(density; midpoints, npoints, samplesize, binwidth) , for :pdf the function is defined as f(x; args...) = x, for :count we compute the expected counts, f(x; args...) = x .* binwidth .* npoints 
 
     :opacity => 1,
-    :fillopacity=>0.7,
+    :fillopacity=>0.5,
 
     :filled => true,
-    :fillcolor => "#4682b4",
+    :fillcolor => nothing, # derive from :color
 
     :color =>nothing,
 
@@ -121,7 +123,7 @@ function _push_plots!(vspec, plt::Density, all_args; idx=1)
     end
     if opts[:group] === nothing
         if opts[:filled]
-            s_spec_marks[:encode][:enter][:fill][:value] = opts[:fillcolor]
+            s_spec_marks[:encode][:enter][:fill][:value] = something(opts[:fillcolor], opts[:color], "#4682b4")
         end
         s_spec_marks[:encode][:enter][:stroke][:value] = something(opts[:color], "#4682b4") # we allow the outline color be set
     else
@@ -257,7 +259,7 @@ function _check_and_normalize!(plt::Density, all_args)
     else
         _scale_fun = opts[:scale]
     end
-    density_ds = combine(gatherby(ds, g_col, mapformats=all_args.mapformats, threads=threads), col => (x -> fit_density(x, opts[:type], opts[:kernel], opts[:bw], _f, opts[:npoints], _scale_fun)) => "$(sg_col_prefix)density_info", threads = threads)
+    density_ds = combine(gatherby(ds, g_col, mapformats=all_args.mapformats, threads=threads), col => (x -> fit_density(x, opts[:type], opts[:weights], opts[:bw], _f, opts[:npoints], _scale_fun)) => "$(sg_col_prefix)density_info", threads = threads)
     modify!(density_ds, "$(sg_col_prefix)density_info" => splitter => ["$(sg_col_prefix)midpoint__density", "$(sg_col_prefix)height__density"])
     select!(density_ds, Not("$(sg_col_prefix)density_info"))
 
