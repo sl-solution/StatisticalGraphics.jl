@@ -22,6 +22,10 @@ julia> sgplot(ds, [
 
 ![output](assets/visualization.svg)
 
+**Histogram**
+
+Histogram of a column overlaid by kde and fitted normal distribution.
+
 ```julia
 julia> ds = Dataset(x=randn(100));
 julia> sgplot(ds, [
