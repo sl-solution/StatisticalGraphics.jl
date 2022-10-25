@@ -26,6 +26,7 @@ function normal_pdf(x, mu, sigma)
     0.3989422804014327/sigma * exp(-0.5*((x-mu)/sigma)*((x-mu)/sigma))
 end
 
+#scale should be a function with one positional argument (density) and can accept the following keyword arguments: midpoints, npoints, samplesize, binwidth
 function fit_density(x, type, kernel, bw, f, npoints, scale)::Vector{Tuple}
     _sample_size = count(y->!ismissing(f(y)), x)
     if type==:normal 
