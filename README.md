@@ -23,8 +23,12 @@ julia> sgplot(ds, [
 ![output](assets/visualization.svg)
 
 ```julia
-julia> ds = Dataset(x=randn(10^7));
-julia> sgplot(ds, Histogram(x=:x, color=:steelblue, outlinethickness=0.5, space=0.5),
+julia> ds = Dataset(x=randn(100));
+julia> sgplot(ds, [
+                   Histogram(x=:x, color=:steelblue, outlinethickness=0.5, space=0.5),
+                   Density(x=:x, type=:kernel, color=:red, fillopacity=0.3),
+                   Density(x=:x, color=:green, fillopacity=0.3)
+                  ],
                   xaxis = Axis(offset=10, domain=false),
                   yaxis = Axis(offset=10, domain=false, grid=true)
                )
