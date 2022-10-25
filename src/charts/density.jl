@@ -9,7 +9,7 @@ function _compute_kde(x, ngrid; f, kernel, bw)
     gridpoints = range(min_val, max_val, length=ngrid)
     res = Vector{Float64}(undef, length(gridpoints))
     for i in eachindex(gridpoints)
-        res[i] = IMD.mean(y -> IMD.mean(1.0 / bw * kernel((gridpoints[i] - f(y)) / bw)), x)
+        res[i] = IMD.mean(y -> (1.0 / bw * kernel((gridpoints[i] - f(y)) / bw)), x)
     end
     collect(gridpoints), res
 end
