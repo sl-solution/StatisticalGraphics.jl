@@ -55,8 +55,18 @@ function histogram(x::AbstractVector{Union{T, Missing}}, bins::Union{AbstractVec
         res = _histogram(x, bins, _f)
         # the firt bin count is 0 so we add 1 to h to make the size matched
         h = [1;diff(res[1])]
-        (res[1], res[2] ./ sum(h .* (res[2])))
+        (res[1], res[2]/sum(res[2] .* h))
     # we need to add :cdf, :density, :probability, ...?
+    elseif scale == :cdf
+          res = _histogram(x, bins, _f)
+        # the firt bin count is 0 so we add 1 to h to make the size matched
+        h = [1;diff(res[1])]
+        (res[1], cumsum((res[2] .* h)/sum(res[2] .* h)))
+    elseif scale == :probability
+        res = _histogram(x, bins, _f)
+        # the firt bin count is 0 so we add 1 to h to make the size matched
+        h = [1;diff(res[1])]
+        (res[1], (res[2] .* h)/sum(res[2] .* h))
     end
 end
 
