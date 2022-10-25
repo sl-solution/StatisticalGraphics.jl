@@ -19,9 +19,11 @@ end
 function epan_kernel(x)
     abs(x) <= 1 ? 3.0 / 4.0 * (1.0 - x * x) : 0.0
 end
+epan_kernel(::Missing) = missing
 function triangular_kernel(x)
     abs(x) <= 1 ? 1.0 - abs(x) : 0.0
 end
+triangular_kernel(::Missing) = missing
 function normal_pdf(x, mu, sigma)
     0.3989422804014327/sigma * exp(-0.5*((x-mu)/sigma)*((x-mu)/sigma))
 end
