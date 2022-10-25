@@ -36,21 +36,15 @@ function fit_density(x, type, kernel, bw, f, npoints, scale)::Vector{Tuple}
         min_val = mu - 3*sigma
         max_val = mu + 3*sigma
         gridpoints = range(min_val, max_val, length = npoints)
-        if scale == :pdf
-            tuple.(collect(gridpoints), normal_pdf.(gridpoints, mu, sigma))
-        elseif scale == :count # this is just a the pdf * sample size
-            tuple.(collect(gridpoints), normal_pdf.(gridpoints, mu, sigma) .* _sample_size)
-        end
+       
+        tuple.(collect(gridpoints), scale(normal_pdf.(gridpoints, mu, sigma); midpoints=collect(gridpoints), npoints=npoints, samplesize=_sample_size, binwidth = gridpoints[2]-gridpoints[1]))
 
     else
         bw = something(bw, 1.06*IMD.std(f, x)*_sample_size^(-0.2))
         kernel_type = kernel == :gaussian ? normal_kernel : kernel == :epanechnikov ? epan_kernel : kernel == :triangular ? triangular_kernel : throw(ArgumentError("only :gaussian, :epanechnikov and :triangular kernels are supported"))
         res = _compute_kde(x, npoints; f=f, kernel = kernel_type, bw=bw)
-        if scale == :pdf
-            tuple.(res[1], res[2])
-        elseif scale == :count
-            tuple.(res[1], res[2] .* _sample_size)
-        end
+      
+        tuple.(res[1],  scale(res[2]; midpoints=res[1], npoints=npoints, samplesize=_sample_size, binwidth = res[1][2]-res[1][1]))
     end
 end
 
@@ -63,7 +57,7 @@ DENSITY_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0, :group => nothing,
     :type => :normal, # :normal or :kde
     :kernel => :gaussian,
     :bw => nothing, # automatically calculate
-    :scale => :pdf, # if users like pdf * sample size, they can pass :count to this option
+    :scale => :pdf, # user can pass any function to this option, the function must be in the form of fun(density; midpoints, npoints, samplesize, binwidth) , for :pdf the function is defined as f(x; args...) = x, for :count we compute the expected counts, f(x; args...) = x .* binwidth .* npoints 
 
     :opacity => 1,
     :fillopacity=>0.7,
@@ -203,7 +197,7 @@ function _push_plots!(vspec, plt::Density, all_args; idx=1)
     addto_scale!(all_args, which_scale, new_ds, "$(sg_col_prefix)midpoint__density")
     addto_scale!(all_args, which_scale_2, new_ds, "$(sg_col_prefix)height__density")
     addto_axis!(vspec[:axes][which_scale], all_args.axes[which_scale], opts[_var_])
-    addto_axis!(vspec[:axes][which_scale_2], all_args.axes[which_scale_2], "Density")
+    addto_axis!(vspec[:axes][which_scale_2], all_args.axes[which_scale_2], opts[:scale] in (:count, :pdf) ? string(opts[:scale]) : string(nameof(opts[:scale])))
 
     vspec[:scales][which_scale_2][:zero] = true
 
@@ -256,7 +250,14 @@ function _check_and_normalize!(plt::Density, all_args)
     else
         g_col = _extra_col_for_panel
     end
-    density_ds = combine(gatherby(ds, g_col, mapformats=all_args.mapformats, threads=threads), col => (x -> fit_density(x, opts[:type], opts[:kernel], opts[:bw], _f, opts[:npoints], opts[:scale])) => "$(sg_col_prefix)density_info", threads = threads)
+    if opts[:scale] == :pdf 
+        _scale_fun = (x; args...) -> x
+    elseif opts[:scale] == :count # expected count
+        _scale_fun = (x; binwidth, npoints, args...) -> x .* binwidth .* npoints
+    else
+        _scale_fun = opts[:scale]
+    end
+    density_ds = combine(gatherby(ds, g_col, mapformats=all_args.mapformats, threads=threads), col => (x -> fit_density(x, opts[:type], opts[:kernel], opts[:bw], _f, opts[:npoints], _scale_fun)) => "$(sg_col_prefix)density_info", threads = threads)
     modify!(density_ds, "$(sg_col_prefix)density_info" => splitter => ["$(sg_col_prefix)midpoint__density", "$(sg_col_prefix)height__density"])
     select!(density_ds, Not("$(sg_col_prefix)density_info"))
 
