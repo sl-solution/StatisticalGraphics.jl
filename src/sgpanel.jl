@@ -140,6 +140,21 @@ function _sgpanel(ds, panelby::IMD.MultiColumnIndex, plts::Vector{<:SGMarks}; ma
     sgpanel_marks = Dict{Symbol,Any}(:marks => Dict{Symbol,Any}[]) # we use the a layer of mark for assigning graph axes labels in the case of lattice type layouts
     sgpanel_marks[:type] = "group"
     # vspec[:axes] = Dict{Symbol,Any}[]
+    if global_opts[:wallcolor] != :transparent
+        # create all panel wallcolor before doing anything else. In this way we are sure that wallcolor is at the back of everything
+        for i in 1:nrow(panel_info)
+            newmark = Dict{Symbol,Any}()
+            newmark[:type] = :group
+            newmark[:encode] = Dict{Symbol,Any}()
+            newmark[:encode][:enter] = Dict{Symbol,Any}()
+            newmark[:encode][:enter][:x] = Dict{Symbol,Any}(:value => panel_info[i, "$(sg_col_prefix)x"])
+            newmark[:encode][:enter][:y] = Dict{Symbol,Any}(:value => panel_info[i, "$(sg_col_prefix)y"])
+            newmark[:encode][:enter][:height] = Dict{Symbol,Any}(:value => panel_info[i, "$(sg_col_prefix)height"])
+            newmark[:encode][:enter][:width] = Dict{Symbol,Any}(:value => panel_info[i, "$(sg_col_prefix)width"])
+            newmark[:encode][:enter][:fill] = Dict{Symbol, Any}(:value => global_opts[:wallcolor])
+            push!(sgpanel_marks[:marks], newmark)
+        end
+    end
     for i in 1:nrow(panel_info)
         newmark = Dict{Symbol,Any}()
         newmark[:type] = :group
@@ -159,9 +174,10 @@ function _sgpanel(ds, panelby::IMD.MultiColumnIndex, plts::Vector{<:SGMarks}; ma
         newmark[:encode][:enter][:y] = Dict{Symbol,Any}(:value => panel_info[i, "$(sg_col_prefix)y"])
         newmark[:encode][:enter][:height] = Dict{Symbol,Any}(:value => panel_info[i, "$(sg_col_prefix)height"])
         newmark[:encode][:enter][:width] = Dict{Symbol,Any}(:value => panel_info[i, "$(sg_col_prefix)width"])
-        if global_opts[:wallcolor] != :transparent
-            newmark[:encode][:enter][:fill] = Dict{Symbol, Any}(:value => global_opts[:wallcolor])
-        end
+        # we create a separate group for each panel and apply wallcolor there
+        # if global_opts[:wallcolor] != :transparent
+        #     newmark[:encode][:enter][:fill] = Dict{Symbol, Any}(:value => global_opts[:wallcolor])
+        # end
 
         if all_args.opts[:panelborder]
             newmark[:encode][:enter][:stroke] = Dict{Symbol,Any}(:value => all_args.opts[:panelbordercolor])
