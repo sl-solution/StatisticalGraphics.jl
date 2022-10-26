@@ -11,19 +11,21 @@ function _histogram_counts(x::AbstractVector{Union{T,Missing}}, k, _f) where {T<
 
     if k isa Integer
         bins = range(min_val_act, max_val_act, length=k)
+        counts = zeros(Int, k)
         # if k is a vector, it must contains the beginning of hist intervals
     elseif k isa AbstractVector
-        bins = collect(k)
-        if firstindex(bins) > min_val_act
+        bins = float.(collect(k))
+        if bins[firstindex(bins)] > min_val_act
             pushfirst!(bins, min_val_act)
         end
-        if lastindex(bins) < max_val_act
+        if bins[lastindex(bins)] < max_val_act
             push!(bins, max_val_act)
         end
+        counts = zeros(Int, length(bins))
     else
         throw(ArgumentError("bins must be a number or an abstract vector"))
     end
-    counts = zeros(Int, k)
+    
     for val in x
         if !ismissing(val)
             counts[searchsortedfirst(bins, _f(val))] += 1
@@ -45,7 +47,7 @@ function _histogram(x::AbstractVector{Union{T, Missing}}, method::Symbol, _f) wh
     end
     _histogram_counts(x, k, _f)
 end
-function _histogram(x::AbstractVector{Union{T,Missing}}, k::Integer, _f) where {T<:Real}
+function _histogram(x::AbstractVector{Union{T,Missing}}, k::Union{<:Integer, <:AbstractVector}, _f) where {T<:Real}
     _histogram_counts(x, k, _f)
 end
 function histogram(x::AbstractVector{Union{T, Missing}}, bins::Union{AbstractVector, Integer, Symbol}, _f, scale = :pdf) where T <: Real
