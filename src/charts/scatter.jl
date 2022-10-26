@@ -72,7 +72,7 @@ function _push_plots!(vspec, plt::Scatter, all_args; idx = 1)
     else
         s_spec_marks[:encode][:enter][:fill][:scale] = "color_scale_$idx"
         s_spec_marks[:encode][:enter][:fill][:field] = opts[:colorresponse]
-        addto_color_scale!(vspec, "source_0", "color_scale_$idx", opts[:colorresponse], opts[:colorresponse] in all_args.nominal)
+        addto_color_scale!(vspec, "source_0", "color_scale_$idx", opts[:colorresponse], opts[:colorresponse] in all_args.nominal, color_model = opts[:colormodel])
     end
     s_spec_marks[:encode][:enter][:shape] = Dict{Symbol, Any}()
 
