@@ -82,6 +82,8 @@ sgplot(dubai_weather, [
 
 **[Box Plot](https://observablehq.com/@d3/box-plot)**
 
+Reproducing an example from [`D3`](http://d3js.org)`s examples collection.
+
 Using the `format` feature of `InMemoryDataset` to manually bin data before plotting a box plot.
 
 ```julia
@@ -121,6 +123,7 @@ sgplot(bar_ds, Bar(x=2, response=3, group=1), # refer columns by their indices
 
 **unemployment stacked area plot across industries** 
 
+Reproducing an example from [`vega`](https://vega.github.io)`s examples collection.
 
 ```julia
 unemployment = filereader("assets/unemployment_across_industry.csv", types = Dict(2=>Date))
@@ -139,6 +142,8 @@ sgplot(unemployment, Band(x=:date, lower=0.0, upper=:cum_sum, group=:series, opa
 ![unemployment](assets/unemployment.svg)
 
 **[Revenue by Music Format, 1973–2018](https://observablehq.com/@mbostock/revenue-by-music-format-1973-2018)**
+
+Reproducing an example from [`D3`](http://d3js.org)`s examples collection.
 
 ```julia
 music = filereader("assets/music.csv")
@@ -182,6 +187,8 @@ sgplot(music, [
 ![normalised_music](assets/normalised_music.svg)
 
 **[Stacked Bar Chart, Diverging](https://observablehq.com/@d3/diverging-stacked-bar-chart)**
+
+Reproducing an example from [`D3`](http://d3js.org)`s examples collection.
 
 Using the `baselineresponse` keyword argument to control the baseline of bars in each category.
 
@@ -307,6 +314,8 @@ sgplot(gatherby(fun_example, [:x3, :x4]),
 ![fun_example](assets/for_fun.svg)
 
 **[U-District Cuisine Example](https://vega.github.io/vega/examples/u-district-cuisine/)**
+
+Reproducing an example from [`vega`](https://vega.github.io)`s examples collection.
 
 ```julia
 udistrict = filereader("assets/udistrict.csv")
