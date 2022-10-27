@@ -137,7 +137,7 @@ function _sgplot!(all_args)
     push!(vspec[:axes], Dict{Symbol,Any}(:scale => "y1", :orient => "left", :title => yaxis.opts[:title]))
     push!(vspec[:axes], Dict{Symbol,Any}(:scale => "y2", :orient => "right", :title => y2axis.opts[:title]))
 
-    # if any of the axes has supplied with custom labels we should create an ordinal scale for it
+    # if any of the axes has been supplied with custom labels we should create an ordinal scale for it
     for i in 1:4
         if all_args.axes[i].opts[:values] !== nothing && all_args.axes[i].opts[:values] isa Tuple
             push!(vspec[:scales], Dict{Symbol,Any}(:type=>:ordinal, :name => "axis_label_$i", :domain => _convert_values_for_js.(all_args.axes[i].opts[:values][1]), :range => all_args.axes[i].opts[:values][2]))
