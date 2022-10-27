@@ -2,16 +2,17 @@ BAR_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0, :group => nothing,
     :response => nothing,
     :stat => nothing, #by default, if response is given we use sum, if not we use freq - the function passed as stat must accept two arguments f and x, f is a function and x is a abstract vector. function apply f on each elements of x and return the aggregations
     :normalize => false, # use normalizer for more control about how to do it
-    :normalizer => x->x ./ sum(x), # within each level of x/y 
+    :normalizer => x -> x ./ sum(x), # within each level of x/y 
     :x2axis => false,
     :y2axis => false,
     :opacity => 1,
     :outlinethickness => 1,
-    :barwidth => 1, # can be between[0,1]
+    :barwidth => 1, # can be between[0,1], or :nest to display each group nested in the other one
+    :nestfactor => nothing,
     :filled => true,
     :fill => "null",
     :fillcolor => :white,
-    :opacity=>1,
+    :opacity => 1,
     :color => "#4682b4",
     :colorresponse => nothing,
     :colorstat => nothing, # the same rule as :stat
@@ -19,18 +20,15 @@ BAR_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0, :group => nothing,
     :space => 0.1, # the space between bars - the space is calculated as space * total_bandwidth
     :groupspace => 0.05, # the space between bars inside each group - for groupdisplay = :cluster
     :outlinecolor => :white,
-    :groupdisplay => :stack, #:stack, :cluster, :step (i.e. stacked and cluster)
+    :groupdisplay => :stack, #:stack, :cluster, :step (i.e. stacked and cluster), or :none
     :grouporder => :ascending, # :data, :ascending, :descending
     :orderresponse => nothing, # by default axis order control it, but it can be controlled by a column
-    :orderstat=>freq, # freq is default aggregator, however, it can be any other function 
-    :baseline=>0,
+    :orderstat => freq, # freq is default aggregator, however, it can be any other function 
+    :baseline => 0,
     :baselineresponse => nothing,  # each bar (or each group when groupped) can have its own baseline 
     :baselinestat => nothing, # same rule as :stat
-    :legend=>nothing,
-
-    :barcorner => [0,0,0,0], #corner radius (cornerRadiusTopLeft, cornerRadiusTopRight, cornerRadiusBottomLeft, cornerRadiusBottomRight)
-
-    :clip=>nothing
+    :legend => nothing, :barcorner => [0, 0, 0, 0], #corner radius (cornerRadiusTopLeft, cornerRadiusTopRight, cornerRadiusBottomLeft, cornerRadiusBottomRight)
+    :clip => nothing
 )
 mutable struct Bar <: SGMarks
     opts
@@ -45,7 +43,7 @@ mutable struct Bar <: SGMarks
         else
             length(cp_BAR_DEFAULT[:barcorner]) != 4 && throw(ArgumentError("the barcorner option must be a single value or a vector of length four of values"))
         end
-
+        !(cp_BAR_DEFAULT[:groupdisplay] in (:stack, :none, :cluster, :step)) && throw(ArgumentError("the groupdisplay option can be one of :stack, :cluster, :step, or :none"))
         new(cp_BAR_DEFAULT)
     end
 end
@@ -64,7 +62,6 @@ function _push_plots!(vspec, plt::Bar, all_args; idx=1)
     # # we add baseline to new_ds to make sure that domains calculation are adjusted
     # append!(new_ds, map(new_ds, x->plt.opts[:baseline], :__height__bar__, threads=false), promote = true)
     opts = plt.opts
-    complement_bandwidth = (1 - opts[:barwidth]) / 2
 
     s_spec = Dict{Symbol,Any}()
     s_spec[:type] = "group"
@@ -74,13 +71,13 @@ function _push_plots!(vspec, plt::Bar, all_args; idx=1)
     s_spec_marks[:from] = Dict(:data => "bar_data_$idx")
     s_spec_marks[:encode] = Dict{Symbol,Any}()
     s_spec_marks[:encode][:enter] = Dict{Symbol,Any}()
-    s_spec_marks[:encode][:enter][:cornerRadiusTopLeft] = Dict{Symbol, Any}(:value => opts[:barcorner][1])
-    s_spec_marks[:encode][:enter][:cornerRadiusTopRight]= Dict{Symbol, Any}(:value => opts[:barcorner][2])
-    s_spec_marks[:encode][:enter][:cornerRadiusBottomLeft]= Dict{Symbol, Any}(:value => opts[:barcorner][3])
-    s_spec_marks[:encode][:enter][:cornerRadiusBottomRight]= Dict{Symbol, Any}(:value => opts[:barcorner][4])
-    s_spec_marks[:encode][:enter][:opacity] = Dict{Symbol, Any}(:value => opts[:opacity])
-    s_spec_marks[:encode][:enter][:stroke] = Dict{Symbol, Any}(:value => opts[:outlinecolor])
-    s_spec_marks[:encode][:enter][:strokeWidth] = Dict{Symbol, Any}(:value => opts[:outlinethickness])
+    s_spec_marks[:encode][:enter][:cornerRadiusTopLeft] = Dict{Symbol,Any}(:value => opts[:barcorner][1])
+    s_spec_marks[:encode][:enter][:cornerRadiusTopRight] = Dict{Symbol,Any}(:value => opts[:barcorner][2])
+    s_spec_marks[:encode][:enter][:cornerRadiusBottomLeft] = Dict{Symbol,Any}(:value => opts[:barcorner][3])
+    s_spec_marks[:encode][:enter][:cornerRadiusBottomRight] = Dict{Symbol,Any}(:value => opts[:barcorner][4])
+    s_spec_marks[:encode][:enter][:opacity] = Dict{Symbol,Any}(:value => opts[:opacity])
+    s_spec_marks[:encode][:enter][:stroke] = Dict{Symbol,Any}(:value => opts[:outlinecolor])
+    s_spec_marks[:encode][:enter][:strokeWidth] = Dict{Symbol,Any}(:value => opts[:outlinethickness])
     s_spec_marks[:encode][:enter][:fill] = Dict{Symbol,Any}()
 
     if opts[:colorresponse] !== nothing
@@ -131,11 +128,21 @@ function _push_plots!(vspec, plt::Bar, all_args; idx=1)
 
     s_spec_marks[:encode][:enter][_var_] = Dict{Symbol,Any}()
     s_spec_marks[:encode][:enter][_var_][:scale] = _scale_
-    s_spec_marks[:encode][:enter][_var_][:band] = complement_bandwidth
-    if _orient_ == :vertical
-        s_spec_marks[:encode][:enter][:width] = Dict{Symbol,Any}(:scale => _scale_, :band => opts[:barwidth])
+    if opts[:barwidth] == :nest
+        s_spec_marks[:encode][:enter][_var_][:band] = Dict{Symbol, Any}(:field=>"$(sg_col_prefix)nest__barwidth_complement")
+        if _orient_ == :vertical
+            s_spec_marks[:encode][:enter][:width] = Dict{Symbol,Any}(:scale => _scale_, :band => Dict{Symbol, Any}(:field=>"$(sg_col_prefix)nest__barwidth"))
+        else
+            s_spec_marks[:encode][:enter][:height] = Dict{Symbol,Any}(:scale => _scale_, :band => Dict{Symbol, Any}(:field=>"$(sg_col_prefix)nest__barwidth"))
+        end
     else
-        s_spec_marks[:encode][:enter][:height] = Dict{Symbol,Any}(:scale => _scale_, :band => opts[:barwidth])
+        complement_bandwidth = (1 - opts[:barwidth]) / 2
+        s_spec_marks[:encode][:enter][_var_][:band] = complement_bandwidth
+        if _orient_ == :vertical
+            s_spec_marks[:encode][:enter][:width] = Dict{Symbol,Any}(:scale => _scale_, :band => opts[:barwidth])
+        else
+            s_spec_marks[:encode][:enter][:height] = Dict{Symbol,Any}(:scale => _scale_, :band => opts[:barwidth])
+        end
     end
 
     # we make sure addto_scale! knows about type before obtaining domain
@@ -287,12 +294,12 @@ function _check_and_normalize!(plt::Bar, all_args)
         else
             @goto argerr
         end
-         _f_order = identity
+        _f_order = identity
         if all_args.mapformats
             _f_order = getformat(ds, opts[:orderresponse])
         end
     end
-   
+
 
     if opts[:group] !== nothing
         opts[:colorresponse] !== nothing && throw(ArgumentError("only one of group or colorresponse must be passed"))
@@ -311,20 +318,20 @@ function _check_and_normalize!(plt::Bar, all_args)
 
     if opts[:response] === nothing
         # TODO we should move this to constructor
-        if opts[:stat] === nothing 
+        if opts[:stat] === nothing
             opts[:stat] = freq
         end
 
-        bar_ds = combine(gatherby(ds, g_col, mapformats=all_args.mapformats, threads=threads), col => (x-> opts[:stat](_f, x)) => :__height__bar__, color_response => (x->color_stat(_f_color, x)) => :__color__value__)
+        bar_ds = combine(gatherby(ds, g_col, mapformats=all_args.mapformats, threads=threads), col => (x -> opts[:stat](_f, x)) => :__height__bar__, color_response => (x -> color_stat(_f_color, x)) => :__color__value__)
         if opts[:normalize] && opts[:group] !== nothing
-            modify!(groupby(bar_ds, [col; _extra_col_for_panel_names_], mapformats = all_args.mapformats, threads = false), :__height__bar__ => opts[:normalizer])
+            modify!(groupby(bar_ds, [col; _extra_col_for_panel_names_], mapformats=all_args.mapformats, threads=false), :__height__bar__ => opts[:normalizer])
         elseif opts[:normalize] && opts[:group] === nothing
             throw(ArgumentError("group column must be specified when normalize=true"))
         end
         #baseline must be computed within each group
         #we use hash method, since we are not sure the panel columns are sortable
-        bar_ds_base = combine(groupby(ds, unique([col; _extra_col_for_panel_names_]), mapformats=all_args.mapformats, threads=false), base_response => (x->base_stat(_f_base, x)) => :__baseline__value__)
-        leftjoin!(bar_ds, bar_ds_base[!, unique(["__baseline__value__"; col; _extra_col_for_panel_names_])], on = unique([col; _extra_col_for_panel_names_]), method = :hash, mapformats=all_args.mapformats)
+        bar_ds_base = combine(groupby(ds, unique([col; _extra_col_for_panel_names_]), mapformats=all_args.mapformats, threads=false), base_response => (x -> base_stat(_f_base, x)) => :__baseline__value__)
+        leftjoin!(bar_ds, bar_ds_base[!, unique(["__baseline__value__"; col; _extra_col_for_panel_names_])], on=unique([col; _extra_col_for_panel_names_]), method=:hash, mapformats=all_args.mapformats)
         if opts[:group] !== nothing
             if opts[:grouporder] == :ascending
                 sort!(bar_ds, opts[:group], mapformats=all_args.mapformats, threads=false)
@@ -346,16 +353,16 @@ function _check_and_normalize!(plt::Bar, all_args)
         if opts[:stat] === nothing
             opts[:stat] = IMD.sum
         end
-        bar_ds = combine(gatherby(ds, g_col, mapformats=all_args.mapformats, threads=threads), opts[:response] => (x->opts[:stat](_f_response, x)) => :__height__bar__, color_response => (x->color_stat(_f_color, x)) => :__color__value__ , threads=threads)
+        bar_ds = combine(gatherby(ds, g_col, mapformats=all_args.mapformats, threads=threads), opts[:response] => (x -> opts[:stat](_f_response, x)) => :__height__bar__, color_response => (x -> color_stat(_f_color, x)) => :__color__value__, threads=threads)
         if opts[:normalize] && opts[:group] !== nothing
-            modify!(groupby(bar_ds, [col; _extra_col_for_panel_names_], mapformats = all_args.mapformats, threads = false), :__height__bar__ => opts[:normalizer])
+            modify!(groupby(bar_ds, [col; _extra_col_for_panel_names_], mapformats=all_args.mapformats, threads=false), :__height__bar__ => opts[:normalizer])
         elseif opts[:normalize] && opts[:group] === nothing
             throw(ArgumentError("group column must be specified when normalize=true"))
         end
         #baseline must be computed within each group
         #we use hash method, since we are not sure the panel columns are sortable
-        bar_ds_base = combine(groupby(ds, unique([col; _extra_col_for_panel_names_]), mapformats=all_args.mapformats, threads=false), base_response => (x->base_stat(_f_base, x)) => :__baseline__value__)
-        leftjoin!(bar_ds, bar_ds_base[!, unique(["__baseline__value__";col; _extra_col_for_panel_names_])], on = unique([col; _extra_col_for_panel_names_]), method = :hash, mapformats=all_args.mapformats, threads = false)
+        bar_ds_base = combine(groupby(ds, unique([col; _extra_col_for_panel_names_]), mapformats=all_args.mapformats, threads=false), base_response => (x -> base_stat(_f_base, x)) => :__baseline__value__)
+        leftjoin!(bar_ds, bar_ds_base[!, unique(["__baseline__value__"; col; _extra_col_for_panel_names_])], on=unique([col; _extra_col_for_panel_names_]), method=:hash, mapformats=all_args.mapformats, threads=false)
         if opts[:group] !== nothing
             if opts[:grouporder] == :ascending
                 sort!(bar_ds, opts[:group], mapformats=all_args.mapformats, threads=false)
@@ -371,14 +378,33 @@ function _check_and_normalize!(plt::Bar, all_args)
     end
     # the axes order must be :data for the following to be effective
     if opts[:orderresponse] !== nothing
-        bar_order = combine(groupby(ds, unique([col; _extra_col_for_panel_names_]), mapformats = all_args.mapformats, threads = all_args.threads), opts[:orderresponse] => (x->opts[:orderstat](_f_order, x))=>:__bar__order__column__)
-        leftjoin!(bar_ds, bar_order, on = unique([col; _extra_col_for_panel_names_]), mapformats = all_args.mapformats, threads=false, method = :hash)
+        bar_order = combine(groupby(ds, unique([col; _extra_col_for_panel_names_]), mapformats=all_args.mapformats, threads=all_args.threads), opts[:orderresponse] => (x -> opts[:orderstat](_f_order, x)) => :__bar__order__column__)
+        leftjoin!(bar_ds, bar_order, on=unique([col; _extra_col_for_panel_names_]), mapformats=all_args.mapformats, threads=false, method=:hash)
         sort!(bar_ds, :__bar__order__column__)
     end
 
     #TODO should we apply baselineresponse after sorting?
     if opts[:baselineresponse] !== nothing
-        modify!(bar_ds, [[:__height__bar__, :__baseline__value__],[:__height__bar__start__, :__baseline__value__]] .=> byrow(sum) .=> [:__height__bar__, :__height__bar__start__])
+        modify!(bar_ds, [[:__height__bar__, :__baseline__value__], [:__height__bar__start__, :__baseline__value__]] .=> byrow(sum) .=> [:__height__bar__, :__height__bar__start__])
+    end
+
+    # take care of nested display
+    if opts[:barwidth] == :nest && opts[:group] !== nothing
+        nest_factor_lookup = Dict(2 => 0.3, (3:4 .=> 0.2)..., (5:7 .=> 0.15)...) # for more than 8 we calculate it
+        g_col = unique(push!(_extra_col_for_panel_names_, col))
+        # find the maximum number of group in one single category
+        _temp_ds_ = combine(groupby(bar_ds, g_col), 1 => length => "$(sg_col_prefix)number__of__groups")
+        max_level = IMD.maximum(_temp_ds_[!, "$(sg_col_prefix)number__of__groups"])
+        if opts[:nestfactor] === nothing
+            if haskey(nest_factor_lookup, max_level)
+                opts[:nestfactor] = nest_factor_lookup[max_level]
+            else
+                opts[:nestfactor] = 1 / max_level
+            end
+        end
+        _temp_ds_ = Dataset(opts[:group]=>unique(bar_ds[:, opts[:group]]))
+        modify!(_temp_ds_, 1 => (x -> _nest_barwidth_calculate(x, opts[:nestfactor])) => "$(sg_col_prefix)nest__barwidth", "$(sg_col_prefix)nest__barwidth" => byrow(x -> (1 - x) / 2) => "$(sg_col_prefix)nest__barwidth_complement")
+        leftjoin!(bar_ds, _temp_ds_, on=opts[:group])
     end
 
     return col, bar_ds
@@ -386,12 +412,20 @@ function _check_and_normalize!(plt::Bar, all_args)
     throw(ArgumentError("only a single column must be selected"))
 end
 
+function _nest_barwidth_calculate(x, nest_factor)
+    res = ones(length(x))
+    for i in 2:length(x)
+        res[i] = res[i-1] - nest_factor
+    end
+    res
+end
+
 
 function _add_legends!(plt::Bar, all_args, idx)
     opts = plt.opts
     # find the suitable scales for the legend
     # group, color, symbol, angle, ...
-   which_scale = [opts[:group], opts[:colorresponse]]
+    which_scale = [opts[:group], opts[:colorresponse]]
 
     if opts[:legend] === nothing
         legend_id = "__internal__name__for__legend__$idx"
@@ -399,18 +433,18 @@ function _add_legends!(plt::Bar, all_args, idx)
         legend_id = opts[:legend]
     end
     if all_args.legends isa Vector
-        loc_of_leg = findfirst(x->x.opts[:name] == legend_id, all_args.legends)
+        loc_of_leg = findfirst(x -> x.opts[:name] == legend_id, all_args.legends)
     else
         loc_of_leg = nothing
     end
     if loc_of_leg !== nothing # user provided some customisation
         leg_spec = all_args.legends[loc_of_leg]
     else
-        leg_spec = Legend(name = legend_id)
+        leg_spec = Legend(name=legend_id)
     end
-    
-  
-    leg_spec_cp = Dict{Symbol, Any}()   
+
+
+    leg_spec_cp = Dict{Symbol,Any}()
     if which_scale[1] !== nothing
         _title = which_scale[1]
         leg_spec_cp[:fill] = "group_scale"
@@ -418,7 +452,7 @@ function _add_legends!(plt::Bar, all_args, idx)
         push!(all_args.out_legends, leg_spec_cp)
     end
 
-    leg_spec_cp = Dict{Symbol, Any}()   
+    leg_spec_cp = Dict{Symbol,Any}()
     if which_scale[2] !== nothing
         _title = which_scale[2]
         leg_spec_cp[:fill] = "color_scale_$idx"
