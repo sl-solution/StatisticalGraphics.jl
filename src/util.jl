@@ -164,6 +164,7 @@ function addto_scale!(all_args, which_scale, ds, col)
 end
 function addto_axis!(in_axis, axis, title)
     if !haskey(in_axis, :domain)
+        in_axis[:encode] = Dict{Symbol, Any}()
         # domain
         in_axis[:domain] = axis.opts[:show] ? axis.opts[:domain] : false
         in_axis[:domainColor] = something(axis.opts[:domaincolor], axis.opts[:color])
@@ -245,9 +246,14 @@ function addto_axis!(in_axis, axis, title)
             in_axis[:format] = axis.opts[:d3format]
         end
 
-        if axis.opts[:values] !== nothing
+        if axis.opts[:values] !== nothing && axis.opts[:label_scale] === nothing
             !(axis.opts[:values] isa AbstractVector) && throw(ArgumentError("Axis values must be a vector of values"))
             in_axis[:values] = _convert_values_for_js.(axis.opts[:values])
+        elseif axis.opts[:values] !== nothing && axis.opts[:label_scale] !== nothing
+            in_axis[:values] = Dict{Symbol, Any}(:signal => "domain('$(axis.opts[:label_scale])')")
+            in_axis[:encode][:labels] =Dict{Symbol, Any}()
+            in_axis[:encode][:labels][:update] =Dict{Symbol, Any}()
+            in_axis[:encode][:labels][:update][:text] = Dict{Symbol, Any}(:signal=>"scale('$(axis.opts[:label_scale])', datum.value)")
         end
 
         #fonts
