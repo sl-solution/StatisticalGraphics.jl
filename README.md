@@ -96,8 +96,12 @@ sgplot(diamond,
                               mediancolor=:black, medianthickness = 0.5,
                               fencewidth=0,
                               whiskerdash=[0], whiskerthickness = 0.5,
+
                               outliers = true,
-                              outlierjitter = 5, outliersymbolsize=10, outliercolor=:black, outlieropacity=0.1
+                              outlierjitter = 5,
+                              outliersymbolsize=10,
+                              outliercolor=:black,
+                              outlieropacity=0.1
                             ),
                               yaxis=Axis(domain = false, nice=false, grid=true),
                               groupcolormodel=["lightgray"],
@@ -155,7 +159,13 @@ inbillion(x) = x/10^9 # make the yaxis' values in billion $
 setformat!(music, r"Infla" => inbillion)
 
 sgplot(music, [
-                Bar(x = :Year, response = r"Infla", group = :Format, grouporder = :data, legend = :music_leg, outlinethickness = 0, space = 0.05)
+                Bar(x = :Year, response = r"Infla",
+                    group = :Format,
+                    grouporder = :data,
+                    outlinethickness = 0,
+                    space = 0.05,
+                    legend = :music_leg
+                  )
               ],
               nominal = [:Format],
               groupcolormodel = reverse!(color_ds[:, :Color]),
@@ -172,8 +182,14 @@ sgplot(music, [
 
 ```julia
 sgplot(music, [
-        Bar(x=:Year, response=r"Infla", group=:Format, grouporder=:data, legend=:music_leg, outlinethickness=0, space=0.05,
-        normalize=true)
+        Bar(x=:Year, response=r"Infla",
+            group=:Format,
+            grouporder=:data,
+            outlinethickness=0,
+            space=0.05,
+            normalize=true,
+            legend=:music_leg
+          )
     ],
     nominal=[:Format],
     groupcolormodel=reverse!(color_ds[:, :Color]),
@@ -206,12 +222,16 @@ modify!(groupby(ds, :speaker),
               )
 
 sgplot(ds, [
-                    Bar(y=:speaker, response=:count, group=:Ruling, grouporder=:data,
-                        baselineresponse=:baseline, baselinestat=IMD.sum,
-                        orderresponse=:baseline, orderstat=IMD.sum,
+                    Bar(y=:speaker, response=:count,
+                        group=:Ruling,
+                        grouporder=:data,
+                        baselineresponse=:baseline,
+                        baselinestat=IMD.sum,
+                        orderresponse=:baseline,
+                        orderstat=IMD.sum,
+                        outlinethickness=0.1,
                         legend = :bar_leg,
-                        x2axis=true,
-                        outlinethickness=0.1
+                        x2axis=true
                       ),
                     RefLine(values = 0.0, axis=:x2axis)
                   ],
@@ -238,11 +258,15 @@ cars = filereader("assets/cars.csv", types = Dict(9=>Date))
 make_fmt(x) = split(x)[1]
 setformat!(cars, :Name => make_fmt)
 sgplot(groupby(cars, :Cylinders), 
-                     Bar(response=:Horsepower, x=:Name, stat=IMD.mean,
-                          colorresponse=:Acceleration, colorstat=IMD.mean,
-                          outlinethickness=0.5, space=0,
-                          orderresponse=:Horsepower, orderstat=IMD.maximum,
-                          colormodel=["#d53e4f", "#fc8d59", "#fee08b", "#e6f598", "#99d594"]
+                     Bar(response=:Horsepower, x=:Name,
+                         stat=IMD.mean,
+                         colorresponse=:Acceleration,
+                         colorstat=IMD.mean,
+                         orderresponse=:Horsepower,
+                         orderstat=IMD.maximum,
+                         outlinethickness=0.5,
+                         space=0,
+                         colormodel=["#d53e4f", "#fc8d59", "#fee08b", "#e6f598", "#99d594"]
                         ),
                         
                      layout = :row,
