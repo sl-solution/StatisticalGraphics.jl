@@ -8,10 +8,10 @@ The package uses [`vega`](https://vega.github.io/vega/) (see also [D3](https://d
 # Examples
 
 ```julia
-julia> using StatisticalGraphics
-julia> using InMemoryDatasets
-julia> ds = Dataset(x=1:100, y=rand(100), y2=rand(100) .+ 5, group=rand(1:2, 100));
-julia> sgplot(ds, [
+using StatisticalGraphics
+using InMemoryDatasets
+ds = Dataset(x=1:100, y=rand(100), y2=rand(100) .+ 5, group=rand(1:2, 100));
+sgplot(ds, [
                     Line(x=:x, y=:y2, y2axis=true, group=:group),
                     Scatter(x=:x, y=:y2, group=:group)
                   ],
@@ -27,8 +27,8 @@ julia> sgplot(ds, [
 Histogram of a column overlaid by kde and fitted normal distribution.
 
 ```julia
-julia> ds = Dataset(x=randn(100));
-julia> sgplot(ds, [
+ds = Dataset(x=randn(100));
+sgplot(ds, [
                    Histogram(x=:x, color=:steelblue, outlinethickness=0.5, space=0.5),
                    Density(x=:x, type=:kernel, color=:red, fillopacity=0.3),
                    Density(x=:x, color=:green, fillopacity=0.3)
@@ -43,9 +43,9 @@ julia> sgplot(ds, [
 **Dubai Weather**
 
 ```julia
-julia> using DLMReader
-julia> dubai_weather = filereader("assets/dubai_weather.csv", types=Dict(1 => Date))
-julia> sgplot(dubai_weather, [
+using DLMReader
+dubai_weather = filereader("assets/dubai_weather.csv", types=Dict(1 => Date))
+sgplot(dubai_weather, [
         Band(x=:date, lower=:min, upper=:max),
         Line(x=:date, y=:min, color="#4682b4", thickness=1),
         Line(x=:date, y=:max, color="#ff7f0e", thickness=0.5),
@@ -62,10 +62,10 @@ julia> sgplot(dubai_weather, [
 Using `BoxPlot` to plot monthly temperature (minimum and maximum), and add second axes for plotting weekly pressure.
 
 ```julia
-julia> modify!(dubai_weather, :date=>byrow(week)=>:Week)
-julia> setformat!(dubai_weather, :date=>month)
+modify!(dubai_weather, :date=>byrow(week)=>:Week)
+setformat!(dubai_weather, :date=>month)
 
-julia> sgplot(dubai_weather, [
+sgplot(dubai_weather, [
     BoxPlot(y=[:min, :max], category=:date, outliers=true),
     BoxPlot(y=:pressure, category=:Week, opacity=0.5, y2axis=true, outliers=true, x2axis=true)
   ],
@@ -85,11 +85,11 @@ julia> sgplot(dubai_weather, [
 Using the `format` feature of `InMemoryDataset` to manually bin data before plotting a box plot.
 
 ```julia
-julia> diamond = filereader("assets/diamonds.csv")
-julia> carat_fmt(x) = round((searchsortedfirst(0.19:0.2:5.02, x)-2)*.2 + 0.3, digits=2)
-julia> setformat!(diamond, :carat=>carat_fmt)
+diamond = filereader("assets/diamonds.csv")
+carat_fmt(x) = round((searchsortedfirst(0.19:0.2:5.02, x)-2)*.2 + 0.3, digits=2)
+setformat!(diamond, :carat=>carat_fmt)
 
-julia> sgplot(diamond, 
+sgplot(diamond, 
                       BoxPlot(y=:price, category =:carat,
                               mediancolor=:black, medianthickness = 0.5,
                               fencewidth=0,
@@ -108,9 +108,9 @@ julia> sgplot(diamond,
 **Bar chart**
 
 ```julia
-julia> bar_ds = Dataset(x = repeat(1:50, outer=50), group = repeat(1:50, inner = 50))
-julia> insertcols!(bar_ds, :y => rand(nrow(bar_ds)))
-julia> sgplot(bar_ds, Bar(x=2, response=3, group=1), # refer columns by their indices
+bar_ds = Dataset(x = repeat(1:50, outer=50), group = repeat(1:50, inner = 50))
+insertcols!(bar_ds, :y => rand(nrow(bar_ds)))
+sgplot(bar_ds, Bar(x=2, response=3, group=1), # refer columns by their indices
                         groupcolormodel = Dict(:scheme=>"turbo"),
                         xaxis=Axis(show=false),
                         yaxis=Axis(show=false),
@@ -123,12 +123,12 @@ julia> sgplot(bar_ds, Bar(x=2, response=3, group=1), # refer columns by their in
 
 
 ```julia
-julia> unemployment = filereader("assets/unemployment_across_industry.csv", types = Dict(2=>Date))
-julia> sort!(unemployment, :series, rev=true) # keep alphabetical order
-julia> modify!(groupby(unemployment, :date), :count=>cumsum=>:cum_sum)
-julia> sort!(unemployment, [:date,:cum_sum], rev=[false,true]) # put the larger area at the back
+unemployment = filereader("assets/unemployment_across_industry.csv", types = Dict(2=>Date))
+sort!(unemployment, :series, rev=true) # keep alphabetical order
+modify!(groupby(unemployment, :date), :count=>cumsum=>:cum_sum)
+sort!(unemployment, [:date,:cum_sum], rev=[false,true]) # put the larger area at the back
 
-julia> sgplot(unemployment, Band(x=:date, lower=0.0, upper=:cum_sum, group=:series, opacity=1),
+sgplot(unemployment, Band(x=:date, lower=0.0, upper=:cum_sum, group=:series, opacity=1),
                             nominal = [:series],
                             xaxis=Axis(type=:time, nice=false),
                             yaxis=Axis(title=""),
@@ -141,15 +141,15 @@ julia> sgplot(unemployment, Band(x=:date, lower=0.0, upper=:cum_sum, group=:seri
 **[Revenue by Music Format, 1973–2018](https://observablehq.com/@mbostock/revenue-by-music-format-1973-2018)**
 
 ```julia
-julia> music = filereader("assets/music.csv")
-julia> color_ds = filereader("assets/color_ds.csv")
-julia> leftjoin!(music, color_ds, on = :Format)# sort data based on d3js example
-julia> sort!(music, [:Year, :order], rev = [false, true]) # rev = true for :order to make the color similar to d3js example
+music = filereader("assets/music.csv")
+color_ds = filereader("assets/color_ds.csv")
+leftjoin!(music, color_ds, on = :Format)# sort data based on d3js example
+sort!(music, [:Year, :order], rev = [false, true]) # rev = true for :order to make the color similar to d3js example
 
-julia> inbillion(x) = x/10^9 # make the yaxis' values in billion $
-julia> setformat!(music, r"Infla" => inbillion)
+inbillion(x) = x/10^9 # make the yaxis' values in billion $
+setformat!(music, r"Infla" => inbillion)
 
-julia> sgplot(music, [
+sgplot(music, [
                 Bar(x = :Year, response = r"Infla", group = :Format, grouporder = :data, legend = :music_leg, outlinethickness = 0, space = 0.05)
               ],
               nominal = [:Format],
@@ -166,7 +166,7 @@ julia> sgplot(music, [
 **Normalised bar chart**
 
 ```julia
-julia> sgplot(music, [
+sgplot(music, [
         Bar(x=:Year, response=r"Infla", group=:Format, grouporder=:data, legend=:music_leg, outlinethickness=0, space=0.05,
         normalize=true)
     ],
@@ -186,19 +186,19 @@ julia> sgplot(music, [
 Using the `baselineresponse` keyword argument to control the baseline of bars in each category.
 
 ```julia
-julia> ds = filereader("assets/politifact.csv")
-julia> ds_order = Dataset(ruling = ["true", "mostly-true", "half-true","barely-true", "false", "full-flop", "pants-fire"], 
+ds = filereader("assets/politifact.csv")
+ds_order = Dataset(ruling = ["true", "mostly-true", "half-true","barely-true", "false", "full-flop", "pants-fire"], 
                   Ruling = ["True", "Mostly true", "Half true", "Mostly false", "False", "False", "Pants on fire!"],
                   order = 1:7,
                   weight = [0,0,0,-1,-1,-1,-1])
-julia> leftjoin!(ds, ds_order, on = :ruling)
-julia> sort!(ds, [:order], rev=true) # order Ruling
-julia> modify!(groupby(ds, :speaker), 
+leftjoin!(ds, ds_order, on = :ruling)
+sort!(ds, [:order], rev=true) # order Ruling
+modify!(groupby(ds, :speaker), 
               :count=> x->x ./ IMD.sum(x), # manually normalise counts
               [:count, :weight]=> byrow(prod) =>:baseline
               )
 
-julia> sgplot(ds, [
+sgplot(ds, [
                     Bar(y=:speaker, response=:count, group=:Ruling, grouporder=:data,
                         baselineresponse=:baseline, baselinestat=IMD.sum,
                         orderresponse=:baseline, orderstat=IMD.sum,
@@ -227,10 +227,10 @@ julia> sgplot(ds, [
 The following bar chart shows the average horsepower of different cars (bar categories) across different number of cylinders (panel). The color of each bar is computed based on the mean of acceleration inside each group of cars (bar categories) and the bars inside each panel are sorted by the maximum horsepower.
 
 ```julia
-julia> cars = filereader("assets/cars.csv", types = Dict(9=>Date))
-julia> make_fmt(x) = split(x)[1]
-julia> setformat!(cars, :Name => make_fmt)
-julia> sgplot(groupby(cars, :Cylinders), 
+cars = filereader("assets/cars.csv", types = Dict(9=>Date))
+make_fmt(x) = split(x)[1]
+setformat!(cars, :Name => make_fmt)
+sgplot(groupby(cars, :Cylinders), 
                      Bar(response=:Horsepower, x=:Name, stat=IMD.mean,
                           colorresponse=:Acceleration, colorstat=IMD.mean,
                           outlinethickness=0.5, space=0,
@@ -258,8 +258,8 @@ julia> sgplot(groupby(cars, :Cylinders),
 **usage**
 
 ```julia
-julia> panel_example = Dataset(rand(1:4, 1000, 10), :auto)
-julia> sgplot(gatherby(panel_example, [:x3, :x4]), 
+panel_example = Dataset(rand(1:4, 1000, 10), :auto)
+sgplot(gatherby(panel_example, [:x3, :x4]), 
                         Bar(x=:x1, group=:x2),
                         nominal = [:x2],
                         layout = :lattice,
@@ -273,7 +273,7 @@ julia> sgplot(gatherby(panel_example, [:x3, :x4]),
 **panel**
 
 ```julia
-julia> sgplot(groupby(panel_example, [:x5, :x6]), 
+sgplot(groupby(panel_example, [:x5, :x6]), 
                                Bar(x=:x7, group=:x8),
                                nominal = [:x8],
                                width = 100,
@@ -286,8 +286,8 @@ julia> sgplot(groupby(panel_example, [:x5, :x6]),
 
 
 ```julia
-julia> fun_example = Dataset(rand(1:4, 1000, 4), :auto)
-julia> sgplot(gatherby(fun_example, [:x3, :x4]), 
+fun_example = Dataset(rand(1:4, 1000, 4), :auto)
+sgplot(gatherby(fun_example, [:x3, :x4]), 
                         Bar(x=:x1, group=:x2, barcorner=15),
                         nominal = :x2,
                         layout = :lattice,
@@ -305,3 +305,58 @@ julia> sgplot(gatherby(fun_example, [:x3, :x4]),
 ```
 
 ![fun_example](assets/for_fun.svg)
+
+**[U-District Cuisine Example](https://vega.github.io/vega/examples/u-district-cuisine/)**
+
+```julia
+udistrict = filereader("assets/udistrict.csv")
+# contains some information to match colors and orders with `vega` example 
+udistrict_info = filereader("assets/udistrict_info.csv", quotechar='"')
+
+# attach information to order data
+leftjoin!(udistrict, udistrict_info, on = :key)
+sort!(udistrict, :order)
+
+# produce plot
+sgplot(gatherby(udistrict, :names), 
+
+                Density(x=:lat, type=:kernel, bw=0.0005, npoints=200,
+                        scale=(x; samplesize, args...)->x .* samplesize, # to match the scale in the original example
+                
+                        group=:names,
+                        grouporder=:data,
+
+                        fillopacity=0.7, 
+                        color=:white
+                       ),
+                yaxis=Axis(show=false),
+                xaxis=Axis(title="",
+                            grid=true,
+                            griddash=[2],
+                            values=([47.6516, 47.655363, 47.6584, 47.6614, 47.664924, 47.668519], ["Boat St.", "40th St.", "42nd St.", "45th St.", "50th St.", "55th St."])
+                          ),
+                
+                layout=:column,
+                width=800,
+                height=70,
+                rowspace=-50, # to force plot overlaps
+                panelborder=false,
+                
+                headercolname=false,
+                headerangle=0,
+                headerloc=:start,
+                headeralign=:left,
+                
+                # set the font for whole graph
+                font="Times",
+                italic=true,
+                fontweight=100,
+                
+                # match color in the original example
+                groupcolormodel=udistrict_info[:, :color],
+                
+                legend=false
+      )
+```
+
+![udistrict](assets/udistrict.svg)
