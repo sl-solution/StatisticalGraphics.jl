@@ -390,11 +390,12 @@ function _check_and_normalize!(plt::Bar, all_args)
 
     # take care of nested display
     if opts[:barwidth] == :nest && opts[:group] !== nothing
-        nest_factor_lookup = Dict(2 => 0.3, (3:4 .=> 0.2)..., (5:7 .=> 0.15)...) # for more than 8 we calculate it
+        nest_factor_lookup = Dict(1=>0, 2 => 0.3, (3:4 .=> 0.2)..., (5:7 .=> 0.15)...) # for more than 8 we calculate it
         g_col = unique(push!(_extra_col_for_panel_names_, col))
         # find the maximum number of group in one single category
         _temp_ds_ = combine(groupby(bar_ds, g_col), 1 => length => "$(sg_col_prefix)number__of__groups")
         max_level = IMD.maximum(_temp_ds_[!, "$(sg_col_prefix)number__of__groups"])
+        
         if opts[:nestfactor] === nothing
             if haskey(nest_factor_lookup, max_level)
                 opts[:nestfactor] = nest_factor_lookup[max_level]
