@@ -331,6 +331,13 @@ function _fill_scales!(vspec, all_args)
                 in_scale[:nice] = all_args.axes[i].opts[:nice]
             end
             in_scale[:reverse] = all_args.axes[i].opts[:reverse]
+            if all_args.axes[i].opts[:padding] !== nothing
+                if (in_scale[:type] in [:point, :band, :discrete])
+                    in_scale[:paddingOuter] = all_args.axes[i].opts[:padding]
+                else
+                    in_scale[:padding] = all_args.axes[i].opts[:padding]
+                end
+            end
         end
     end
     for i in shared_axes

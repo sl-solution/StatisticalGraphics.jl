@@ -11,6 +11,8 @@ AXES_DEFAULT = Dict{Symbol, Any}(:type => :linear,
                                  
                                  :offset => 1,
 
+                                 :padding=>nothing, #padding to extend axis - for :band and :point is between 0 and 1 and for other type is the amount of extra pixels
+
                                  :domaincolor => nothing,
                                  :domain=>true,
                                  :domainthickness=>1.01, #FIXME probably a bug in safari
