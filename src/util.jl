@@ -305,6 +305,12 @@ function _build_legen!(out_leg, leg_opts, _symbol, _title, _id, all_args; opts..
     out_leg[:titleFont] = something(leg_opts[:titlefont], leg_opts[:font], all_args.opts[:font])
     out_leg[:titleFontStyle] = something(leg_opts[:titleitalic], leg_opts[:italic], all_args.opts[:italic]) ? "italic" : "normal"
     out_leg[:titleFontWeight] = something(leg_opts[:titlefontweight], leg_opts[:fontweight], all_args.opts[:fontweight])
+    if leg_opts[:titlesize] !== nothing 
+        out_leg[:titleFontSize] = leg_opts[:titlesize]
+    end
+    if leg_opts[:labelsize] !== nothing 
+        out_leg[:labelFontSize] = leg_opts[:labelsize]
+    end 
     out_leg[:labelFont] = something(leg_opts[:labelfont], leg_opts[:font], all_args.opts[:font])
     out_leg[:labelFontStyle] = something(leg_opts[:labelitalic], leg_opts[:italic], all_args.opts[:italic]) ? "italic" : "normal"
     out_leg[:labelFontWeight] = something(leg_opts[:labelfontweight], leg_opts[:fontweight], all_args.opts[:fontweight])
