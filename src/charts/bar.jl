@@ -322,15 +322,15 @@ function _check_and_normalize!(plt::Bar, all_args)
             opts[:stat] = freq
         end
 
-        bar_ds = combine(gatherby(ds, g_col, mapformats=all_args.mapformats, threads=threads), col => (x -> opts[:stat](_f, x)) => :__height__bar__, color_response => (x -> color_stat(_f_color, x)) => :__color__value__)
+        bar_ds = combine(gatherby(ds, g_col, mapformats=all_args.mapformats, threads=threads), col => (x -> opts[:stat](_f, x)) => :__height__bar__, color_response => (x -> color_stat(_f_color, x)) => :__color__value__, threads=threads)
         if opts[:normalize] && opts[:group] !== nothing
-            modify!(groupby(bar_ds, [col; _extra_col_for_panel_names_], mapformats=all_args.mapformats, threads=false), :__height__bar__ => opts[:normalizer])
+            modify!(groupby(bar_ds, [col; _extra_col_for_panel_names_], mapformats=all_args.mapformats, threads=false), :__height__bar__ => opts[:normalizer], threads=false)
         elseif opts[:normalize] && opts[:group] === nothing
             throw(ArgumentError("group column must be specified when normalize=true"))
         end
         #baseline must be computed within each group
         #we use hash method, since we are not sure the panel columns are sortable
-        bar_ds_base = combine(groupby(ds, unique([col; _extra_col_for_panel_names_]), mapformats=all_args.mapformats, threads=false), base_response => (x -> base_stat(_f_base, x)) => :__baseline__value__)
+        bar_ds_base = combine(groupby(ds, unique([col; _extra_col_for_panel_names_]), mapformats=all_args.mapformats, threads=threads), base_response => (x -> base_stat(_f_base, x)) => :__baseline__value__, threads=threads)
         leftjoin!(bar_ds, bar_ds_base[!, unique(["__baseline__value__"; col; _extra_col_for_panel_names_])], on=unique([col; _extra_col_for_panel_names_]), method=:hash, mapformats=all_args.mapformats)
         if opts[:group] !== nothing
             if opts[:grouporder] == :ascending
@@ -343,7 +343,7 @@ function _check_and_normalize!(plt::Bar, all_args)
         # if groupdisplay is stack we should stack the values
         if opts[:group] !== nothing && opts[:groupdisplay] in (:stack, :step)
             g_col = unique(push!(_extra_col_for_panel_names_, col))
-            modify!(groupby(bar_ds, g_col, mapformats=all_args.mapformats, threads=threads), :__height__bar__ => cumsum, :__height__bar__ => (x -> lag(x, 1, default=opts[:baseline])) => :__height__bar__start__)
+            modify!(groupby(bar_ds, g_col, mapformats=all_args.mapformats, threads=threads), :__height__bar__ => cumsum, :__height__bar__ => (x -> lag(x, 1, default=opts[:baseline])) => :__height__bar__start__, threads=false)
         end
     else
         _f_response = identity
@@ -355,7 +355,7 @@ function _check_and_normalize!(plt::Bar, all_args)
         end
         bar_ds = combine(gatherby(ds, g_col, mapformats=all_args.mapformats, threads=threads), opts[:response] => (x -> opts[:stat](_f_response, x)) => :__height__bar__, color_response => (x -> color_stat(_f_color, x)) => :__color__value__, threads=threads)
         if opts[:normalize] && opts[:group] !== nothing
-            modify!(groupby(bar_ds, [col; _extra_col_for_panel_names_], mapformats=all_args.mapformats, threads=false), :__height__bar__ => opts[:normalizer])
+            modify!(groupby(bar_ds, [col; _extra_col_for_panel_names_], mapformats=all_args.mapformats, threads=false), :__height__bar__ => opts[:normalizer], threads=false)
         elseif opts[:normalize] && opts[:group] === nothing
             throw(ArgumentError("group column must be specified when normalize=true"))
         end
@@ -373,12 +373,12 @@ function _check_and_normalize!(plt::Bar, all_args)
         insertcols!(bar_ds, :__height__bar__start__ => plt.opts[:baseline])
         if opts[:group] !== nothing && opts[:groupdisplay] in (:stack, :step)
             g_col = unique(push!(_extra_col_for_panel_names_, col))
-            modify!(groupby(bar_ds, g_col, mapformats=all_args.mapformats, threads=threads), :__height__bar__ => cumsum, :__height__bar__ => (x -> lag(x, 1, default=opts[:baseline])) => :__height__bar__start__)
+            modify!(groupby(bar_ds, g_col, mapformats=all_args.mapformats, threads=threads), :__height__bar__ => cumsum, :__height__bar__ => (x -> lag(x, 1, default=opts[:baseline])) => :__height__bar__start__, threads=threads)
         end
     end
     # the axes order must be :data for the following to be effective
     if opts[:orderresponse] !== nothing
-        bar_order = combine(groupby(ds, unique([col; _extra_col_for_panel_names_]), mapformats=all_args.mapformats, threads=all_args.threads), opts[:orderresponse] => (x -> opts[:orderstat](_f_order, x)) => :__bar__order__column__)
+        bar_order = combine(groupby(ds, unique([col; _extra_col_for_panel_names_]), mapformats=all_args.mapformats, threads=all_args.threads), opts[:orderresponse] => (x -> opts[:orderstat](_f_order, x)) => :__bar__order__column__, threads=threads)
         leftjoin!(bar_ds, bar_order, on=unique([col; _extra_col_for_panel_names_]), mapformats=all_args.mapformats, threads=false, method=:hash)
         sort!(bar_ds, :__bar__order__column__)
     end
@@ -406,7 +406,7 @@ function _check_and_normalize!(plt::Bar, all_args)
         _temp_ds_ = select(bar_ds, opts[:group])
         unique!(_temp_ds_, opts[:group], mapformats = all_args.mapformats, threads=false)
         modify!(_temp_ds_, 1 => (x -> _nest_barwidth_calculate(x, opts[:nestfactor])) => "$(sg_col_prefix)nest__barwidth", "$(sg_col_prefix)nest__barwidth" => byrow(x -> (1 - x) / 2) => "$(sg_col_prefix)nest__barwidth_complement", threads=false)
-        leftjoin!(bar_ds, _temp_ds_, on=opts[:group], mapformats=all_args.mapformats, threads=false)
+        leftjoin!(bar_ds, _temp_ds_, on=opts[:group], mapformats=all_args.mapformats, threads=false, method=:hash)
     end
 
     return col, bar_ds
