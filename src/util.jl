@@ -139,10 +139,20 @@ function addto_scale!(all_args, which_scale, ds, col)
             end
         end
     else
-        if all_args.scale_type[which_scale] in [:band, :point]
-            append!(all_args.scale_ds[which_scale], combine(gatherby(ds, all_args.uniscale_col, mapformats = all_args.mapformats), col => (_temp_fun) => "$(sg_col_prefix)__scale_col__"), promote=true, cols=:union)
+        # for shared axes we do not use gatheby to keep the order of axes based on Axis.opts[:order]
+        if !(which_scale in all_args.independent_axes)
+             if all_args.scale_type[which_scale] in [:band, :point]
+                append!(all_args.scale_ds[which_scale], combine(ds, col => (_temp_fun) => "$(sg_col_prefix)__scale_col__"), promote=true, cols=:union)
+            else
+                append!(all_args.scale_ds[which_scale], combine(ds, col => (x -> [IMD.minimum(_fun_, x), IMD.maximum(_fun_, x)]) => "$(sg_col_prefix)__scale_col__"), promote=true, cols=:union)
+            end
         else
-            append!(all_args.scale_ds[which_scale], combine(gatherby(ds, all_args.uniscale_col, mapformats = all_args.mapformats), col => (x -> [IMD.minimum(_fun_, x), IMD.maximum(_fun_, x)]) => "$(sg_col_prefix)__scale_col__"), promote=true, cols=:union)
+
+            if all_args.scale_type[which_scale] in [:band, :point]
+                append!(all_args.scale_ds[which_scale], combine(gatherby(ds, all_args.uniscale_col, mapformats = all_args.mapformats), col => (_temp_fun) => "$(sg_col_prefix)__scale_col__"), promote=true, cols=:union)
+            else
+                append!(all_args.scale_ds[which_scale], combine(gatherby(ds, all_args.uniscale_col, mapformats = all_args.mapformats), col => (x -> [IMD.minimum(_fun_, x), IMD.maximum(_fun_, x)]) => "$(sg_col_prefix)__scale_col__"), promote=true, cols=:union)
+            end
         end
     end
 
