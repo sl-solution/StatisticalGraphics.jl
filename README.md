@@ -407,7 +407,7 @@ sgplot(
         headerloc=:start,
         headeralign=:left,
         
-        # set the font for whole graph
+        # set the font for the whole graph
         font="Times",
         italic=true,
         fontweight=100,
