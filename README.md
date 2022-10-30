@@ -1,6 +1,6 @@
 # StatisticalGraphics
 
-The idea of the `StatisticalGraphics` package is to create a powerful, yet easy-to-use solution for creating statistical graphics. 
+The idea of the `StatisticalGraphics` package is to develop a powerful, yet easy-to-use solution for creating statistical graphics. 
 The package uses [`vega`](https://vega.github.io/vega/) (see also [D3](https://d3js.org/)) for producing the final outputs.
 
 ![siteexamples](assets/site.png)
@@ -92,7 +92,7 @@ sgplot(
 
 **[Box Plot](https://observablehq.com/@d3/box-plot)**
 
-Reproducing an example from [`D3`](http://d3js.org)`s examples collection.
+Reproducing an example from the [`D3`](http://d3js.org)`s examples collection.
 
 Using the `format` feature of `InMemoryDataset` to manually bin data before plotting a box plot.
 
@@ -142,13 +142,13 @@ sgplot(
 
 **unemployment stacked area plot across industries** 
 
-Reproducing an example from [`vega`](https://vega.github.io)`s examples collection.
+Reproducing an example from the [`vega`](https://vega.github.io)`s examples collection.
 
 ```julia
 unemployment = filereader("assets/unemployment_across_industry.csv", types = Dict(2=>Date))
 sort!(unemployment, :series, rev=true) # keep alphabetical order
 modify!(groupby(unemployment, :date), :count=>cumsum=>:cum_sum)
-sort!(unemployment, [:date,:cum_sum], rev=[false,true]) # put the larger area at the back
+sort!(unemployment, [:date,:cum_sum], rev=[false,true]) # put the larger areas behind the smaller one 
 
 sgplot(
         unemployment,
@@ -164,13 +164,13 @@ sgplot(
 
 **[Revenue by Music Format, 1973–2018](https://observablehq.com/@mbostock/revenue-by-music-format-1973-2018)**
 
-Reproducing an example from [`D3`](http://d3js.org)`s examples collection.
+Reproducing an example from the [`D3`](http://d3js.org)`s examples collection.
 
 ```julia
 music = filereader("assets/music.csv")
 color_ds = filereader("assets/color_ds.csv")
-leftjoin!(music, color_ds, on = :Format)# sort data based on d3js example
-sort!(music, [:Year, :order], rev = [false, true]) # rev = true for :order to make the color similar to d3js example
+leftjoin!(music, color_ds, on = :Format)# sort data - original example
+sort!(music, [:Year, :order], rev = [false, true]) # rev = true for :order to make the color similar to the original example
 
 inbillion(x) = x/10^9 # make the yaxis' values in billion $
 setformat!(music, r"Infla" => inbillion)
@@ -223,7 +223,7 @@ sgplot(
 
 **[Stacked Bar Chart, Diverging](https://observablehq.com/@d3/diverging-stacked-bar-chart)**
 
-Reproducing an example from [`D3`](http://d3js.org)`s examples collection.
+Reproducing an example from the [`D3`](http://d3js.org)`s examples collection.
 
 Using the `baselineresponse` keyword argument to control the baseline of bars in each category.
 
@@ -237,7 +237,7 @@ leftjoin!(ds, ds_order, on = :ruling)
 sort!(ds, [:order], rev=true) # order Ruling
 modify!(
         groupby(ds, :speaker), 
-        :count=> x->x ./ IMD.sum(x), # manually normalise counts
+        :count=> x->x ./ IMD.sum(x), # normalise counts
         [:count, :weight]=> byrow(prod) =>:baseline
         )
 
@@ -365,18 +365,18 @@ sgplot(
 
 **[U-District Cuisine Example](https://vega.github.io/vega/examples/u-district-cuisine/)**
 
-Reproducing an example from [`vega`](https://vega.github.io)`s examples collection.
+Reproducing an example from the [`vega`](https://vega.github.io)`s examples collection.
 
 ```julia
 udistrict = filereader("assets/udistrict.csv")
-# contains some information to match colors and orders with `vega` example 
+# contains some information - use to customise the appearance
 udistrict_info = filereader("assets/udistrict_info.csv", quotechar='"')
 
-# attach information to order data
+# order data
 leftjoin!(udistrict, udistrict_info, on = :key)
 sort!(udistrict, :order)
 
-# produce plot
+# actual graph
 sgplot(
         gatherby(udistrict, :names), 
 
@@ -399,7 +399,7 @@ sgplot(
         layout=:column,
         width=800,
         height=70,
-        rowspace=-50, # to force plot overlaps
+        rowspace=-50, # to force overlaps
         panelborder=false,
         
         headercolname=false,
@@ -412,7 +412,7 @@ sgplot(
         italic=true,
         fontweight=100,
         
-        # match color in the original example
+        # change default colors
         groupcolormodel=udistrict_info[:, :color],
         
         legend=false
