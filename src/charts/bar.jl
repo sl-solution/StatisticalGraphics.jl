@@ -21,7 +21,7 @@ BAR_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0, :group => nothing,
     :groupspace => 0.05, # the space between bars inside each group - for groupdisplay = :cluster
     :outlinecolor => :white,
     :groupdisplay => :stack, #:stack, :cluster, :step (i.e. stacked and cluster), or :none
-    :grouporder => :ascending, # :data, :ascending, :descending
+    :grouporder => :ascending, # :data, :ascending, :descending - having a group column in panelby can cause some issues
     :orderresponse => nothing, # by default axis order control it, but it can be controlled by a column
     :orderstat => freq, # freq is default aggregator, however, it can be any other function 
     :baseline => 0,
