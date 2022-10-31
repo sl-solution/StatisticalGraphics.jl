@@ -269,7 +269,7 @@ sgplot(
 
 ![stack-div-bar](assets/stack-div-bar.svg)
 
-# Examples - sgpanel
+# Examples - grouped datasets
 
 **Cars example**
 
