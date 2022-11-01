@@ -324,13 +324,13 @@ function _check_and_normalize!(plt::Bar, all_args)
 
         bar_ds = combine(gatherby(ds, g_col, mapformats=all_args.mapformats, threads=threads), col => (x -> opts[:stat](_f, x)) => :__height__bar__, color_response => (x -> color_stat(_f_color, x)) => :__color__value__, threads=threads)
         if opts[:normalize] && opts[:group] !== nothing
-            modify!(groupby(bar_ds, [col; _extra_col_for_panel_names_], mapformats=all_args.mapformats, threads=false), :__height__bar__ => opts[:normalizer], threads=false)
+            modify!(gatherby(bar_ds, [col; _extra_col_for_panel_names_], mapformats=all_args.mapformats, threads=false), :__height__bar__ => opts[:normalizer], threads=false)
         elseif opts[:normalize] && opts[:group] === nothing
             throw(ArgumentError("group column must be specified when normalize=true"))
         end
         #baseline must be computed within each group
         #we use hash method, since we are not sure the panel columns are sortable
-        bar_ds_base = combine(groupby(ds, unique([col; _extra_col_for_panel_names_]), mapformats=all_args.mapformats, threads=threads), base_response => (x -> base_stat(_f_base, x)) => :__baseline__value__, threads=threads)
+        bar_ds_base = combine(gatherby(ds, unique([col; _extra_col_for_panel_names_]), mapformats=all_args.mapformats, threads=threads), base_response => (x -> base_stat(_f_base, x)) => :__baseline__value__, threads=threads)
         leftjoin!(bar_ds, bar_ds_base[!, unique(["__baseline__value__"; col; _extra_col_for_panel_names_])], on=unique([col; _extra_col_for_panel_names_]), method=:hash, mapformats=all_args.mapformats)
         if opts[:group] !== nothing
             if opts[:grouporder] == :ascending
@@ -343,7 +343,7 @@ function _check_and_normalize!(plt::Bar, all_args)
         # if groupdisplay is stack we should stack the values
         if opts[:group] !== nothing && opts[:groupdisplay] in (:stack, :step)
             g_col = unique(push!(_extra_col_for_panel_names_, col))
-            modify!(groupby(bar_ds, g_col, mapformats=all_args.mapformats, threads=threads), :__height__bar__ => cumsum, :__height__bar__ => (x -> lag(x, 1, default=opts[:baseline])) => :__height__bar__start__, threads=false)
+            modify!(gatherby(bar_ds, g_col, mapformats=all_args.mapformats, threads=threads), :__height__bar__ => cumsum, :__height__bar__ => (x -> lag(x, 1, default=opts[:baseline])) => :__height__bar__start__, threads=false)
         end
     else
         _f_response = identity
@@ -355,13 +355,13 @@ function _check_and_normalize!(plt::Bar, all_args)
         end
         bar_ds = combine(gatherby(ds, g_col, mapformats=all_args.mapformats, threads=threads), opts[:response] => (x -> opts[:stat](_f_response, x)) => :__height__bar__, color_response => (x -> color_stat(_f_color, x)) => :__color__value__, threads=threads)
         if opts[:normalize] && opts[:group] !== nothing
-            modify!(groupby(bar_ds, [col; _extra_col_for_panel_names_], mapformats=all_args.mapformats, threads=false), :__height__bar__ => opts[:normalizer], threads=false)
+            modify!(gatherby(bar_ds, [col; _extra_col_for_panel_names_], mapformats=all_args.mapformats, threads=false), :__height__bar__ => opts[:normalizer], threads=false)
         elseif opts[:normalize] && opts[:group] === nothing
             throw(ArgumentError("group column must be specified when normalize=true"))
         end
         #baseline must be computed within each group
         #we use hash method, since we are not sure the panel columns are sortable
-        bar_ds_base = combine(groupby(ds, unique([col; _extra_col_for_panel_names_]), mapformats=all_args.mapformats, threads=false), base_response => (x -> base_stat(_f_base, x)) => :__baseline__value__)
+        bar_ds_base = combine(gatherby(ds, unique([col; _extra_col_for_panel_names_]), mapformats=all_args.mapformats, threads=false), base_response => (x -> base_stat(_f_base, x)) => :__baseline__value__)
         leftjoin!(bar_ds, bar_ds_base[!, unique(["__baseline__value__"; col; _extra_col_for_panel_names_])], on=unique([col; _extra_col_for_panel_names_]), method=:hash, mapformats=all_args.mapformats, threads=false)
         if opts[:group] !== nothing
             if opts[:grouporder] == :ascending
@@ -373,12 +373,12 @@ function _check_and_normalize!(plt::Bar, all_args)
         insertcols!(bar_ds, :__height__bar__start__ => plt.opts[:baseline])
         if opts[:group] !== nothing && opts[:groupdisplay] in (:stack, :step)
             g_col = unique(push!(_extra_col_for_panel_names_, col))
-            modify!(groupby(bar_ds, g_col, mapformats=all_args.mapformats, threads=threads), :__height__bar__ => cumsum, :__height__bar__ => (x -> lag(x, 1, default=opts[:baseline])) => :__height__bar__start__, threads=threads)
+            modify!(gatherby(bar_ds, g_col, mapformats=all_args.mapformats, threads=threads), :__height__bar__ => cumsum, :__height__bar__ => (x -> lag(x, 1, default=opts[:baseline])) => :__height__bar__start__, threads=threads)
         end
     end
     # the axes order must be :data for the following to be effective
     if opts[:orderresponse] !== nothing
-        bar_order = combine(groupby(ds, unique([col; _extra_col_for_panel_names_]), mapformats=all_args.mapformats, threads=all_args.threads), opts[:orderresponse] => (x -> opts[:orderstat](_f_order, x)) => :__bar__order__column__, threads=threads)
+        bar_order = combine(gatherby(ds, unique([col; _extra_col_for_panel_names_]), mapformats=all_args.mapformats, threads=all_args.threads), opts[:orderresponse] => (x -> opts[:orderstat](_f_order, x)) => :__bar__order__column__, threads=threads)
         leftjoin!(bar_ds, bar_order, on=unique([col; _extra_col_for_panel_names_]), mapformats=all_args.mapformats, threads=false, method=:hash)
         sort!(bar_ds, :__bar__order__column__)
     end
@@ -393,7 +393,7 @@ function _check_and_normalize!(plt::Bar, all_args)
         nest_factor_lookup = Dict(1=>0, 2 => 0.3, (3:4 .=> 0.2)..., (5:7 .=> 0.15)...) # for more than 8 we calculate it
         g_col = unique(push!(_extra_col_for_panel_names_, col))
         # find the maximum number of group in one single category
-        _temp_ds_ = combine(groupby(bar_ds, g_col, mapformats=all_args.mapformats, threads = false), 1 => length => "$(sg_col_prefix)number__of__groups")
+        _temp_ds_ = combine(gatherby(bar_ds, g_col, mapformats=all_args.mapformats, threads = false), 1 => length => "$(sg_col_prefix)number__of__groups")
         max_level = IMD.maximum(_temp_ds_[!, "$(sg_col_prefix)number__of__groups"])
         
         if opts[:nestfactor] === nothing

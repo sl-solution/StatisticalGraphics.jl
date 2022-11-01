@@ -506,13 +506,13 @@ function lattice_add_height_width_x_y!(panel_info, all_args)
     _find_height_proportion!(panel_info, all_args)
     insertcols!(panel_info, "$(sg_col_prefix)y" => panel_info[:, "$(sg_col_prefix)height"] .+ all_args.opts[:rowspace])
     insertcols!(panel_info, "$(sg_col_prefix)x" => panel_info[:, "$(sg_col_prefix)width"] .+ all_args.opts[:columnspace])
-    modify!(groupby(panel_info, 3, mapformats = all_args.mapformats, threads = false), "$(sg_col_prefix)x" => cumsum, "$(sg_col_prefix)x" =>lag)
-    modify!(groupby(panel_info, 2, mapformats = all_args.mapformats, threads = false), "$(sg_col_prefix)y" => cumsum, "$(sg_col_prefix)y" => lag)
+    modify!(gatherby(panel_info, 3, mapformats = all_args.mapformats, threads = false), "$(sg_col_prefix)x" => cumsum, "$(sg_col_prefix)x" =>lag)
+    modify!(gatherby(panel_info, 2, mapformats = all_args.mapformats, threads = false), "$(sg_col_prefix)y" => cumsum, "$(sg_col_prefix)y" => lag)
     map!(panel_info, x->ismissing(x) ? 0 : x, ["$(sg_col_prefix)x", "$(sg_col_prefix)y"])
-    modify!(groupby(panel_info, 3, mapformats = all_args.mapformats, threads = false), 1 => _bool_first_true => "$(sg_col_prefix)yaxis")
-    modify!(groupby(panel_info, 3, mapformats = all_args.mapformats, threads = false), 1 => _bool_last_true => "$(sg_col_prefix)y2axis")
-    modify!(groupby(panel_info, 2, mapformats = all_args.mapformats, threads = false), 1 => _bool_first_true => "$(sg_col_prefix)x2axis")
-    modify!(groupby(panel_info, 2, mapformats = all_args.mapformats, threads = false), 1 => _bool_last_true => "$(sg_col_prefix)xaxis")
+    modify!(gatherby(panel_info, 3, mapformats = all_args.mapformats, threads = false), 1 => _bool_first_true => "$(sg_col_prefix)yaxis")
+    modify!(gatherby(panel_info, 3, mapformats = all_args.mapformats, threads = false), 1 => _bool_last_true => "$(sg_col_prefix)y2axis")
+    modify!(gatherby(panel_info, 2, mapformats = all_args.mapformats, threads = false), 1 => _bool_first_true => "$(sg_col_prefix)x2axis")
+    modify!(gatherby(panel_info, 2, mapformats = all_args.mapformats, threads = false), 1 => _bool_last_true => "$(sg_col_prefix)xaxis")
 
     if all_args.opts[:layout] == :panel
         insertcols!(panel_info, "$(sg_col_prefix)cell_title_$(all_args.opts[:headerorient])" => _how_to_print.(panel_info[:, "$(sg_col_prefix)__title_info_for_each_panel__"], all_args.opts[:headercolname]))
@@ -523,10 +523,10 @@ function lattice_add_height_width_x_y!(panel_info, all_args)
         which_have_header_rows = _rows_orient == :left ? _first_not_missing : _last_not_missing
         
         insertcols!(panel_info, "$(sg_col_prefix)cell_title_$(_cols_orient)" => _how_to_print.(panel_info[:, "$(sg_col_prefix)__title_info_for_each_panel__"], all_args.opts[:headercolname], idx=1))
-        modify!(groupby(panel_info, 2, mapformats = all_args.mapformats, threads = false), "$(sg_col_prefix)cell_title_$(_cols_orient)" => which_have_header_cols)
+        modify!(gatherby(panel_info, 2, mapformats = all_args.mapformats, threads = false), "$(sg_col_prefix)cell_title_$(_cols_orient)" => which_have_header_cols)
 
         insertcols!(panel_info, "$(sg_col_prefix)cell_title_$(_rows_orient)" => _how_to_print.(panel_info[:, "$(sg_col_prefix)__title_info_for_each_panel__"], all_args.opts[:headercolname], idx=2))
-         modify!(groupby(panel_info, 3, mapformats = all_args.mapformats, threads = false), "$(sg_col_prefix)cell_title_$(_rows_orient)" => which_have_header_rows)
+         modify!(gatherby(panel_info, 3, mapformats = all_args.mapformats, threads = false), "$(sg_col_prefix)cell_title_$(_rows_orient)" => which_have_header_rows)
     end
 end
 function panel_add_height_width_x_y!(panel_info, all_args)
