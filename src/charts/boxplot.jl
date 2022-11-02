@@ -67,7 +67,7 @@ function _box_plot_fun(x, outliers; olf = 1.5, fun = identity)
         return (q1, q3, med, mu, minval, maxval, actual_min, actual_max, filter(x -> isless(maxval, x) || isless(x, minval), y))
     else
         
-        return (quantile(y, 0.25), quantile(y, 0.75), quantile(y, 0.5), IMD.mean(x), IMD.minimum(y), IMD.maximum(y), IMD.minimum(y), IMD.maximum(y), Any[])
+        return (quantile(y, 0.25), quantile(y, 0.75), quantile(y, 0.5), IMD.mean(y), IMD.minimum(y), IMD.maximum(y), IMD.minimum(y), IMD.maximum(y), Any[])
     end
 end
 
