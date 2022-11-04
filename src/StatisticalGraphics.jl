@@ -17,11 +17,12 @@ module StatisticalGraphics
         Bar,
         BoxPlot,
         RefLine,
+        Label,
         Axis,
         Legend,
         sgplot,
         freq # freq is a function used in Bar plot
-    
+  
     abstract type SGMarks end
 
     include("util.jl")
@@ -36,6 +37,7 @@ module StatisticalGraphics
     include("charts/bar.jl")
     include("charts/boxplot.jl")
     include("charts/refline.jl")
+    include("charts/label.jl")
     include("sgplot.jl")
     include("sgpanel.jl")
     include("precompile/warmup.jl")

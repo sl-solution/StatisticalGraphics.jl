@@ -75,6 +75,35 @@ function addto_symbol_scale!(vspec, source, name, col)
     new_scale[:name] = name
     push!(vspec[:scales], new_scale)
 end
+function addto_opacity_scale!(vspec, source, name, col)
+    new_scale = Dict{Symbol,Any}()
+    new_scale[:domain] = Dict{Symbol,Any}()
+    new_scale[:domain][:fields] = Dict{Symbol,Any}[]
+    push!(new_scale[:domain][:fields], Dict{Symbol,Any}(:data => source, :field => col))
+    new_scale[:type] = "linear"
+    new_scale[:range] = [0,1]
+    new_scale[:name] = name
+    push!(vspec[:scales], new_scale)
+end
+
+# angle response assign range with the values from its domain
+# user must make sure that the response are valid angles(in degree)
+function addto_angle_scale!(vspec, source, name, col)
+    new_scale = Dict{Symbol,Any}()
+    new_scale[:domain] = Dict{Symbol,Any}()
+    new_scale[:domain][:fields] = Dict{Symbol,Any}[]
+    push!(new_scale[:domain][:fields], Dict{Symbol,Any}(:data => source, :field => col))
+    # we trick vega to find range for angle scale based on domain of dummy scale
+    new_scale[:name] = "dummy_$name"
+    push!(vspec[:scales], new_scale)
+
+    new_scale = Dict{Symbol,Any}()
+    new_scale[:domain] = Dict{Symbol,Any}(:signal => "domain('dummy_$name')")
+    new_scale[:type] = "linear"
+    new_scale[:range] = Dict{Symbol,Any}(:signal => "domain('dummy_$name')")
+    new_scale[:name] = name
+    push!(vspec[:scales], new_scale)
+end
 
 function addto_group_scale!(group_scale, source, col, all_args)
     if haskey(group_scale, :type) # it has been initialised
