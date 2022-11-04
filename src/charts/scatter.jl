@@ -237,7 +237,7 @@ function _add_legends!(plt::Scatter, all_args, idx)
     leg_spec_cp = Dict{Symbol, Any}()     
     if which_scale[2] !== nothing
         leg_spec_cp[:fill] = "color_scale_$idx"
-        _build_legen!(leg_spec_cp, leg_spec.opts, nothing, which_scale[1], "$(legend_id)_color_scale_legend_$idx", all_args)
+        _build_legen!(leg_spec_cp, leg_spec.opts, nothing, which_scale[2], "$(legend_id)_color_scale_legend_$idx", all_args)
         push!(all_args.out_legends, leg_spec_cp)
     end
 end   
