@@ -1,4 +1,5 @@
 AXES_DEFAULT = Dict{Symbol, Any}(:type => :linear,
+                                 :exponent=>nothing,#if type=pow then user can pass exponent
                                  :show => true, # if it is false, domain, ticks, labels and title are set to false
                                  :values => nothing, # manually put ticks
 

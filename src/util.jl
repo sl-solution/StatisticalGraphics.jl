@@ -362,6 +362,9 @@ function _fill_scales!(vspec, all_args)
         if all_args.scale_type[i] !== nothing
             in_scale = vspec[:scales][i]
             in_scale[:type] = all_args.scale_type[i]
+            if all_args.axes[i].opts[:exponent] !== nothing && in_scale[:type] == :pow
+                in_scale[:exponent] = all_args.axes[i].opts[:exponent]
+            end
             # some marks like Histogram, set :zero to true
             if !(in_scale[:type] in [:time, :band, :point]) && !haskey(in_scale, :zero)
                 in_scale[:zero] = false
