@@ -75,20 +75,21 @@ function addto_symbol_scale!(vspec, source, name, col)
     new_scale[:name] = name
     push!(vspec[:scales], new_scale)
 end
-function addto_opacity_scale!(vspec, source, name, col)
-    new_scale = Dict{Symbol,Any}()
-    new_scale[:domain] = Dict{Symbol,Any}()
-    new_scale[:domain][:fields] = Dict{Symbol,Any}[]
-    push!(new_scale[:domain][:fields], Dict{Symbol,Any}(:data => source, :field => col))
-    new_scale[:type] = "linear"
-    new_scale[:range] = [0,1]
-    new_scale[:name] = name
-    push!(vspec[:scales], new_scale)
-end
+# function addto_opacity_scale!(vspec, source, name, col)
+#     new_scale = Dict{Symbol,Any}()
+#     new_scale[:domain] = Dict{Symbol,Any}()
+#     new_scale[:domain][:fields] = Dict{Symbol,Any}[]
+#     push!(new_scale[:domain][:fields], Dict{Symbol,Any}(:data => source, :field => col))
+#     new_scale[:type] = "linear"
+#     new_scale[:range] = [0,1]
+#     new_scale[:name] = name
+#     push!(vspec[:scales], new_scale)
+# end
 
-# angle response assign range with the values from its domain
-# user must make sure that the response are valid angles(in degree)
-function addto_angle_scale!(vspec, source, name, col)
+# identity scale defines both domains and range as the [min, max]
+# useful for angleresponse, opacityresponse...
+# user must make sure that the response are valid
+function addto_identity_scale!(vspec, source, name, col)
     new_scale = Dict{Symbol,Any}()
     new_scale[:domain] = Dict{Symbol,Any}()
     new_scale[:domain][:fields] = Dict{Symbol,Any}[]
