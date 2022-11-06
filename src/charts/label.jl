@@ -55,7 +55,7 @@ function _push_plots!(vspec, plt::Label, all_args; idx=1)
         s_spec_marks[:encode][:enter][:opacity] = Dict(:value => opts[:opacity])
     else
         s_spec_marks[:encode][:enter][:opacity] = Dict(:field => opts[:opacityresponse], :scale => "opacity_scale_$idx")
-        addto_opacity_scale!(vspec, "source_0", "opacity_scale_$idx", opts[:opacityresponse])
+        addto_identity_scale!(vspec, "source_0", "opacity_scale_$idx", opts[:opacityresponse])
     end
 
 
@@ -65,7 +65,7 @@ function _push_plots!(vspec, plt::Label, all_args; idx=1)
         s_spec_marks[:encode][:enter][:angle] = Dict(:value => opts[:angle])
     else
         s_spec_marks[:encode][:enter][:angle] = Dict(:field => opts[:angleresponse], :scale => "angle_scale_$idx")
-        addto_angle_scale!(vspec, "source_0", "angle_scale_$idx", opts[:angleresponse])
+        addto_identity_scale!(vspec, "source_0", "angle_scale_$idx", opts[:angleresponse])
     end
 
     s_spec_marks[:encode][:enter][:fill] = Dict{Symbol,Any}()
