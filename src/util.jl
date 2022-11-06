@@ -58,7 +58,7 @@ function addto_color_scale!(vspec, source, name, col, isnominal; color_model = n
     new_scale[:domain][:fields] = Dict{Symbol,Any}[]
     push!(new_scale[:domain][:fields], Dict{Symbol,Any}(:data => source, :field => col))
     # we support two types :point and :linear
-    new_scale[:type] = isnominal ? "point" : "linear"
+    new_scale[:type] = isnominal ? "ordinal" : "linear"
     new_scale[:range] = color_model !== nothing ? color_model : isnominal ? "category" : "diverging"
     new_scale[:name] = name
     push!(vspec[:scales], new_scale)
@@ -102,6 +102,17 @@ function addto_identity_scale!(vspec, source, name, col)
     new_scale[:domain] = Dict{Symbol,Any}(:signal => "domain('dummy_$name')")
     new_scale[:type] = "linear"
     new_scale[:range] = Dict{Symbol,Any}(:signal => "domain('dummy_$name')")
+    new_scale[:name] = name
+    push!(vspec[:scales], new_scale)
+end
+
+function addto_size_scale!(vspec, source, name, col, minsize, maxsize)
+    new_scale = Dict{Symbol,Any}()
+    new_scale[:domain] = Dict{Symbol,Any}()
+    new_scale[:domain][:fields] = Dict{Symbol,Any}[]
+    push!(new_scale[:domain][:fields], Dict{Symbol,Any}(:data => source, :field => col))
+    new_scale[:type] = "linear"
+    new_scale[:range] = [minsize^2, maxsize^2]
     new_scale[:name] = name
     push!(vspec[:scales], new_scale)
 end

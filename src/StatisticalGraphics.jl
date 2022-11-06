@@ -18,6 +18,7 @@ module StatisticalGraphics
         BoxPlot,
         RefLine,
         Label,
+        Bubble,
         Axis,
         Legend,
         sgplot,
@@ -38,6 +39,7 @@ module StatisticalGraphics
     include("charts/boxplot.jl")
     include("charts/refline.jl")
     include("charts/label.jl")
+    include("charts/bubble.jl")
     include("sgplot.jl")
     include("sgpanel.jl")
     include("precompile/warmup.jl")
