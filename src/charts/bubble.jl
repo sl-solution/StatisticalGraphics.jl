@@ -47,6 +47,9 @@ function _push_plots!(vspec, plt::Bubble, all_args; idx = 1)
     if opts[:maxsize] === nothing
         opts[:maxsize] = all_args.opts[:height] ÷ 10
     end
+    if opts[:maxsize] <= opts[:minsize]
+        opts[:maxsize] = 2*opts[:minsize]
+    end
     # we should filter out invalid data
     filter_data = Dict{Symbol, Any}()
     filter_data[:name] = "source_0_$idx"
