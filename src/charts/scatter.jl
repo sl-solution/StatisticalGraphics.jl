@@ -3,6 +3,7 @@ SCATTER_DEFAULT = Dict{Symbol, Any}(:x => 0, :y => 0,
                                     :x2axis=>false,
                                     :y2axis=>false,
                                     :opacity=>1,
+                                    :opacityresponse=>nothing,
                                     :thickness=>1, # symbol outline thickness
                                     :filled=>true,
                                     :fill=>"null",
@@ -62,10 +63,20 @@ function _push_plots!(vspec, plt::Scatter, all_args; idx = 1)
     s_spec_marks[:from] = Dict(:data => "source_0_$idx")
     s_spec_marks[:encode] = Dict{Symbol,Any}()
     s_spec_marks[:encode][:enter] = Dict{Symbol,Any}()
-    s_spec_marks[:encode][:enter][:opacity] = Dict(:value => opts[:opacity])
+    if opts[:opacityresponse] === nothing
+        s_spec_marks[:encode][:enter][:opacity] = Dict(:value => opts[:opacity])
+    else
+        s_spec_marks[:encode][:enter][:opacity] = Dict(:field => opts[:opacityresponse], :scale => "opacity_scale_$idx")
+        addto_identity_scale!(vspec, "source_0", "opacity_scale_$idx", opts[:opacityresponse])
+    end
     s_spec_marks[:encode][:enter][:strokeWidth] = Dict(:value => opts[:thickness])
     s_spec_marks[:encode][:enter][:size] = Dict(:value => opts[:size])
-    s_spec_marks[:encode][:enter][:angle] = Dict(:value => opts[:angle])
+    if opts[:angleresponse] === nothing
+        s_spec_marks[:encode][:enter][:angle] = Dict(:value => opts[:angle])
+    else
+        s_spec_marks[:encode][:enter][:angle] = Dict(:field => opts[:angleresponse], :scale => "angle_scale_$idx")
+        addto_identity_scale!(vspec, "source_0", "angle_scale_$idx", opts[:angleresponse])
+    end
     s_spec_marks[:encode][:enter][:fill] = Dict{Symbol,Any}()
     if opts[:colorresponse] === nothing
         s_spec_marks[:encode][:enter][:fill][:value] = ifelse(opts[:filled], opts[:fillcolor], "transparent")
@@ -170,6 +181,14 @@ function _check_and_normalize!(plt::Scatter, all_args)
         if length(IMD.index(ds)[opts[:angleresponse]]) == 1
             append!(cols, IMD.index(ds)[opts[:angleresponse]])
             opts[:angleresponse] = _colname_as_string(ds, opts[:angleresponse])
+        else
+            @goto argerr 
+        end
+    end
+    if opts[:opacityresponse] !== nothing
+        if length(IMD.index(ds)[opts[:opacityresponse]]) == 1
+            append!(cols, IMD.index(ds)[opts[:opacityresponse]])
+            opts[:opacityresponse] = _colname_as_string(ds, opts[:opacityresponse])
         else
             @goto argerr 
         end
