@@ -32,6 +32,7 @@ BOXPLOT_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0, :category => nothing, # x o
     :outlieropacity=>1,
     :legend => nothing,
 
+    :tooltip=>false,
     :clip=>nothing
 
 )
@@ -180,6 +181,10 @@ function _push_boxplot_box!(vspec, plt, all_args, cols, new_ds; idx=1)
     s_spec_marks[:encode][:enter][_var_][:field] = groupcol
     s_spec_marks[:encode][:enter][_var_2_][:field] = "__box__vars__q1"
     s_spec_marks[:encode][:enter][Symbol(_var_2_, 2)][:field] = "__box__vars__q3"
+    if opts[:tooltip]
+        s_spec_marks[:encode][:enter][:tooltip] = Dict{Symbol, Any}(:signal => "{min : datum['__box__vars__min'], q1 :  datum['__box__vars__q1']
+        , median : datum['__box__vars__med'], mean : datum['__box__vars__mean'], q3 : datum['__box__vars__q3'], max : datum['__box__vars__max']}")
+    end
 
 
     s_spec[:from] = Dict{Symbol,Any}()
