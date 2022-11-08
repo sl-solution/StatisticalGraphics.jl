@@ -1,4 +1,4 @@
-LABEL_DEFAULT = Dict{Symbol,Any}(:x => nothing, :y => nothing, :text => nothing,
+TEXT_DEFAULT = Dict{Symbol,Any}(:x => nothing, :y => nothing, :text => nothing,
     :group => nothing,
     :x2axis => false,
     :y2axis => false, :opacity => 1,
@@ -13,25 +13,25 @@ LABEL_DEFAULT = Dict{Symbol,Any}(:x => nothing, :y => nothing, :text => nothing,
     :colormodel => :diverging, :legend => nothing, #user must give a name to this if further customisation is needed for the legend
     :clip => nothing
 )
-mutable struct Label <: SGMarks # we have to use Label instead of Text, since Julia has a Text type already (although it is deprecated)
+mutable struct TextPlot <: SGMarks # we have to use TextPlot instead of Text, since Julia has a Text type already (although it is deprecated)
     opts
-    function Label(; opts...)
+    function TextPlot(; opts...)
         optsd = val_opts(opts)
-        cp_LABEL_DEFAULT = update_default_opts!(deepcopy(LABEL_DEFAULT), optsd)
-        if cp_LABEL_DEFAULT[:text] == 0 || cp_LABEL_DEFAULT[:x] == 0 || cp_LABEL_DEFAULT[:y] == 0
-            throw(ArgumentError("Label needs text, x and y keyword arguments"))
+        cp_TEXT_DEFAULT = update_default_opts!(deepcopy(TEXT_DEFAULT), optsd)
+        if cp_TEXT_DEFAULT[:text] == 0 || cp_TEXT_DEFAULT[:x] == 0 || cp_TEXT_DEFAULT[:y] == 0
+            throw(ArgumentError("TextPlot needs text, x and y keyword arguments"))
         end
-        if cp_LABEL_DEFAULT[:colorresponse] !== nothing && cp_LABEL_DEFAULT[:group] !== nothing
+        if cp_TEXT_DEFAULT[:colorresponse] !== nothing && cp_TEXT_DEFAULT[:group] !== nothing
             throw(ArgumentError("only one of colorresponse or group should be passed"))
         end
-        new(cp_LABEL_DEFAULT)
+        new(cp_TEXT_DEFAULT)
     end
 end
 
-# Label puts a text in a plot
+# TextPlot puts a text in a plot
 # It requires text, x and y keyword arguments
 # It needs the input data set to be passed dirctly to vega
-function _push_plots!(vspec, plt::Label, all_args; idx=1)
+function _push_plots!(vspec, plt::TextPlot, all_args; idx=1)
     # check if the required arguments are passed
     _check_and_normalize!(plt, all_args)
     _add_legends!(plt, all_args, idx)
@@ -135,7 +135,7 @@ end
 
 # converts all column names to string, also check if the required arguments are passed
 # TODO use macro to generate repeated code
-function _check_and_normalize!(plt::Label, all_args)
+function _check_and_normalize!(plt::TextPlot, all_args)
     opts = plt.opts
     ds = all_args.ds
     cols = all_args.referred_cols
@@ -203,7 +203,7 @@ function _check_and_normalize!(plt::Label, all_args)
     throw(ArgumentError("only a single column must be selected"))
 end
 
-function _add_legends!(plt::Label, all_args, idx)
+function _add_legends!(plt::TextPlot, all_args, idx)
     opts = plt.opts
     # find the suitable scales for the legend
     # group, color, symbol, angle, ...

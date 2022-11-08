@@ -17,7 +17,7 @@ module StatisticalGraphics
         Bar,
         BoxPlot,
         RefLine,
-        Label,
+        TextPlot,
         Bubble,
         Axis,
         Legend,
@@ -38,7 +38,7 @@ module StatisticalGraphics
     include("charts/bar.jl")
     include("charts/boxplot.jl")
     include("charts/refline.jl")
-    include("charts/label.jl")
+    include("charts/textplot.jl")
     include("charts/bubble.jl")
     include("sgplot.jl")
     include("sgpanel.jl")
