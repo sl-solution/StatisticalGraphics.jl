@@ -10,7 +10,7 @@ LABEL_DEFAULT = Dict{Symbol,Any}(:x => nothing, :y => nothing, :text => nothing,
     :dir => :ltr, :align => :left, :textbaseline => :alphabetic, :angle => 0,
     :angleresponse => nothing, :color => :black,
     :colorresponse => nothing,
-    :colormodel => ["#2f6790", "#bed8ec"], :legend => nothing, #user must give a name to this if further customisation is needed for the legend
+    :colormodel => :diverging, :legend => nothing, #user must give a name to this if further customisation is needed for the legend
     :clip => nothing
 )
 mutable struct Label <: SGMarks # we have to use Label instead of Text, since Julia has a Text type already (although it is deprecated)

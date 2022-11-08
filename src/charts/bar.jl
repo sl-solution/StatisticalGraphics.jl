@@ -16,7 +16,7 @@ BAR_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0, :group => nothing,
     :color => "#4682b4",
     :colorresponse => nothing,
     :colorstat => nothing, # the same rule as :stat
-    :colormodel => ["#2f6790", "#bed8ec"], # we use linear scale to produce colors
+    :colormodel => :diverging, # we use linear scale to produce colors
     :space => 0.1, # the space between bars - the space is calculated as space * total_bandwidth
     :groupspace => 0.05, # the space between bars inside each group - for groupdisplay = :cluster
     :outlinecolor => :white,
