@@ -15,7 +15,7 @@ SCATTER_DEFAULT = Dict{Symbol, Any}(:x => 0, :y => 0,
                                     :angleresponse=>nothing,
                                     :color=>"#4682b4",
                                     :colorresponse => nothing,
-                                    :colormodel=>["#2f6790", "#bed8ec"],
+                                    :colormodel=>:diverging,
                                     :legend => nothing , #user must give a name to this if further customisation is needed for the legend
                                     :jitter=>[0,0], # jitter strength, the first one is the horizontal strength and the second number is the vertical strength
 
