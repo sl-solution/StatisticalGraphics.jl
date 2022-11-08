@@ -17,7 +17,21 @@ BUBBLE_DEFAULT = Dict{Symbol, Any}(:x => 0, :y => 0, :size=>0,
                                     :colormodel=>["#2f6790", "#bed8ec"],
 
                                     :legend => nothing , #user must give a name to this if further customisation is needed for the legend
-                                 
+
+                                    #data label
+                                    :labelresponse=>nothing,
+                                    :labelfont=>nothing,
+                                    :labelfontweight=>nothing,
+                                    :labelitalic=>nothing,
+                                    :labelsize=>nothing,
+                                    :labelcolor=>:black, # allow :group, :colorresponse to use their color if available
+                                    :labelangle=>0,
+                                    :labeldir=>:ltr,
+                                    :labellimit=>nothing,
+                                    :labelanchor=>[:top, :bottom, :left, :right],
+                                    :labelalgorithm=>:naive,
+                                    :tooltip => false, # it can be true, only if labelresponse is provided
+
                                     :clip=>nothing
                                     )
 mutable struct Bubble <: SGMarks
@@ -25,7 +39,7 @@ mutable struct Bubble <: SGMarks
     function Bubble(;opts...)
         optsd = val_opts(opts)
         cp_BUBBLE_DEFAULT = update_default_opts!(deepcopy(BUBBLE_DEFAULT), optsd)
-       
+        cp_BUBBLE_DEFAULT[:tooltip] && cp_BUBBLE_DEFAULT[:labelresponse] === nothing && throw(ArgumentError("tooltip only works when the labelresponse keyword is set"))
         if cp_BUBBLE_DEFAULT[:x] == 0 || cp_BUBBLE_DEFAULT[:y] == 0 || cp_BUBBLE_DEFAULT[:size] == 0
             throw(ArgumentError("Bubble plot needs all x, y, and size keyword arguments"))
         end
@@ -63,9 +77,13 @@ function _push_plots!(vspec, plt::Bubble, all_args; idx = 1)
     s_spec_marks = Dict{Symbol,Any}()
     s_spec_marks[:type] = "symbol"
     s_spec_marks[:style] = ["point"]
+    s_spec_marks[:name] = "bubble"
     s_spec_marks[:from] = Dict(:data => "source_0_$idx")
     s_spec_marks[:encode] = Dict{Symbol,Any}()
     s_spec_marks[:encode][:enter] = Dict{Symbol,Any}()
+    if opts[:tooltip]
+        s_spec_marks[:encode][:enter][:tooltip] = Dict{Symbol, Any}(:field=>opts[:labelresponse])
+    end
     if opts[:opacityresponse] === nothing
         s_spec_marks[:encode][:enter][:opacity] = Dict(:value => opts[:opacity])
     else
@@ -92,12 +110,6 @@ function _push_plots!(vspec, plt::Bubble, all_args; idx = 1)
     if opts[:group] === nothing
         s_spec_marks[:encode][:enter][:stroke][:value] = opts[:color]
     else
-        s_spec[:from] = Dict{Symbol,Any}()
-        s_spec[:from][:facet] = Dict{Symbol,Any}()
-        s_spec[:from][:facet][:name] = "group_facet_source"
-        s_spec[:from][:facet][:data] = "source_0_$idx"
-        s_spec[:from][:facet][:groupby] = opts[:group]
-        s_spec_marks[:from][:data] = "group_facet_source"
         s_spec_marks[:encode][:enter][:stroke][:scale] = "group_scale"
         s_spec_marks[:encode][:enter][:stroke][:field] = opts[:group]
         # group is the 5th element of scales
@@ -128,6 +140,11 @@ function _push_plots!(vspec, plt::Bubble, all_args; idx = 1)
     s_spec_marks[:encode][:enter][:y][:field] = opts[:y]
     
     s_spec[:marks] = [s_spec_marks]
+    if opts[:labelresponse] !== nothing
+        labels_mark = _label_for_points("bubble", opts, all_args; idx=idx)
+        push!(s_spec[:marks], labels_mark)
+    end
+    
     push!(vspec[:marks], s_spec)
 end
 
@@ -176,6 +193,14 @@ function _check_and_normalize!(plt::Bubble, all_args)
         if length(IMD.index(ds)[opts[:colorresponse]]) == 1
             append!(cols, IMD.index(ds)[opts[:colorresponse]])
             opts[:colorresponse] = _colname_as_string(ds, opts[:colorresponse])
+        else
+            @goto argerr
+        end
+    end
+    if opts[:labelresponse] !== nothing
+        if length(IMD.index(ds)[opts[:labelresponse]]) == 1
+            append!(cols, IMD.index(ds)[opts[:labelresponse]])
+            opts[:labelresponse] = _colname_as_string(ds, opts[:labelresponse])
         else
             @goto argerr
         end

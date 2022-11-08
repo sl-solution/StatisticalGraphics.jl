@@ -19,6 +19,20 @@ SCATTER_DEFAULT = Dict{Symbol, Any}(:x => 0, :y => 0,
                                     :legend => nothing , #user must give a name to this if further customisation is needed for the legend
                                     :jitter=>[0,0], # jitter strength, the first one is the horizontal strength and the second number is the vertical strength
 
+                                    #data label
+                                    :labelresponse=>nothing,
+                                    :labelfont=>nothing,
+                                    :labelfontweight=>nothing,
+                                    :labelitalic=>nothing,
+                                    :labelsize=>nothing,
+                                    :labelcolor=>:black,# allow :group, :colorresponse to use their color if available 
+                                    :labelangle=>0,
+                                    :labeldir=>:ltr,
+                                    :labellimit=>nothing,
+                                    :labelanchor=>[:top, :bottom, :left, :right],
+                                    :labelalgorithm=>:naive,
+                                    :tooltip => false, # it can be true, only if labelresponse is provided
+
                                     :clip=>nothing
                                     )
 mutable struct Scatter <: SGMarks
@@ -26,6 +40,7 @@ mutable struct Scatter <: SGMarks
     function Scatter(;opts...)
         optsd = val_opts(opts)
         cp_SCATTER_DEFAULT = update_default_opts!(deepcopy(SCATTER_DEFAULT), optsd)
+        cp_SCATTER_DEFAULT[:tooltip] && cp_SCATTER_DEFAULT[:labelresponse] === nothing && throw(ArgumentError("tooltip only works when the labelresponse keyword is set"))
         if !(cp_SCATTER_DEFAULT[:jitter] isa AbstractVector)
             cp_SCATTER_DEFAULT[:jitter] = [cp_SCATTER_DEFAULT[:jitter], cp_SCATTER_DEFAULT[:jitter]]
         else
@@ -60,9 +75,13 @@ function _push_plots!(vspec, plt::Scatter, all_args; idx = 1)
     s_spec_marks = Dict{Symbol,Any}()
     s_spec_marks[:type] = "symbol"
     s_spec_marks[:style] = ["point"]
+    s_spec_marks[:name] = "points"
     s_spec_marks[:from] = Dict(:data => "source_0_$idx")
     s_spec_marks[:encode] = Dict{Symbol,Any}()
     s_spec_marks[:encode][:enter] = Dict{Symbol,Any}()
+    if opts[:tooltip]
+        s_spec_marks[:encode][:enter][:tooltip] = Dict{Symbol, Any}(:field=>opts[:labelresponse])
+    end
     if opts[:opacityresponse] === nothing
         s_spec_marks[:encode][:enter][:opacity] = Dict(:value => opts[:opacity])
     else
@@ -99,12 +118,6 @@ function _push_plots!(vspec, plt::Scatter, all_args; idx = 1)
     if opts[:group] === nothing
         s_spec_marks[:encode][:enter][:stroke][:value] = opts[:color]
     else
-        s_spec[:from] = Dict{Symbol,Any}()
-        s_spec[:from][:facet] = Dict{Symbol,Any}()
-        s_spec[:from][:facet][:name] = "group_facet_source"
-        s_spec[:from][:facet][:data] = "source_0_$idx"
-        s_spec[:from][:facet][:groupby] = opts[:group]
-        s_spec_marks[:from][:data] = "group_facet_source"
         s_spec_marks[:encode][:enter][:stroke][:scale] = "group_scale"
         s_spec_marks[:encode][:enter][:stroke][:field] = opts[:group]
         # group is the 5th element of scales
@@ -139,6 +152,10 @@ function _push_plots!(vspec, plt::Scatter, all_args; idx = 1)
         s_spec_marks[:encode][:enter][:y][:offset] = Dict{Symbol, Any}(:signal=>_addjitter(opts[:jitter][2]))
     end
     s_spec[:marks] = [s_spec_marks]
+    if opts[:labelresponse] !== nothing
+        labels_mark = _label_for_points("points", opts, all_args; idx=idx)
+        push!(s_spec[:marks], labels_mark)
+    end
     push!(vspec[:marks], s_spec)
 end
 
@@ -197,6 +214,14 @@ function _check_and_normalize!(plt::Scatter, all_args)
         if length(IMD.index(ds)[opts[:colorresponse]]) == 1
             append!(cols, IMD.index(ds)[opts[:colorresponse]])
             opts[:colorresponse] = _colname_as_string(ds, opts[:colorresponse])
+        else
+            @goto argerr
+        end
+    end
+    if opts[:labelresponse] !== nothing
+        if length(IMD.index(ds)[opts[:labelresponse]]) == 1
+            append!(cols, IMD.index(ds)[opts[:labelresponse]])
+            opts[:labelresponse] = _colname_as_string(ds, opts[:labelresponse])
         else
             @goto argerr
         end
@@ -261,3 +286,47 @@ function _add_legends!(plt::Scatter, all_args, idx)
     end
 end   
     
+function _label_for_points(source, opts, all_args; idx = 1)
+    s_mark = Dict{Symbol, Any}()
+    s_mark[:type] = "text"
+    s_mark[:from] = Dict{Symbol, Any}(:data=>source)
+    s_mark[:encode] = Dict{Symbol, Any}()
+    s_mark[:encode][:enter] = Dict{Symbol, Any}()
+    if opts[:labelcolor] in (:group, :colorresponse)
+        if opts[:labelcolor] == :group && opts[:group] !== nothing
+            s_mark[:encode][:enter][:fill] = Dict{Symbol, Any}(:field => "datum['$(opts[:group])']", :scale=>"group_scale")
+        elseif opts[:colorresponse] !== nothing
+            s_mark[:encode][:enter][:fill] = Dict{Symbol, Any}(:field => "datum['$(opts[:colorresponse])']", :scale=>"color_scale_$idx")
+        end
+    else
+        s_mark[:encode][:enter][:fill] = Dict{Symbol, Any}(:value => opts[:labelcolor])
+    end
+    s_mark[:encode][:enter][:text] = Dict{Symbol, Any}(:field=> "datum['$(opts[:labelresponse])']")
+    s_mark[:encode][:enter][:font] = Dict{Symbol, Any}(:value=>something(opts[:labelfont], all_args.opts[:font]))
+    s_mark[:encode][:enter][:fontWeight] = Dict{Symbol, Any}(:value=>something(opts[:labelfontweight], all_args.opts[:fontweight]))
+    s_mark[:encode][:enter][:fontStyle] = Dict{Symbol, Any}(:value=>something(opts[:labelitalic], all_args.opts[:italic]) ? "italic" : "normal")
+    s_mark[:encode][:enter][:angle] = Dict{Symbol, Any}(:value=>opts[:labelangle])
+    if opts[:labelsize] !== nothing
+        s_mark[:encode][:enter][:fontSize] = Dict{Symbol, Any}(:value=>opts[:labelsize])
+    end
+    s_mark[:encode][:enter][:dir] = Dict{Symbol, Any}(:value=>opts[:labeldir])
+    if opts[:labellimit] !== nothing
+        s_mark[:encode][:enter][:limit] = Dict{Symbol, Any}(:value=>opts[:labellimit])
+    end
+    
+    s_mark[:transform] = Dict{Symbol, Any}[]
+    s_mark_transform = Dict{Symbol, Any}()
+    s_mark_transform[:type] = "label"
+    s_mark_transform[:avoidMarks] = [source]
+    s_mark_transform[:size] = Dict{Symbol, Any}(:signal=>"[$(all_args.opts[:width]), $(all_args.opts[:height])]")
+    s_mark_transform[:anchor] = opts[:labelanchor]
+    s_mark_transform[:method] = opts[:labelalgorithm]
+    push!(s_mark[:transform], s_mark_transform)
+    s_mark
+end
+
+
+
+
+
+
