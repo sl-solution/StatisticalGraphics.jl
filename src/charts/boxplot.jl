@@ -506,9 +506,9 @@ function _add_legends!(plt::BoxPlot, all_args, idx)
     # currently, group and symbol can be mixed
     # box plot use different color for each analysis variable
     leg_spec_cp = Dict{Symbol, Any}()    
-    if which_scale[1] !== nothing
+    # if which_scale[1] !== nothing
         leg_spec_cp[:fill] = "group_scale"
         _build_legen!(leg_spec_cp, leg_spec.opts, "square", "variables", "$(legend_id)_group_scale_legend_$idx", all_args)
         push!(all_args.out_legends, leg_spec_cp)
-    end
+    # end
 end   
