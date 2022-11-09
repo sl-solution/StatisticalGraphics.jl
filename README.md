@@ -1,6 +1,6 @@
 # StatisticalGraphics
 
-The idea of the `StatisticalGraphics` package is to develop a powerful, yet easy-to-use solution for creating statistical graphics. 
+The motivation of the `StatisticalGraphics` package is to develop a powerful, yet easy-to-use solution for creating statistical graphics. 
 The package uses [`vega`](https://vega.github.io/vega/) (see also [D3](https://d3js.org/)) for producing the final outputs.
 
 ![siteexamples](assets/site.png)
