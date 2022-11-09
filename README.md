@@ -438,7 +438,7 @@ nations = filereader("assets/nations.csv", emptycolname=true, quotechar='"')
            color=:white,
            labelresponse=:country,
            labelsize=8,
-           labelcolor=:group,
+           labelcolor=:colorresponse,
            maxsize=70,
            tooltip=true
           ),
