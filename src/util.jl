@@ -705,7 +705,11 @@ end
 function add_filters_to_panel_info_fun(val...; colname, f)
     expr  = ""
     for i in eachindex(colname)
-        expr *= " datum['$(colname[i])'] == '$(_convert_values_for_js(f[i](val[i])))' "
+        if ismissing(f[i](val[i]))
+            expr *= " datum['$(colname[i])'] == null "
+        else
+            expr *= " datum['$(colname[i])'] == '$(_convert_values_for_js(f[i](val[i])))' "
+        end
         if i != lastindex(colname)
             expr *= " && "
         end
