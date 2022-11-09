@@ -21,7 +21,7 @@ BAR_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0, :group => nothing,
     :groupspace => 0.05, # the space between bars inside each group - for groupdisplay = :cluster
     :outlinecolor => :white,
     :groupdisplay => :stack, #:stack, :cluster, :step (i.e. stacked and cluster), or :none
-    :grouporder => :ascending, # :data, :ascending, :descending - having a group column in panelby can cause some issues
+    :grouporder => :ascending, # :data, :ascending, :descending, userdefined order (by giving a vector of group level) - having a group column in panelby can cause some issues
     :orderresponse => nothing, # by default axis order control it, but it can be controlled by a column
     :orderstat => freq, # freq is default aggregator, however, it can be any other function 
     :baseline => 0,
@@ -337,6 +337,9 @@ function _check_and_normalize!(plt::Bar, all_args)
                 sort!(bar_ds, opts[:group], mapformats=all_args.mapformats, threads=false)
             elseif opts[:grouporder] == :decending
                 sort!(bar_ds, opts[:group], rev=true, mapformats=all_args.mapformats, threads=false)
+            elseif opts[:grouporder] isa AbstractVector
+                leftjoin!(bar_ds, Dataset("$(sg_col_prefix)_bar_order_userdefine"=>opts[:grouporder], "$(sg_col_prefix)_bar_order_user"=>1:length(opts[:grouporder])), on = opts[:group] => "$(sg_col_prefix)_bar_order_userdefine", mapformats=all_args.mapformats, threads = false, method=:hash)
+                sort!(bar_ds, "$(sg_col_prefix)_bar_order_user", mapformats=all_args.mapformats, threads=false)
             end
         end
         insertcols!(bar_ds, :__height__bar__start__ => plt.opts[:baseline])
