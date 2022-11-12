@@ -459,9 +459,9 @@ triangle(a, mul=[1,1,1]) = [(0.0, 0.0) .* mul[1], (sqrt(2 * a^2 - 2 * a^2 * cos(
 ds = Dataset(x=range(0.01, 3, step=0.091))
 @chain ds begin
   modify!(
-            :x=>byrow(x->x/10)=>:opacity,
+            :x => byrow(x->x/10) => :opacity,
             :x => byrow(triangle) => :t1,
-            :x => byrow(x->triangle(x, [(1,-1), (1,-1), (3.1,-1)]))=> :t2
+            :x => byrow(x->triangle(x, [(1,-1), (1,-1), (3.1,-1)])) => :t2
           )
  
   flatten!(r"^t")
@@ -476,7 +476,7 @@ ds = Dataset(x=range(0.01, 3, step=0.091))
                     id=:x,
                     opacityresponse=:opacity,
                     color=:darkgreen,
-                    outlinethickness=0)
+                    outlinethickness=0, colorresponse=:opacity)
             for i in 1:2
           ],
           height=200,
