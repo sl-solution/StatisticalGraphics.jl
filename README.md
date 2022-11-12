@@ -186,7 +186,6 @@ sgplot(
               legend = :music_leg
             )
         ],
-        nominal = [:Format],
         groupcolormodel = reverse!(color_ds[:, :Color]),
         yaxis = Axis(title = "Revenue (billion, adj.)", domain = false, titlepos=[5,5], titleangle=0, titlealign=:left, titlesize=10),
         xaxis = Axis(values = 1975:5:2015),
@@ -210,7 +209,6 @@ sgplot(
             normalize=true,
             legend=:music_leg
           ),
-        nominal=[:Format],
         groupcolormodel=reverse!(color_ds[:, :Color]),
         yaxis=Axis(title="Revenue %", domain=false, nice=false, d3format = "%"),
         xaxis=Axis(values=1975:5:2015),
@@ -257,7 +255,6 @@ sgplot(
             ),
           RefLine(values = 0.0, axis=:x2axis)
         ],
-        nominal=[:Ruling, :speaker],
         x2axis=Axis(title = "← more lies · Truthiness · more truths →", domain = false, d3format="%", nice=false, grid=true),
         yaxis=Axis(title = "", domain = false, ticks = false),
         legend = Legend(name = :bar_leg, title = "", orient=:top, columns=0, size=200, columnspace = 10 ),
