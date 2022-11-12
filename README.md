@@ -449,3 +449,42 @@ end
 ```
 
 ![nations](assets/nations.svg)
+
+**Polygon example**
+
+```julia
+using Chain
+triangle(a, mul=[1,1,1]) = [(0.0, 0.0) .* mul[1], (sqrt(2 * a^2 - 2 * a^2 * cos(a)), 0.0) .* mul[2], ((a^2 - a^2 * cos(a)) / sqrt(
+    2 * a^2 - 2 * a^2 * cos(a)), (a^2 * sin(a)) / sqrt(2 * a^2 - 2 * a^2 * cos(a))) .* mul[3]]
+ds = Dataset(x=range(0.01, 3, step=0.091))
+@chain ds begin
+  modify!(
+            :x=>byrow(x->x/10)=>:opacity,
+            :x => byrow(triangle) => :t1,
+            :x => byrow(x->triangle(x, [(1,-1), (1,-1), (3.1,-1)]))=> :t2
+          )
+ 
+  flatten!(r"^t")
+
+  modify!( 
+            :t1 => splitter => [:x1, :y1],
+            :t2 => splitter => [:x2, :y2]
+          )
+  sgplot( 
+          [
+            Polygon(x="x$i", y="y$i",
+                    id=:x,
+                    opacityresponse=:opacity,
+                    color=:darkgreen,
+                    outlinethickness=0)
+            for i in 1:2
+          ],
+          height=200,
+          width=800,
+          xaxis=Axis(show=false),
+          yaxis=Axis(show=false)
+        )
+end
+```
+
+![polygon_example](assets/polygon_example.svg)
