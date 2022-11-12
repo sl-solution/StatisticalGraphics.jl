@@ -19,6 +19,7 @@ module StatisticalGraphics
         RefLine,
         TextPlot,
         Bubble,
+        Polygon,
         Axis,
         Legend,
         sgplot,
@@ -40,6 +41,7 @@ module StatisticalGraphics
     include("charts/refline.jl")
     include("charts/textplot.jl")
     include("charts/bubble.jl")
+    include("charts/polygon.jl")
     include("sgplot.jl")
     include("sgpanel.jl")
     include("precompile/warmup.jl")
