@@ -26,7 +26,7 @@ function _reg_core(x, y, _f_x, _f_y; degree=1, intercept=true)
         xpx = xpx[2:end, 2:end]
         xpy = xpy[2:end]
     end
-    beta = inv(xpx) * xpy
+    beta = inv(big.(xpx)) * xpy
     ssr = ypy - 2 * beta' * xpy + beta' * xpx * beta
     ssreg = ypy - beta' * xpy
     n, p, xpx, beta, ypy, ssr / (n - p), ssreg
@@ -48,7 +48,7 @@ function reg_fit(x, y, _f_x, _f_y; degree=1, intercept=true, alpha = 0.05, cl=fa
     reg_info = _reg_core(x, y, _f_x, _f_y, degree=degree, intercept=intercept)
     init0 = intercept ? 0 : 1
     fit = [sum(reg_info[4] .* (val_x .^ (init0:degree))) for val_x in x0]
-    if cl
+    if cl && reg_info[1] > reg_info[2]
         tval = quantile(TDist(reg_info[1]-reg_info[2]), 1-alpha/2)
         invxpx = inv(reg_info[3])
         upper_clm = [fit[i] + _confident_mean(tval, reg_info[6], x0[i], invxpx, degree, init0, false) for i in 1:length(x0)]
