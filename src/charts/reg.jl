@@ -37,14 +37,14 @@ function _confident_mean(tval, sigmahat2, x0, invxpx, degree, init0, indiv) # se
     tval * sqrt(sum(sigmahat2 * (Int(indiv) + newx0' * invxpx * newx0)))
 end
 using Distributions
-function reg_fit(x, y, _f_x, _f_y; degree=1, intercept=true, alpha = 0.05, cl=false)::Vector{Tuple}
+function reg_fit(x, y, _f_x, _f_y; degree=1, intercept=true, alpha = 0.05, cl=false, npoints=100)::Vector{Tuple}
     min_val = IMD.minimum(_f_x, x)
     max_val = IMD.maximum(_f_x, x)
 
     any(isequal.(max_val, (missing, NaN, Inf, -Inf))) && throw(ArgumentError("x shouldn't be all missing or contains any NaN or infinite value"))
     any(isequal.(min_val, (missing, NaN, Inf, -Inf))) && throw(ArgumentError("x shouldn't be all missing or contains any NaN or infinite value"))
 
-    x0 = range(min_val, max_val, length=100)
+    x0 = range(min_val, max_val, length=npoints)
     reg_info = _reg_core(x, y, _f_x, _f_y, degree=degree, intercept=intercept)
     init0 = intercept ? 0 : 1
     fit = [sum(reg_info[4] .* (val_x .^ (init0:degree))) for val_x in x0]
@@ -85,6 +85,8 @@ REG_DEFAULT = Dict{Symbol, Any}(:x => 0, :y=>0, :group=>nothing,
                                     :degree=>1, # between 1 and 10
                                     :intercept=>true,
                                     :alpha=>0.05,
+
+                                    :npoints=>100,
 
 
                                     :clip=>nothing
@@ -277,7 +279,7 @@ function _check_and_normalize!(plt::Reg, all_args)
         _f_x = getformat(ds, opts[:x])
         _f_y = getformat(ds, opts[:y])
     end
-    reg_ds = combine(gatherby(ds, g_col, threads = threads, mapformats = all_args.mapformats), (opts[:x], opts[:y])=> ((x,y)->reg_fit(x, y, _f_x, _f_y, degree = opts[:degree], intercept = opts[:intercept], alpha = opts[:alpha], cl = opts[:clm] || opts[:cli])) => "$(sg_col_prefix)reg__info__", threads = threads)
+    reg_ds = combine(gatherby(ds, g_col, threads = threads, mapformats = all_args.mapformats), (opts[:x], opts[:y])=> ((x,y)->reg_fit(x, y, _f_x, _f_y, degree = opts[:degree], intercept = opts[:intercept], alpha = opts[:alpha], cl = opts[:clm] || opts[:cli], npoints=opts[:npoints])) => "$(sg_col_prefix)reg__info__", threads = threads)
 
     modify!(reg_ds, "$(sg_col_prefix)reg__info__" => splitter => ["$(sg_col_prefix)_x0", "$(sg_col_prefix)_yhat", "$(sg_col_prefix)_l_clm", "$(sg_col_prefix)_u_clm", "$(sg_col_prefix)_l_cli", "$(sg_col_prefix)_u_cli"], threads = false)
 
