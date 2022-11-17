@@ -20,6 +20,7 @@ module StatisticalGraphics
         TextPlot,
         Bubble,
         Polygon,
+        Reg,
         Axis,
         Legend,
         sgplot,
@@ -42,6 +43,7 @@ module StatisticalGraphics
     include("charts/textplot.jl")
     include("charts/bubble.jl")
     include("charts/polygon.jl")
+    include("charts/reg.jl")
     include("sgplot.jl")
     include("sgpanel.jl")
     include("precompile/warmup.jl")

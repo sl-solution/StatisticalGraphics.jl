@@ -5,11 +5,13 @@ version = "0.4.0"
 
 [deps]
 InMemoryDatasets = "5c01b14b-ab03-46ff-b164-14c663efdd9f"
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 DLMReader = "e1d33f9a-7203-49d2-8e1a-e3c4f85197b8"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 
 [compat]
 InMemoryDatasets = "0.7"
+Distributions = "0.16, 0.17, 0.18, 0.19, 0.20, 0.21, 0.22, 0.23, 0.24, 0.25"
 DLMReader = "0.4"
 JSON = "0.19, 0.20, 0.21"
 julia = "1.6"
