@@ -745,7 +745,11 @@ function _modify_data_for_panel!(vspec, marks, info, idx)
         elseif haskey(marks[i], :marks)
             old_name = marks[i][:marks][1][:from][:data]
             new_name = old_name * "_$idx"
-            marks[i][:marks][1][:from][:data] = new_name
+            # if marks[i][:marks] has more than one mark, we need to change data for all of them 
+            # (assuming all of them using the same data)
+            for j in eachindex(marks[i][:marks])
+                marks[i][:marks][j][:from][:data] = new_name
+            end
         else
             needchange = false
         end
