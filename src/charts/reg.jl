@@ -28,6 +28,7 @@ function _reg_core(x, y, _f_x, _f_y; degree=1, intercept=true)
     end
     beta = inv(big.(xpx)) * xpy
     ssr = ypy - 2 * beta' * xpy + beta' * xpx * beta
+    @show beta
     ssreg = ypy - beta' * xpy
     n, p, xpx, beta, ypy, ssr / (n - p), ssreg
 end
@@ -279,7 +280,7 @@ function _check_and_normalize!(plt::Reg, all_args)
         _f_x = getformat(ds, opts[:x])
         _f_y = getformat(ds, opts[:y])
     end
-    reg_ds = combine(gatherby(ds, g_col, threads = threads, mapformats = all_args.mapformats), (opts[:x], opts[:y])=> ((x,y)->reg_fit(x, y, _f_x, _f_y, degree = opts[:degree], intercept = opts[:intercept], alpha = opts[:alpha], cl = opts[:clm] || opts[:cli], npoints=opts[:npoints])) => "$(sg_col_prefix)reg__info__", threads = threads)
+    reg_ds = combine(gatherby(dropmissing(ds, [opts[:x], opts[:y]], mapformats=all_args.mapformats, threads=threads, view=true), g_col, threads = threads, mapformats = all_args.mapformats), (opts[:x], opts[:y])=> ((x,y)->reg_fit(x, y, _f_x, _f_y, degree = opts[:degree], intercept = opts[:intercept], alpha = opts[:alpha], cl = opts[:clm] || opts[:cli], npoints=opts[:npoints])) => "$(sg_col_prefix)reg__info__", threads = threads)
 
     modify!(reg_ds, "$(sg_col_prefix)reg__info__" => splitter => ["$(sg_col_prefix)_x0", "$(sg_col_prefix)_yhat", "$(sg_col_prefix)_l_clm", "$(sg_col_prefix)_u_clm", "$(sg_col_prefix)_l_cli", "$(sg_col_prefix)_u_cli"], threads = false)
 
