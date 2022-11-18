@@ -28,7 +28,7 @@ function _reg_core(x, y, _f_x, _f_y; degree=1, intercept=true)
     end
     xpx = big.(xpx)
     xpy = big.(xpy)
-    beta = inv(xpx) * xpy
+    beta = xpx \ xpy
     ssr = ypy - 2 * beta' * xpy + beta' * xpx * beta
     ssreg = ypy - beta' * xpy
     n, p, xpx, beta, ypy, ssr / (n - p), ssreg
