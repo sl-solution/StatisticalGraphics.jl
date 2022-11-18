@@ -726,6 +726,7 @@ end
 function add_title_to_panel(val...; colname, f)
     keys = (Symbol.(colname)...,)
     vals = ([f[i](val[i]) for i in 1:length(f)]...,)
+    vals = replace(vals, missing => "null") # vega has null instead of missing
     (; zip(keys, vals)...)
 end
 
