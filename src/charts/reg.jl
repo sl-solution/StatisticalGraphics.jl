@@ -28,7 +28,6 @@ function _reg_core(x, y, _f_x, _f_y; degree=1, intercept=true)
     end
     beta = inv(big.(xpx)) * xpy
     ssr = ypy - 2 * beta' * xpy + beta' * xpx * beta
-    @show beta
     ssreg = ypy - beta' * xpy
     n, p, xpx, beta, ypy, ssr / (n - p), ssreg
 end
