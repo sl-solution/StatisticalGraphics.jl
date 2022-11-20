@@ -33,6 +33,9 @@ SCATTER_DEFAULT = Dict{Symbol, Any}(:x => 0, :y => 0,
                                     :labelalgorithm=>:naive,
                                     :tooltip => false, # it can be true, only if labelresponse is provided
 
+                                    :xshift=>0, # between [0,1], useful for discrete axes
+                                    :yshift=>0,
+
                                     :clip=>nothing
                                     )
 mutable struct Scatter <: SGMarks
@@ -57,16 +60,16 @@ end
 # Scatter graphic produce a simple 2D scatter plot
 # It requires two keyword arguments; x and y 
 # It needs the input data set to be passed dirctly to vega
-function _push_plots!(vspec, plt::Scatter, all_args; idx = 1)
+function _push_plots!(vspec, plt::Scatter, all_args; idx=1)
     # check if the required arguments are passed
     _check_and_normalize!(plt, all_args)
     _add_legends!(plt, all_args, idx)
     opts = plt.opts
     # we should filter out invalid data
-    filter_data = Dict{Symbol, Any}()
+    filter_data = Dict{Symbol,Any}()
     filter_data[:name] = "source_0_$idx"
     filter_data[:source] = "source_0"
-    filter_data[:transform] = [Dict{Symbol, Any}(:type=>:filter, :expr=>"isValid(datum['$(opts[:x])']) && isValid(datum['$(opts[:y])'])")]
+    filter_data[:transform] = [Dict{Symbol,Any}(:type => :filter, :expr => "isValid(datum['$(opts[:x])']) && isValid(datum['$(opts[:y])'])")]
     push!(vspec[:data], filter_data)
 
     s_spec = Dict{Symbol,Any}()
@@ -80,7 +83,7 @@ function _push_plots!(vspec, plt::Scatter, all_args; idx = 1)
     s_spec_marks[:encode] = Dict{Symbol,Any}()
     s_spec_marks[:encode][:enter] = Dict{Symbol,Any}()
     if opts[:tooltip]
-        s_spec_marks[:encode][:enter][:tooltip] = Dict{Symbol, Any}(:field=>opts[:labelresponse])
+        s_spec_marks[:encode][:enter][:tooltip] = Dict{Symbol,Any}(:field => opts[:labelresponse])
     end
     if opts[:opacityresponse] === nothing
         s_spec_marks[:encode][:enter][:opacity] = Dict(:value => opts[:opacity])
@@ -102,9 +105,9 @@ function _push_plots!(vspec, plt::Scatter, all_args; idx = 1)
     else
         s_spec_marks[:encode][:enter][:fill][:scale] = "color_scale_$idx"
         s_spec_marks[:encode][:enter][:fill][:field] = opts[:colorresponse]
-        addto_color_scale!(vspec, "source_0", "color_scale_$idx", opts[:colorresponse], opts[:colorresponse] in all_args.nominal, color_model = opts[:colormodel])
+        addto_color_scale!(vspec, "source_0", "color_scale_$idx", opts[:colorresponse], opts[:colorresponse] in all_args.nominal, color_model=opts[:colormodel])
     end
-    s_spec_marks[:encode][:enter][:shape] = Dict{Symbol, Any}()
+    s_spec_marks[:encode][:enter][:shape] = Dict{Symbol,Any}()
 
     if opts[:symbolresponse] === nothing
         s_spec_marks[:encode][:enter][:shape][:value] = opts[:symbol]
@@ -135,7 +138,7 @@ function _push_plots!(vspec, plt::Scatter, all_args; idx = 1)
     end
     s_spec_marks[:encode][:enter][:x][:field] = opts[:x]
     if opts[:jitter][1] > 0
-        s_spec_marks[:encode][:enter][:x][:offset] = Dict{Symbol, Any}(:signal=>_addjitter(opts[:jitter][1]))
+        s_spec_marks[:encode][:enter][:x][:offset] = Dict{Symbol,Any}(:signal => _addjitter(opts[:jitter][1]))
     end
     s_spec_marks[:encode][:enter][:y] = Dict{Symbol,Any}()
     if opts[:y2axis]
@@ -148,8 +151,17 @@ function _push_plots!(vspec, plt::Scatter, all_args; idx = 1)
         addto_axis!(vspec[:axes][3], all_args.axes[3], opts[:y])
     end
     s_spec_marks[:encode][:enter][:y][:field] = opts[:y]
+
+    # shifting if it is supplied
+    if opts[:xshift] > 0
+        s_spec_marks[:encode][:enter][:x][:band] = opts[:xshift]
+    end
+    if opts[:yshift] > 0
+        s_spec_marks[:encode][:enter][:y][:band] = opts[:yshift]
+    end
+
     if opts[:jitter][2] > 0
-        s_spec_marks[:encode][:enter][:y][:offset] = Dict{Symbol, Any}(:signal=>_addjitter(opts[:jitter][2]))
+        s_spec_marks[:encode][:enter][:y][:offset] = Dict{Symbol,Any}(:signal => _addjitter(opts[:jitter][2]))
     end
     s_spec[:marks] = [s_spec_marks]
     if opts[:labelresponse] !== nothing

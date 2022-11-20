@@ -32,6 +32,9 @@ BUBBLE_DEFAULT = Dict{Symbol, Any}(:x => 0, :y => 0, :size=>0,
                                     :labelalgorithm=>:naive,
                                     :tooltip => false, # it can be true, only if labelresponse is provided
 
+                                    :xshift=>0, #[0,1] useful for discrete axes
+                                    :yshift=>0,
+
                                     :clip=>nothing
                                     )
 mutable struct Bubble <: SGMarks
@@ -50,7 +53,7 @@ end
 # Bubble graphic produce a simple 2D Bubble plot
 # It requires x,y, and size keyword arguments - it is basically scatter with support of size
 # It needs the input data set to be passed dirctly to vega
-function _push_plots!(vspec, plt::Bubble, all_args; idx = 1)
+function _push_plots!(vspec, plt::Bubble, all_args; idx=1)
     # check if the required arguments are passed
     _check_and_normalize!(plt, all_args)
     _add_legends!(plt, all_args, idx)
@@ -62,13 +65,13 @@ function _push_plots!(vspec, plt::Bubble, all_args; idx = 1)
         opts[:maxsize] = all_args.opts[:height] ÷ 10
     end
     if opts[:maxsize] <= opts[:minsize]
-        opts[:maxsize] = 2*opts[:minsize]
+        opts[:maxsize] = 2 * opts[:minsize]
     end
     # we should filter out invalid data
-    filter_data = Dict{Symbol, Any}()
+    filter_data = Dict{Symbol,Any}()
     filter_data[:name] = "source_0_$idx"
     filter_data[:source] = "source_0"
-    filter_data[:transform] = [Dict{Symbol, Any}(:type=>:filter, :expr=>"isValid(datum['$(opts[:x])']) && isValid(datum['$(opts[:y])']) && isValid(datum['$(opts[:size])'])")]
+    filter_data[:transform] = [Dict{Symbol,Any}(:type => :filter, :expr => "isValid(datum['$(opts[:x])']) && isValid(datum['$(opts[:y])']) && isValid(datum['$(opts[:size])'])")]
     push!(vspec[:data], filter_data)
 
     s_spec = Dict{Symbol,Any}()
@@ -82,7 +85,7 @@ function _push_plots!(vspec, plt::Bubble, all_args; idx = 1)
     s_spec_marks[:encode] = Dict{Symbol,Any}()
     s_spec_marks[:encode][:enter] = Dict{Symbol,Any}()
     if opts[:tooltip]
-        s_spec_marks[:encode][:enter][:tooltip] = Dict{Symbol, Any}(:field=>opts[:labelresponse])
+        s_spec_marks[:encode][:enter][:tooltip] = Dict{Symbol,Any}(:field => opts[:labelresponse])
     end
     if opts[:opacityresponse] === nothing
         s_spec_marks[:encode][:enter][:opacity] = Dict(:value => opts[:opacity])
@@ -91,7 +94,7 @@ function _push_plots!(vspec, plt::Bubble, all_args; idx = 1)
         addto_identity_scale!(vspec, "source_0", "opacity_scale_$idx", opts[:opacityresponse])
     end
     s_spec_marks[:encode][:enter][:strokeWidth] = Dict(:value => opts[:thickness])
-    s_spec_marks[:encode][:enter][:size] = Dict{Symbol, Any}()
+    s_spec_marks[:encode][:enter][:size] = Dict{Symbol,Any}()
     s_spec_marks[:encode][:enter][:size][:field] = opts[:size]
     s_spec_marks[:encode][:enter][:size][:scale] = "size_scale_$idx"
     addto_size_scale!(vspec, "source_0", "size_scale_$idx", opts[:size], opts[:minsize], opts[:maxsize])
@@ -102,9 +105,9 @@ function _push_plots!(vspec, plt::Bubble, all_args; idx = 1)
     else
         s_spec_marks[:encode][:enter][:fill][:scale] = "color_scale_$idx"
         s_spec_marks[:encode][:enter][:fill][:field] = opts[:colorresponse]
-        addto_color_scale!(vspec, "source_0", "color_scale_$idx", opts[:colorresponse], opts[:colorresponse] in all_args.nominal, color_model = opts[:colormodel])
+        addto_color_scale!(vspec, "source_0", "color_scale_$idx", opts[:colorresponse], opts[:colorresponse] in all_args.nominal, color_model=opts[:colormodel])
     end
-   
+
     s_spec_marks[:encode][:enter][:stroke] = Dict{Symbol,Any}()
     # group in all plots uses the same scale
     if opts[:group] === nothing
@@ -126,7 +129,7 @@ function _push_plots!(vspec, plt::Bubble, all_args; idx = 1)
         addto_axis!(vspec[:axes][1], all_args.axes[1], opts[:x])
     end
     s_spec_marks[:encode][:enter][:x][:field] = opts[:x]
-    
+
     s_spec_marks[:encode][:enter][:y] = Dict{Symbol,Any}()
     if opts[:y2axis]
         s_spec_marks[:encode][:enter][:y][:scale] = "y2"
@@ -138,13 +141,21 @@ function _push_plots!(vspec, plt::Bubble, all_args; idx = 1)
         addto_axis!(vspec[:axes][3], all_args.axes[3], opts[:y])
     end
     s_spec_marks[:encode][:enter][:y][:field] = opts[:y]
-    
+
+    # shifting if it is supplied
+    if opts[:xshift] > 0
+        s_spec_marks[:encode][:enter][:x][:band] = opts[:xshift]
+    end
+    if opts[:yshift] > 0
+        s_spec_marks[:encode][:enter][:y][:band] = opts[:yshift]
+    end
+
     s_spec[:marks] = [s_spec_marks]
     if opts[:labelresponse] !== nothing
         labels_mark = _label_for_points("bubble", opts, all_args; idx=idx)
         push!(s_spec[:marks], labels_mark)
     end
-    
+
     push!(vspec[:marks], s_spec)
 end
 

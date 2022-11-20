@@ -12,6 +12,9 @@ LINE_DEFAULT = Dict{Symbol, Any}(:x => 0, :y=>0, :group=>nothing,
                                     :breaks=>false, # false means remove missing values - true means create a break
                                     :legend=>nothing,
 
+                                    :xshift=>0, # [0,1] it is usefull for the situation when x axis is discrete
+                                    :yshift=>0,
+
                                     :clip=>nothing
                                     )
 mutable struct Line <: SGMarks
@@ -76,6 +79,7 @@ function _push_plots!(vspec, plt::Line, all_args; idx=1)
         addto_axis!(vspec[:axes][1], all_args.axes[1], opts[:x])
     end
     s_spec_marks[:encode][:enter][:x][:field] = opts[:x]
+    
     s_spec_marks[:encode][:enter][:y] = Dict{Symbol,Any}()
     if opts[:y2axis]
         s_spec_marks[:encode][:enter][:y][:scale] = "y2"
@@ -87,6 +91,14 @@ function _push_plots!(vspec, plt::Line, all_args; idx=1)
         addto_axis!(vspec[:axes][3], all_args.axes[3], opts[:y])
     end
     s_spec_marks[:encode][:enter][:y][:field] = opts[:y]
+
+    # shifting if it is supplied
+    if opts[:xshift] > 0 
+        s_spec_marks[:encode][:enter][:x][:band] = opts[:xshift]
+    end
+    if opts[:yshift] > 0 
+        s_spec_marks[:encode][:enter][:y][:band] = opts[:yshift]
+    end
 
 
     filter_data = Dict{Symbol,Any}()
