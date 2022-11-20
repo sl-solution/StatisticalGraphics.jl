@@ -6,6 +6,8 @@ POLYGON_DEFAULT = Dict{Symbol,Any}(:x => nothing, :y => nothing, :id => nothing,
     :opacityresponse=>nothing,
     :color=>:steelblue,
 
+    :interpolate=>:linear, # we change it to linear-closed
+
     :outline => true,
     :outlinethickness=>1,
     :outlinedash=>[0],
@@ -59,7 +61,7 @@ function _push_plots!(vspec, plt::Polygon, all_args; idx=1)
 
     s_spec_marks[:encode] = Dict{Symbol,Any}()
     s_spec_marks[:encode][:enter] = Dict{Symbol,Any}()
-    s_spec_marks[:encode][:enter][:interpolate] = Dict{Symbol,Any}(:value => "linear-closed")
+    s_spec_marks[:encode][:enter][:interpolate] = Dict{Symbol,Any}(:value => string(opts[:interpolate], "-closed"))
     s_spec_marks[:encode][:enter][:opacity] = Dict(:value => opts[:outlineopacity])
     # s_spec_marks[:encode][:enter][:fillOpacity] = Dict(:value => opts[:fillopacity])
     #fill opacity can be controlled by a column
