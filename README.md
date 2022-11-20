@@ -473,7 +473,7 @@ ds = Dataset(x=range(0.01, 3, step=0.091))
                     id=:x,
                     opacityresponse=:opacity,
                     color=:darkgreen,
-                    outlinethickness=0)
+                    outline=false)
             for i in 1:2
           ],
           height=200,
