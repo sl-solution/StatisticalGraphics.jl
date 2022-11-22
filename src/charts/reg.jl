@@ -63,7 +63,7 @@ function reg_fit(x, y, _f_x, _f_y; degree=1, intercept=true, alpha = 0.05, cl=fa
         upper_cli = copy(fit)
         lower_cli = copy(fit)
     end
-    tuple.(collect(x0), fit, lower_clm, upper_clm, lower_cli, upper_cli)
+    tuple.(collect(x0), Float64.(fit), Float64.(lower_clm), Float64.(upper_clm), Float64.(lower_cli), Float64.(upper_cli))
 end
 REG_DEFAULT = Dict{Symbol, Any}(:x => 0, :y=>0, :group=>nothing,
                                     :x2axis=>false,
