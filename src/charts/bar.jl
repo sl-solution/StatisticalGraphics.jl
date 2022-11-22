@@ -371,7 +371,11 @@ function _check_and_normalize!(plt::Bar, all_args)
                 sort!(bar_ds, opts[:group], mapformats=all_args.mapformats, threads=false)
             elseif opts[:grouporder] == :decending
                 sort!(bar_ds, opts[:group], rev=true, mapformats=all_args.mapformats, threads=false)
+            elseif opts[:grouporder] isa AbstractVector
+                leftjoin!(bar_ds, Dataset("$(sg_col_prefix)_bar_order_userdefine"=>opts[:grouporder], "$(sg_col_prefix)_bar_order_user"=>1:length(opts[:grouporder])), on = opts[:group] => "$(sg_col_prefix)_bar_order_userdefine", mapformats=all_args.mapformats, threads = false, method=:hash)
+                sort!(bar_ds, "$(sg_col_prefix)_bar_order_user", mapformats=all_args.mapformats, threads=false)
             end
+            
         end
         insertcols!(bar_ds, :__height__bar__start__ => plt.opts[:baseline])
         if opts[:group] !== nothing && opts[:groupdisplay] in (:stack, :step)
