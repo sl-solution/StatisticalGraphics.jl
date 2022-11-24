@@ -749,7 +749,9 @@ function _modify_data_for_panel!(vspec, marks, info, idx)
             # (assuming all of them using the same data)
             for j in eachindex(marks[i][:marks])
                 # if a mark is tagged by DONOTCHANGE, we should skip it
-                if !contains(marks[i][:marks][j][:name], "DONOTCHANGE")
+                if haskey(marks[i][:marks][j],:name) && startswith(marks[i][:marks][j][:name], "DONOTCHANGE")
+                    continue
+                else
                     marks[i][:marks][j][:from][:data] = new_name
                 end
             end
