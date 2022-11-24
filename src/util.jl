@@ -748,7 +748,10 @@ function _modify_data_for_panel!(vspec, marks, info, idx)
             # if marks[i][:marks] has more than one mark, we need to change data for all of them 
             # (assuming all of them using the same data)
             for j in eachindex(marks[i][:marks])
-                marks[i][:marks][j][:from][:data] = new_name
+                # if a mark is tagged by DONOTCHANGE, we should skip it
+                if !contains(marks[i][:marks][j][:name], "DONOTCHANGE")
+                    marks[i][:marks][j][:from][:data] = new_name
+                end
             end
         else
             needchange = false
