@@ -1,7 +1,7 @@
 name = "StatisticalGraphics"
 uuid = "8341d8ab-e5ae-4f11-aa21-e11c5cc71259"
 authors = ["sl-solution <github.sl.solution@icloud.com> and contributors"]
-version = "0.5.2"
+version = "0.5.3"
 
 [deps]
 InMemoryDatasets = "5c01b14b-ab03-46ff-b164-14c663efdd9f"
