@@ -417,7 +417,7 @@ function _check_and_normalize!(plt::Bar, all_args)
     end
     # make sure that values are recorded properly - sometime the column type may be Any and this will cause problem later when we are obtaining the domains
     #TODO we need to take the same approach for other chart types
-    modify!(bar_ds, names(bar_ds) .=> byrow(identity), threads=false)
+    modify!(bar_ds, [:__height__bar__, :__height__bar__start__, :__baseline__value__, :__color__value__] .=> byrow(identity), threads=false)
     return col, bar_ds
     @label argerr
     throw(ArgumentError("only a single column must be selected"))
