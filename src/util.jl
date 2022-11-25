@@ -394,11 +394,13 @@ function _fill_scales!(vspec, all_args)
             end
         end
     end
+     # in sgpanel we need to make sure that axes opts[:order] is effective
+    _fun_temp_x = [x->all_args.axes[i].opts[:order] == :ascending ? sort!(unique(vcat(x...))) : all_args.axes[i].opts[:order] == :descending ? sort!(unique(vcat(x...)), rev=true) : unique(vcat(x...)) for i in 1:4]
     for i in shared_axes
         in_scale = vspec[:scales][i]
         if !isempty(all_args.scale_ds[i]) && all_args.scale_type[i] !== nothing
             if in_scale[:type] in [:band, :point]
-                all_args.scale_ds[i] = combine(all_args.scale_ds[i], "$(sg_col_prefix)__scale_col__" => (x -> unique(vcat(x...))) => "$(sg_col_prefix)__scale_col__")
+                all_args.scale_ds[i] = combine(all_args.scale_ds[i], "$(sg_col_prefix)__scale_col__" => (_fun_temp_x[i]) => "$(sg_col_prefix)__scale_col__")
                 in_scale[:domain] = all_args.scale_ds[i][:, "$(sg_col_prefix)__scale_col__"][1]
                 # fix the issue when domain is singlton
                 if !(in_scale[:domain] isa Vector)
@@ -419,7 +421,7 @@ function _fill_scales!(vspec, all_args)
         in_scale = vspec[:scales][i]
         if !isempty(all_args.scale_ds[i]) && all_args.scale_type[i] !== nothing
             if in_scale[:type] in [:band, :point]
-                all_args.scale_ds[i] = combine(gatherby(all_args.scale_ds[i], uniscale_col, mapformats = all_args.mapformats), "$(sg_col_prefix)__scale_col__" => (x -> unique(vcat(x...))) => "$(sg_col_prefix)__scale_col__")
+                all_args.scale_ds[i] = combine(gatherby(all_args.scale_ds[i], uniscale_col, mapformats = all_args.mapformats), "$(sg_col_prefix)__scale_col__" => (_fun_temp_x[i]) => "$(sg_col_prefix)__scale_col__")
             else
                 all_args.scale_ds[i] = in_scale[:domain] = combine(gatherby(all_args.scale_ds[i], uniscale_col, mapformats = all_args.mapformats), "$(sg_col_prefix)__scale_col__" => (x -> [[IMD.minimum(x), IMD.maximum(x)]]) => "$(sg_col_prefix)__scale_col__")
             end
@@ -487,11 +489,11 @@ end
 function column_add_height_width_x_y!(panel_info, all_args)
     insertcols!(panel_info, "$(sg_col_prefix)x" => 0)
     insertcols!(panel_info, "$(sg_col_prefix)width" => all_args.opts[:width])
-    
+
     ## only row heights can be proportional
     _find_height_proportion!(panel_info, all_args)
     insertcols!(panel_info, "$(sg_col_prefix)y" => panel_info[:, "$(sg_col_prefix)height"] .+ all_args.opts[:rowspace])
-    modify!(panel_info, "$(sg_col_prefix)y" => cumsum, "$(sg_col_prefix)y" => (x->lag(x,1, default=0)))
+    modify!(panel_info, "$(sg_col_prefix)y" => cumsum, "$(sg_col_prefix)y" => (x -> lag(x, 1, default=0)))
     insertcols!(panel_info, "$(sg_col_prefix)xaxis" => false)
     panel_info[nrow(panel_info), "$(sg_col_prefix)xaxis"] = true
     insertcols!(panel_info, "$(sg_col_prefix)x2axis" => false)
@@ -499,7 +501,7 @@ function column_add_height_width_x_y!(panel_info, all_args)
     insertcols!(panel_info, "$(sg_col_prefix)yaxis" => true)
     insertcols!(panel_info, "$(sg_col_prefix)y2axis" => true)
     # if header are requested we create their values
-    insertcols!(panel_info, "$(sg_col_prefix)cell_title_$(all_args.opts[:headerorient])"=>_how_to_print.(panel_info[:, "$(sg_col_prefix)__title_info_for_each_panel__"], all_args.opts[:headercolname]))
+    insertcols!(panel_info, "$(sg_col_prefix)cell_title_$(all_args.opts[:headerorient])" => _how_to_print.(panel_info[:, "$(sg_col_prefix)__title_info_for_each_panel__"], all_args.opts[:headercolname]))
 
 end
 function row_add_height_width_x_y!(panel_info, all_args)
