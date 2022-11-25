@@ -415,7 +415,9 @@ function _check_and_normalize!(plt::Bar, all_args)
         modify!(_temp_ds_, 1 => (x -> _nest_barwidth_calculate(x, opts[:nestfactor])) => "$(sg_col_prefix)nest__barwidth", "$(sg_col_prefix)nest__barwidth" => byrow(x -> (1 - x) / 2) => "$(sg_col_prefix)nest__barwidth_complement", threads=false)
         leftjoin!(bar_ds, _temp_ds_, on=opts[:group], mapformats=all_args.mapformats, threads=false, method=:hash)
     end
-
+    # make sure that values are recorded properly - sometime the column type may be Any and this will cause problem later when we are obtaining the domains
+    #TODO we need to take the same approach for other chart types
+    modify!(bar_ds, names(bar_ds) .=> byrow(identity), threads=false)
     return col, bar_ds
     @label argerr
     throw(ArgumentError("only a single column must be selected"))
