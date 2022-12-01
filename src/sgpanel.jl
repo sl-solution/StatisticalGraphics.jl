@@ -216,29 +216,3 @@ function _sgpanel(ds, panelby::IMD.MultiColumnIndex, plts::Vector{<:SGMarks}; ma
     SGPanel(vspec)
 end
 
-
-function Base.show(io::IO, vspec::SGPanel)
-    out_html = tempname()*".html"
-    html_out = """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Embedding Vega-Lite</title>
-        <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
-        <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
-        <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
-    </head>
-    <body>
-        <div id="vis"></div>
-
-        <script>
-        var spec = $(json(vspec.json_spec));
-        vegaEmbed('#vis', spec);
-        </script>
-    </body>
-    </html>
-    """
-    write(out_html, html_out)
-    launch_browser(out_html);
-    nothing
-end

@@ -2,6 +2,7 @@ module StatisticalGraphics
     using InMemoryDatasets
     using DLMReader
     using JSON
+    using REPL # display plot
 
     const SG = StatisticalGraphics
     export
@@ -46,6 +47,7 @@ module StatisticalGraphics
     include("charts/reg.jl")
     include("sgplot.jl")
     include("sgpanel.jl")
+    include("show.jl")
     include("precompile/warmup.jl")
     if VERSION >= v"1.8"
         SG.warmup()

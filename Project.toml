@@ -8,6 +8,7 @@ InMemoryDatasets = "5c01b14b-ab03-46ff-b164-14c663efdd9f"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 DLMReader = "e1d33f9a-7203-49d2-8e1a-e3c4f85197b8"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
+REPL = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 
 [compat]
 InMemoryDatasets = "0.7"
