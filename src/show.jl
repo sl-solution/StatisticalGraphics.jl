@@ -28,10 +28,10 @@ function _write_script(io::IO, vspec::Union{SGPlot, SGPanel})
     divid=string(DLMReader.UUIDs.uuid1().value, base=16)
     write(io, 
     """
-    <div id="$divid"></div>
     <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
     <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
     <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+    <div id="$divid"></div>
     <script>
         var spec = $(json(vspec.json_spec));
         vegaEmbed('#$divid', spec);
