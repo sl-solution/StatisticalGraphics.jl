@@ -25,7 +25,7 @@ function _write_html(vspec::Union{SGPlot, SGPanel})
 end
 
 function _write_script(io::IO, vspec::Union{SGPlot, SGPanel})
-    divid=string(DLMReader.UUIDs.uuid1().value, base=16)
+    divid=string(rand(UInt128), base=16)
     write(io, 
     """
     <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
