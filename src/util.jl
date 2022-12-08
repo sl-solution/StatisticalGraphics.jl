@@ -678,26 +678,26 @@ function _modify_axes_for_panel(all_args, axes, info)
     if x1loc !== nothing
         if y1loc !== nothing
             axes[x1loc][:gridScale] = "y1"
-        else
+        elseif y2loc !== nothing # for some plots we don't have any axis, e.g. pie
             axes[x1loc][:gridScale] = "y2"
         end
-    else
+    elseif x2loc !== nothing
         if y1loc !== nothing
             axes[x2loc][:gridScale] = "y1"
-        else
+        elseif y2loc !== nothing
             axes[x2loc][:gridScale] = "y2"
         end
     end
     if y1loc !== nothing
         if x1loc !== nothing
             axes[y1loc][:gridScale] = "x1"
-        else
+        elseif x2loc !== nothing
             axes[y1loc][:gridScale] = "x2"
         end
-    else
+    elseif y2loc !== nothing
         if x1loc !== nothing
             axes[y2loc][:gridScale] = "x1"
-        else
+        elseif x2loc !== nothing
             axes[y2loc][:gridScale] = "x2"
         end
     end
