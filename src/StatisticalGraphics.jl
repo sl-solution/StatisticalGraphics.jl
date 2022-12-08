@@ -22,6 +22,7 @@ module StatisticalGraphics
         Bubble,
         Polygon,
         Reg,
+        Pie,
         Axis,
         Legend,
         sgplot,
@@ -45,6 +46,7 @@ module StatisticalGraphics
     include("charts/bubble.jl")
     include("charts/polygon.jl")
     include("charts/reg.jl")
+    include("charts/pie.jl")
     include("sgplot.jl")
     include("sgpanel.jl")
     include("show.jl")
