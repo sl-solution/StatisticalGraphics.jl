@@ -55,6 +55,7 @@ end
 function _push_plots!(vspec, plt::Pie, all_args; idx=1)
     # check if the required arguments are passed / create a new ds and push it to out_ds
     col, new_ds = _check_and_normalize!(plt, all_args)
+    delete!(new_ds, ["$(sg_col_prefix)pie__startangle__", "$(sg_col_prefix)pie__endangle__"], type=isequal)
     _add_legends!(plt, all_args, idx)
     data_csv = tempname()
     filewriter(data_csv, new_ds, mapformats=all_args.mapformats, quotechar='"')
