@@ -16,7 +16,9 @@ PIE_DEFAULT = Dict{Symbol,Any}(:category => nothing,
    
     :outlinecolor => :white,
     :colormodel=>:category,
-   
+    
+    :tooltip=>false,
+
     :legend => nothing,
     :clip => nothing
 )
@@ -39,7 +41,8 @@ function _pie_transform(x, startangle, endangle)::Vector{Tuple}
     total_angle = abs(endangle-startangle)
     xprop = x ./ IMD.sum(x)
     xprop .*= total_angle
-    _endangles_ = IMD.cumsum(xprop)
+    # we use allowmissing to force using cumsum from IMD, and we ignore missing values, if we use :skip we must remove observations with missing start or end angles
+    _endangles_ = IMD.cumsum(allowmissing(xprop), missings=:ignore)
     _startangles_ = [0.0; _endangles_[1:end-1]]
     _endangles_ .+= startangle
     _startangles_ .+= startangle
@@ -71,6 +74,10 @@ function _push_plots!(vspec, plt::Pie, all_args; idx=1)
     s_spec_marks[:encode][:enter][:opacity] = Dict{Symbol,Any}(:value => opts[:opacity])
     s_spec_marks[:encode][:enter][:stroke] = Dict{Symbol,Any}(:value => opts[:outlinecolor])
     s_spec_marks[:encode][:enter][:strokeWidth] = Dict{Symbol,Any}(:value => opts[:outlinethickness])
+    if opts[:tooltip]
+        s_spec_marks[:encode][:enter][:tooltip] = Dict{Symbol,Any}(:field => "$(sg_col_prefix)__pie__val__")
+    end
+
     s_spec_marks[:encode][:enter][:fill] = Dict{Symbol,Any}()
 
 
@@ -147,7 +154,7 @@ function _check_and_normalize!(plt::Pie, all_args)
     if opts[:sort]
         sort!(pie_ds, "$(sg_col_prefix)__pie__val__", threads=false)
     end
-    modify!(gatherby(pie_ds, _extra_col_for_panel_names_, mapformats=all_args.mapformats, threads=false), "$(sg_col_prefix)__pie__val__" => (x->_pie_transform(x, deg2rad(opts[:startangle]), deg2rad(opts[:endangle])))=> "$(sg_col_prefix)pie__info__", "$(sg_col_prefix)pie__info__"=>splitter=>["$(sg_col_prefix)pie__startangle__","$(sg_col_prefix)pie__endangle__"])
+    modify!(gatherby(pie_ds, _extra_col_for_panel_names_, mapformats=all_args.mapformats, threads=false), "$(sg_col_prefix)__pie__val__" =>byrow(identity)=>"$(sg_col_prefix)__pie__val__", "$(sg_col_prefix)__pie__val__" => (x->_pie_transform(x, deg2rad(opts[:startangle]), deg2rad(opts[:endangle])))=> "$(sg_col_prefix)pie__info__", "$(sg_col_prefix)pie__info__"=>splitter=>["$(sg_col_prefix)pie__startangle__","$(sg_col_prefix)pie__endangle__"])
     select!(pie_ds, Not("$(sg_col_prefix)pie__info__"))
     return  col, pie_ds
     @label argerr
