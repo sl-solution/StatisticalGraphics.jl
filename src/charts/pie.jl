@@ -41,8 +41,7 @@ function _pie_transform(x, startangle, endangle)::Vector{Tuple}
     total_angle = abs(endangle-startangle)
     xprop = x ./ IMD.sum(x)
     xprop .*= total_angle
-    # we use allowmissing to force using cumsum from IMD, and we ignore missing values, if we use :skip we must remove observations with missing start or end angles
-    _endangles_ = IMD.cumsum(allowmissing(xprop), missings=:ignore)
+    _endangles_ = IMD.cumsum(xprop, missings=:ignore)
     _startangles_ = [0.0; _endangles_[1:end-1]]
     _endangles_ .+= startangle
     _startangles_ .+= startangle
