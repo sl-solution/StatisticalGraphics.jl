@@ -2,11 +2,13 @@ PIE_DEFAULT = Dict{Symbol,Any}(:category => nothing,
     :response => nothing,
     :stat => nothing, #by default, if response is given we use sum, if not we use freq - the function passed as stat must accept two arguments f and x, f is a function and x is a abstract vector. function apply f on each elements of x and return the aggregations
    
-   
+    :sort => false,
+
     :opacity => 1,
     :outlinethickness => 1,
 
     :innerradius=>0, # donut pie
+    :piecorner=>0,
     :startangle => 0, # can be between[0,1], or :nest to display each group nested in the other one
     :endangle=>360,
     :opacity => 1,
@@ -15,7 +17,7 @@ PIE_DEFAULT = Dict{Symbol,Any}(:category => nothing,
     :outlinecolor => :white,
     :colormodel=>:category,
    
-    :legend => nothing, :barcorner => [0, 0, 0, 0], #corner radius (cornerRadiusTopLeft, cornerRadiusTopRight, cornerRadiusBottomLeft, cornerRadiusBottomRight)
+    :legend => nothing,
     :clip => nothing
 )
 mutable struct Pie <: SGMarks
@@ -25,6 +27,9 @@ mutable struct Pie <: SGMarks
         cp_PIE_DEFAULT = update_default_opts!(deepcopy(PIE_DEFAULT), optsd)
         if (cp_PIE_DEFAULT[:category] == 0)
             throw(ArgumentError("Pie plot needs the category keyword arguments"))
+        end
+        if abs(cp_PIE_DEFAULT[:endangle] - cp_PIE_DEFAULT[:startangle])>360
+            throw(ArgumentError("the total angle of the Pie chart cannot be more than 360 degree"))
         end
         new(cp_PIE_DEFAULT)
     end
@@ -77,7 +82,7 @@ function _push_plots!(vspec, plt::Pie, all_args; idx=1)
     s_spec_marks[:encode][:enter][:padAngle] = Dict{Symbol, Any}(:value=>opts[:space])
     s_spec_marks[:encode][:enter][:innerRadius] = Dict{Symbol, Any}(:value=>opts[:innerradius])
     s_spec_marks[:encode][:enter][:outerRadius] = Dict{Symbol, Any}(:signal=>"min(width,height) / 2")
-
+    s_spec_marks[:encode][:enter][:cornerRadius] = Dict{Symbol, Any}(:value=>opts[:piecorner])
 
     s_spec_marks[:encode][:enter][:x] = Dict{Symbol, Any}(:signal=>"width / 2")
     s_spec_marks[:encode][:enter][:y] = Dict{Symbol, Any}(:signal=>"height / 2")
@@ -138,6 +143,9 @@ function _check_and_normalize!(plt::Pie, all_args)
         end
         pie_ds = combine(gatherby(ds, g_col, mapformats=all_args.mapformats, threads=threads), opts[:response] => (x -> opts[:stat](_f_response, x)) => "$(sg_col_prefix)__pie__val__", threads=threads)
      
+    end
+    if opts[:sort]
+        sort!(pie_ds, "$(sg_col_prefix)__pie__val__", threads=false)
     end
     modify!(gatherby(pie_ds, _extra_col_for_panel_names_, mapformats=all_args.mapformats, threads=false), "$(sg_col_prefix)__pie__val__" => (x->_pie_transform(x, deg2rad(opts[:startangle]), deg2rad(opts[:endangle])))=> "$(sg_col_prefix)pie__info__", "$(sg_col_prefix)pie__info__"=>splitter=>["$(sg_col_prefix)pie__startangle__","$(sg_col_prefix)pie__endangle__"])
     select!(pie_ds, Not("$(sg_col_prefix)pie__info__"))
