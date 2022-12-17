@@ -22,16 +22,18 @@ function _reg_core(x, y, _f_x, _f_y; degree=1, intercept=true)
     for i in 1:dim
         xpx[:, i] .= xpx_elem[1+(i-1):dim+(i-1)]
     end
+    tols = _reg_sweep_tolerance(xpx, n)
     if !intercept
         xpx = xpx[2:end, 2:end]
         xpy = xpy[2:end]
+        tols = tols[2:end]
     end
-    xpx = big.(xpx)
-    xpy = big.(xpy)
-    beta = xpx \ xpy
-    ssr = ypy - 2 * beta' * xpy + beta' * xpx * beta
+    A, dof = _reg_sweep(xpx, xpy, ypy, tols)
+    dof = n - dof
+    beta = A[1:end-1, end]
+    ssr = A[end, end]
     ssreg = ypy - beta' * xpy
-    n, p, xpx, beta, ypy, n-p < 1 ? missing : ssr / (n - p), ssreg,xpy
+    n, p, xpx, beta, ypy, dof < 1 ? missing : ssr / dof, ssreg, dof, A
 end
 
 function _confident_mean(tval, sigmahat2, x0, invxpx, degree, init0, indiv) # set indiv = true for single observation confidence interval
@@ -50,9 +52,9 @@ function reg_fit(x, y, _f_x, _f_y; degree=1, intercept=true, alpha = 0.05, cl=fa
     reg_info = _reg_core(x, y, _f_x, _f_y, degree=degree, intercept=intercept)
     init0 = intercept ? 0 : 1
     fit = [sum(reg_info[4] .* (val_x .^ (init0:degree))) for val_x in x0]
-    if cl && reg_info[1] > reg_info[2]
-        tval = quantile(TDist(reg_info[1]-reg_info[2]), 1-alpha/2)
-        invxpx = inv(reg_info[3])
+    if cl && reg_info[8] > 0
+        tval = quantile(TDist(reg_info[8]), 1-alpha/2)
+        invxpx = reg_info[9][1:end-1, 1:end-1]
         upper_clm = [fit[i] + _confident_mean(tval, reg_info[6], x0[i], invxpx, degree, init0, false) for i in 1:length(x0)]
         lower_clm = [fit[i] - _confident_mean(tval, reg_info[6], x0[i], invxpx, degree, init0, false) for i in 1:length(x0)]
         upper_cli = [fit[i] + _confident_mean(tval, reg_info[6], x0[i], invxpx, degree, init0, true) for i in 1:length(x0)]
@@ -63,7 +65,7 @@ function reg_fit(x, y, _f_x, _f_y; degree=1, intercept=true, alpha = 0.05, cl=fa
         upper_cli = copy(fit)
         lower_cli = copy(fit)
     end
-    tuple.(collect(x0), Float64.(fit), Float64.(lower_clm), Float64.(upper_clm), Float64.(lower_cli), Float64.(upper_cli))
+    tuple.(collect(x0), fit, lower_clm, upper_clm, lower_cli, upper_cli)
 end
 REG_DEFAULT = Dict{Symbol, Any}(:x => 0, :y=>0, :group=>nothing,
                                     :x2axis=>false,

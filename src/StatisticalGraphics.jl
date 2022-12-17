@@ -31,6 +31,7 @@ module StatisticalGraphics
     abstract type SGMarks end
 
     include("util.jl")
+    include("util_reg.jl")
     include("charts/axes.jl")
     include("charts/legend.jl")
     include("charts/scatter.jl")
