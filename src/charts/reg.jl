@@ -31,7 +31,7 @@ function _reg_core(x, y, _f_x, _f_y; degree=1, intercept=true)
     beta = xpx \ xpy
     ssr = ypy - 2 * beta' * xpy + beta' * xpx * beta
     ssreg = ypy - beta' * xpy
-    n, p, xpx, beta, ypy, ssr / (n - p), ssreg
+    n, p, xpx, beta, ypy, n-p < 1 ? missing : ssr / (n - p), ssreg,xpy
 end
 
 function _confident_mean(tval, sigmahat2, x0, invxpx, degree, init0, indiv) # set indiv = true for single observation confidence interval
