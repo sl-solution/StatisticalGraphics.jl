@@ -29,19 +29,22 @@ function _reg_core(x, y, _f_x, _f_y; degree=1, intercept=true)
         tols = tols[2:end]
     end
     A, dof = _reg_sweep(xpx, xpy, ypy, tols)
+    if any(isnan, A)
+        A = replace(A, NaN=>missing)
+    end
     dof = n - dof
     beta = A[1:end-1, end]
-    ssr = A[end, end]
+    ssr = isless(A[end, end], 0.0) ? missing : A[end, end]
     ssreg = ypy - beta' * xpy
     n, p, xpx, beta, ypy, dof < 1 ? missing : ssr / dof, ssreg, dof, A
 end
 
 function _confident_mean(tval, sigmahat2, x0, invxpx, degree, init0, indiv) # set indiv = true for single observation confidence interval
     newx0 = x0 .^ (init0:degree)
-    tval * sqrt(sum(sigmahat2 * (Int(indiv) + newx0' * invxpx * newx0)))
+    tval * sqrt(sigmahat2 * (Int(indiv) + newx0' * invxpx * newx0))
 end
 using Distributions
-function reg_fit(x, y, _f_x, _f_y; degree=1, intercept=true, alpha = 0.05, cl=false, npoints=100)::Vector{Tuple}
+function reg_fit(x, y, _f_x, _f_y; degree=1, intercept=true, alpha=0.05, cl=false, npoints=100)::Vector{Tuple}
     min_val = IMD.minimum(_f_x, x)
     max_val = IMD.maximum(_f_x, x)
 
@@ -52,8 +55,8 @@ function reg_fit(x, y, _f_x, _f_y; degree=1, intercept=true, alpha = 0.05, cl=fa
     reg_info = _reg_core(x, y, _f_x, _f_y, degree=degree, intercept=intercept)
     init0 = intercept ? 0 : 1
     fit = [sum(reg_info[4] .* (val_x .^ (init0:degree))) for val_x in x0]
-    if cl && reg_info[8] > 0
-        tval = quantile(TDist(reg_info[8]), 1-alpha/2)
+    if cl && isless(0, reg_info[8])
+        tval = quantile(TDist(reg_info[8]), 1 - alpha / 2)
         invxpx = reg_info[9][1:end-1, 1:end-1]
         upper_clm = [fit[i] + _confident_mean(tval, reg_info[6], x0[i], invxpx, degree, init0, false) for i in 1:length(x0)]
         lower_clm = [fit[i] - _confident_mean(tval, reg_info[6], x0[i], invxpx, degree, init0, false) for i in 1:length(x0)]
@@ -285,7 +288,8 @@ function _check_and_normalize!(plt::Reg, all_args)
     end
     reg_ds = combine(gatherby(dropmissing(ds, [opts[:x], opts[:y]], mapformats=all_args.mapformats, threads=threads, view=true), g_col, threads = threads, mapformats = all_args.mapformats), (opts[:x], opts[:y])=> ((x,y)->reg_fit(x, y, _f_x, _f_y, degree = opts[:degree], intercept = opts[:intercept], alpha = opts[:alpha], cl = opts[:clm] || opts[:cli], npoints=opts[:npoints])) => "$(sg_col_prefix)reg__info__", threads = threads)
 
-    modify!(reg_ds, "$(sg_col_prefix)reg__info__" => splitter => ["$(sg_col_prefix)_x0", "$(sg_col_prefix)_yhat", "$(sg_col_prefix)_l_clm", "$(sg_col_prefix)_u_clm", "$(sg_col_prefix)_l_cli", "$(sg_col_prefix)_u_cli"], threads = false)
+    # byrow(Float64) makes sure that all computed columns are of type Float64 (sometime they would be Missing rather than Union{Missing, Float64})
+    modify!(reg_ds, "$(sg_col_prefix)reg__info__" => splitter => ["$(sg_col_prefix)_x0", "$(sg_col_prefix)_yhat", "$(sg_col_prefix)_l_clm", "$(sg_col_prefix)_u_clm", "$(sg_col_prefix)_l_cli", "$(sg_col_prefix)_u_cli"], ["$(sg_col_prefix)_yhat", "$(sg_col_prefix)_l_clm", "$(sg_col_prefix)_u_clm", "$(sg_col_prefix)_l_cli", "$(sg_col_prefix)_u_cli"] .=> byrow(Float64), threads = false)
 
     select!(reg_ds, Not("$(sg_col_prefix)reg__info__"))
 
