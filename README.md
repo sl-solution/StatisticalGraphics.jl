@@ -430,9 +430,9 @@ using Chain
             [
                 Scatter(x="Rotten Tomatoes Rating", y="IMDB Rating", size=10),
                 Reg(
-                        x="Rotten Tomatoes Rating", y="IMDB Rating",
-                        degree=3,
-                        clm=true,
+                      x="Rotten Tomatoes Rating", y="IMDB Rating",
+                      degree=3,
+                      clm=true,
                     )
             ],
             xaxis=Axis(grid=true,gridcolor=:white),
@@ -444,7 +444,8 @@ using Chain
             rowspace=15,
             headercolname=false,
             wallcolor=:lightgray,
-            clip=false)
+            clip=false
+          )
 end
 ```
 
