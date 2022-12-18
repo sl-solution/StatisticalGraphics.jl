@@ -463,6 +463,7 @@ nations = filereader("assets/nations.csv", emptycolname=true, quotechar='"')
     Bubble(x=:gdpPercap,
            y=:lifeExp,
            colorresponse=:region,
+           colormodel=:category,
            size=:population,
            color=:white,
            labelresponse=:country,
