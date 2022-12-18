@@ -431,7 +431,7 @@ using Chain
                 Scatter(x="Rotten Tomatoes Rating", y="IMDB Rating", size=10),
                 Reg(
                         x="Rotten Tomatoes Rating", y="IMDB Rating",
-                        degree=1,
+                        degree=3,
                         clm=true,
                     )
             ],
