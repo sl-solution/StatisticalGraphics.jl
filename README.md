@@ -418,6 +418,38 @@ sgplot(
 
 ![udistrict](assets/udistrict.svg)
 
+**Scatter plot with regression line**
+
+```julia
+movies = filereader("assets/movies.csv", dlmstr="::")
+using Chain
+@chain movies begin
+    delete("Major Genre", by = contains("Concert"), missings=false)
+    groupby("Major Genre")
+    sgplot(
+            [
+                Scatter(x="Rotten Tomatoes Rating", y="IMDB Rating", size=10),
+                Reg(
+                        x="Rotten Tomatoes Rating", y="IMDB Rating",
+                        degree=1,
+                        clm=true,
+                    )
+            ],
+            xaxis=Axis(grid=true,gridcolor=:white),
+            yaxis=Axis(grid=true,gridcolor=:white),
+            height=200,
+            width=200,
+            columns=4,
+            columnspace=15,
+            rowspace=15,
+            headercolname=false,
+            wallcolor=:lightgray,
+            clip=false)
+end
+```
+
+![movies](assets/movies.svg)
+
 **automatic labelling for Scatter and Bubble plots**
 
 ```julia
