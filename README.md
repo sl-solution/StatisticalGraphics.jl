@@ -443,6 +443,10 @@ using Chain
             columnspace=15,
             rowspace=15,
             headercolname=false,
+            headeroffset=-20,
+            headercolor=:white,
+            headersize=20,
+            headeritalic=true,
             wallcolor=:lightgray,
             clip=false
           )
