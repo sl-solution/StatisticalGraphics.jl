@@ -54,9 +54,7 @@ function _box_plot_fun(x, outliers; olf = 1.5, fun = identity)
     isempty(y) && throw(ArgumentError("the input vector is empty"))
     if outliers
        
-        q1 = quantile(y, 0.25)
-        q3 = quantile(y, 0.75)
-        med = quantile(y, 0.5)
+        q1, med, q3 = quantile(y, [0.25, 0.5, 0.75])
         mu = IMD.mean(y)
         iqr = q3 - q1
         actual_min = IMD.minimum(y)
@@ -68,7 +66,7 @@ function _box_plot_fun(x, outliers; olf = 1.5, fun = identity)
         return (q1, q3, med, mu, minval, maxval, actual_min, actual_max, filter(x -> isless(maxval, x) || isless(x, minval), y))
     else
         
-        return (quantile(y, 0.25), quantile(y, 0.75), quantile(y, 0.5), IMD.mean(y), IMD.minimum(y), IMD.maximum(y), IMD.minimum(y), IMD.maximum(y), Any[])
+        return (quantile(y, [0.25, 0.75, 0.5])..., IMD.mean(y), IMD.minimum(y), IMD.maximum(y), IMD.minimum(y), IMD.maximum(y), Any[])
     end
 end
 
