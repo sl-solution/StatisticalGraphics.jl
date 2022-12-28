@@ -126,9 +126,9 @@ function _push_plots!(vspec, plt::Density, all_args; idx=1)
     end
     if opts[:group] === nothing
         if opts[:filled]
-            s_spec_marks[:encode][:enter][:fill][:value] = something(opts[:fillcolor], opts[:color], "#4682b4")
+            s_spec_marks[:encode][:enter][:fill][:value] = something(opts[:fillcolor], opts[:color], "red")
         end
-        s_spec_marks[:encode][:enter][:stroke][:value] = something(opts[:color], "#4682b4") # we allow the outline color be set
+        s_spec_marks[:encode][:enter][:stroke][:value] = something(opts[:color], "red") # we allow the outline color be set
     else
         s_spec[:from] = Dict{Symbol,Any}()
         s_spec[:from][:facet] = Dict{Symbol,Any}()
