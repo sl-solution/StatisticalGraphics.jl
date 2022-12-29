@@ -49,11 +49,15 @@ mutable struct BoxPlot <: SGMarks
     end
 end
 
+function _filter_barrier!(y, minval, maxval) 
+    filter!(x -> isless(maxval, x) || isless(x, minval), y)
+    y
+end
+
 function _box_plot_fun(x, outliers; olf = 1.5, fun = identity)
     y = collect(fun(_val_) for _val_ in skipmissing(x))
     isempty(y) && throw(ArgumentError("the input vector is empty"))
     if outliers
-       
         q1, med, q3 = quantile(y, [0.25, 0.5, 0.75])
         mu = IMD.mean(y)
         iqr = q3 - q1
@@ -62,8 +66,8 @@ function _box_plot_fun(x, outliers; olf = 1.5, fun = identity)
         minval = q1 - olf * iqr
         maxval = q3 + olf * iqr
         minval = isless(minval, actual_min) ? actual_min : minval
-        maxval = isless(actual_max, maxval) ? actual_max : maxval      
-        return (q1, q3, med, mu, minval, maxval, actual_min, actual_max, filter(x -> isless(maxval, x) || isless(x, minval), y))
+        maxval = isless(actual_max, maxval) ? actual_max : maxval
+        return (q1, q3, med, mu, minval, maxval, actual_min, actual_max, _filter_barrier!(y, minval, maxval))
     else
         
         return (quantile(y, [0.25, 0.75, 0.5])..., IMD.mean(y), IMD.minimum(y), IMD.maximum(y), IMD.minimum(y), IMD.maximum(y), Any[])
