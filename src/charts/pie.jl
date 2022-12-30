@@ -12,7 +12,21 @@ PIE_DEFAULT = Dict{Symbol,Any}(:category => nothing,
     :startangle => 0, # can be between[0,1], or :nest to display each group nested in the other one
     :endangle=>360,
     :opacity => 1,
-    :space => 0, 
+    :space => 0,
+
+    :label=>nothing,  # show labels for each piecorner - :category, :percent, :both are valid options
+    :decimal=>1, # number of digits after the decimal when percentages are shown
+    :labelpos => 0.5, # where to put the labels
+    :labelfont=>nothing,
+    :labelfontweight=>nothing,
+    :labelitalic=>nothing,
+    :labelsize=>nothing,
+    :labelcolor=>:black,
+    :labelangle=>0,
+    :labeldir=>:ltr,
+    :labellimit=>nothing,
+    :labelalign=>:center,
+
    
     :outlinecolor => :white,
     :colormodel=>:category,
@@ -33,6 +47,9 @@ mutable struct Pie <: SGMarks
         if abs(cp_PIE_DEFAULT[:endangle] - cp_PIE_DEFAULT[:startangle])>360
             throw(ArgumentError("the total angle of the Pie chart cannot be more than 360 degree"))
         end
+        if !(cp_PIE_DEFAULT[:label] in (nothing, :category, :percent, :both))
+            throw(ArgumentError("label can be :category, :percent or :both"))
+        end
         new(cp_PIE_DEFAULT)
     end
 end
@@ -45,7 +62,7 @@ function _pie_transform(x, startangle, endangle)::Vector{Tuple}
     _startangles_ = [0.0; _endangles_[1:end-1]]
     _endangles_ .+= startangle
     _startangles_ .+= startangle
-    tuple.(_startangles_, _endangles_)
+    tuple.(_startangles_, _endangles_, x ./ IMD.sum(x))
 end
 
 # Pie produces a simple Pie Chart
@@ -55,12 +72,12 @@ function _push_plots!(vspec, plt::Pie, all_args; idx=1)
     # check if the required arguments are passed / create a new ds and push it to out_ds
     col, new_ds = _check_and_normalize!(plt, all_args)
     delete!(new_ds, ["$(sg_col_prefix)pie__startangle__", "$(sg_col_prefix)pie__endangle__"], type=isequal)
-    _add_legends!(plt, all_args, idx)
+    # _add_legends!(plt, all_args, idx) # label = true will label every piece
     data_csv = tempname()
     filewriter(data_csv, new_ds, mapformats=all_args.mapformats, quotechar='"')
     push!(vspec[:data], Dict{Symbol,Any}(:name => "pie_data_$idx", :values => read(data_csv, String), :format => Dict(:type => "csv", :delimiter => ",", :parse => :auto)))
 
-    
+
     opts = plt.opts
 
     s_spec = Dict{Symbol,Any}()
@@ -84,16 +101,53 @@ function _push_plots!(vspec, plt::Pie, all_args; idx=1)
     s_spec_marks[:encode][:enter][:fill][:scale] = "color_scale_$idx"
     s_spec_marks[:encode][:enter][:fill][:field] = col
     addto_color_scale!(vspec, "pie_data_$idx", "color_scale_$idx", col, true; color_model=opts[:colormodel])
-    s_spec_marks[:encode][:enter][:startAngle] = Dict{Symbol, Any}(:field=>"$(sg_col_prefix)pie__startangle__")
-    s_spec_marks[:encode][:enter][:endAngle] = Dict{Symbol, Any}(:field=>"$(sg_col_prefix)pie__endangle__")
-    s_spec_marks[:encode][:enter][:padAngle] = Dict{Symbol, Any}(:value=>opts[:space])
-    s_spec_marks[:encode][:enter][:innerRadius] = Dict{Symbol, Any}(:value=>opts[:innerradius])
-    s_spec_marks[:encode][:enter][:outerRadius] = Dict{Symbol, Any}(:signal=>"min(width,height) / 2")
-    s_spec_marks[:encode][:enter][:cornerRadius] = Dict{Symbol, Any}(:value=>opts[:piecorner])
+    s_spec_marks[:encode][:enter][:startAngle] = Dict{Symbol,Any}(:field => "$(sg_col_prefix)pie__startangle__")
+    s_spec_marks[:encode][:enter][:endAngle] = Dict{Symbol,Any}(:field => "$(sg_col_prefix)pie__endangle__")
+    s_spec_marks[:encode][:enter][:padAngle] = Dict{Symbol,Any}(:value => opts[:space])
+    s_spec_marks[:encode][:enter][:innerRadius] = Dict{Symbol,Any}(:value => opts[:innerradius])
+    s_spec_marks[:encode][:enter][:outerRadius] = Dict{Symbol,Any}(:signal => "min(width,height) / 2")
+    s_spec_marks[:encode][:enter][:cornerRadius] = Dict{Symbol,Any}(:value => opts[:piecorner])
 
-    s_spec_marks[:encode][:enter][:x] = Dict{Symbol, Any}(:signal=>"width / 2")
-    s_spec_marks[:encode][:enter][:y] = Dict{Symbol, Any}(:signal=>"height / 2")
+    s_spec_marks[:encode][:enter][:x] = Dict{Symbol,Any}(:signal => "width / 2")
+    s_spec_marks[:encode][:enter][:y] = Dict{Symbol,Any}(:signal => "height / 2")
     s_spec[:marks] = [s_spec_marks]
+    if opts[:label] !== nothing
+        s_spec_marks = Dict{Symbol,Any}()
+        s_spec_marks[:type] = "text"
+        s_spec_marks[:from] = Dict(:data => "pie_data_$idx")
+        s_spec_marks[:encode] = Dict{Symbol,Any}()
+        s_spec_marks[:encode][:enter] = Dict{Symbol,Any}()
+        s_spec_marks[:encode][:enter][:opacity] = Dict{Symbol,Any}(:value => opts[:opacity])
+
+        s_spec_marks[:encode][:enter][:x] = Dict{Symbol,Any}(:signal => "width / 2")
+        s_spec_marks[:encode][:enter][:y] = Dict{Symbol,Any}(:signal => "height / 2")
+
+        s_spec_marks[:encode][:enter][:radius] = Dict{Symbol,Any}(:signal => "(min(width,height) / 2 + $(opts[:innerradius])) / $(inv(opts[:labelpos]))")
+        s_spec_marks[:encode][:enter][:theta] = Dict{Symbol,Any}(:signal => "(datum['$(sg_col_prefix)pie__endangle__'] + datum['$(sg_col_prefix)pie__startangle__'])/2 ")
+        if opts[:label] == :category
+            t_val = "datum['$(opts[:category])']"
+        elseif opts[:label] == :percent
+            t_val = "format(datum['$(sg_col_prefix)pie__percentage__'], '0.$(opts[:decimal])%')"
+        elseif opts[:label] == :both 
+            t_val = "[datum['$(opts[:category])'], format(datum['$(sg_col_prefix)pie__percentage__'], '0.$(opts[:decimal])%')]"
+        end
+        s_spec_marks[:encode][:enter][:text] = Dict{Symbol,Any}(:signal => t_val)
+        s_spec_marks[:encode][:enter][:fill] = Dict{Symbol,Any}(:value => "$(opts[:labelcolor])")
+        s_spec_marks[:encode][:enter][:font] = Dict{Symbol,Any}(:value => something(opts[:labelfont], all_args.opts[:font]))
+        s_spec_marks[:encode][:enter][:fontWeight] = Dict{Symbol,Any}(:value => something(opts[:labelfontweight], all_args.opts[:fontweight]))
+        s_spec_marks[:encode][:enter][:fontStyle] = Dict{Symbol,Any}(:value => something(opts[:labelitalic], all_args.opts[:italic]) ? "italic" : "normal")
+        s_spec_marks[:encode][:enter][:angle] = Dict{Symbol,Any}(:value => opts[:labelangle])
+        s_spec_marks[:encode][:enter][:align] = Dict{Symbol,Any}(:value => opts[:labelalign])
+        if opts[:labelsize] !== nothing
+        s_spec_marks[:encode][:enter][:fontSize] = Dict{Symbol,Any}(:value => opts[:labelsize])
+        end
+        s_spec_marks[:encode][:enter][:dir] = Dict{Symbol,Any}(:value => opts[:labeldir])
+        if opts[:labellimit] !== nothing
+        s_spec_marks[:encode][:enter][:limit] = Dict{Symbol,Any}(:value => opts[:labellimit])
+        end
+
+        push!(s_spec[:marks], s_spec_marks)
+    end
     push!(vspec[:marks], s_spec)
 end
 
@@ -154,7 +208,7 @@ function _check_and_normalize!(plt::Pie, all_args)
     if opts[:sort]
         sort!(pie_ds, "$(sg_col_prefix)__pie__val__", threads=false)
     end
-    modify!(gatherby(pie_ds, _extra_col_for_panel_names_, mapformats=all_args.mapformats, threads=false), "$(sg_col_prefix)__pie__val__" =>byrow(identity)=>"$(sg_col_prefix)__pie__val__", "$(sg_col_prefix)__pie__val__" => (x->_pie_transform(x, deg2rad(opts[:startangle]), deg2rad(opts[:endangle])))=> "$(sg_col_prefix)pie__info__", "$(sg_col_prefix)pie__info__"=>splitter=>["$(sg_col_prefix)pie__startangle__","$(sg_col_prefix)pie__endangle__"])
+    modify!(gatherby(pie_ds, _extra_col_for_panel_names_, mapformats=all_args.mapformats, threads=false), "$(sg_col_prefix)__pie__val__" =>byrow(identity)=>"$(sg_col_prefix)__pie__val__", "$(sg_col_prefix)__pie__val__" => (x->_pie_transform(x, deg2rad(opts[:startangle]), deg2rad(opts[:endangle])))=> "$(sg_col_prefix)pie__info__", "$(sg_col_prefix)pie__info__"=>splitter=>["$(sg_col_prefix)pie__startangle__","$(sg_col_prefix)pie__endangle__", "$(sg_col_prefix)pie__percentage__"])
     select!(pie_ds, Not("$(sg_col_prefix)pie__info__"))
     return  col, pie_ds
     @label argerr
