@@ -334,7 +334,8 @@ sgplot(
           ),
         width = 100,
         height = 100,
-        columns=5
+        columns=5,
+        legend=false
       )
 ```
 
