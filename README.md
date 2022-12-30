@@ -327,15 +327,19 @@ sgplot(
 ```julia
 sgplot(
         groupby(panel_example, [:x5, :x6]), 
-        Bar(x=:x7, group=:x8),
-        nominal = [:x8],
+        Pie(category=:x7,
+            label=:both,
+            labelsize=8,
+            labelpos=0.7,
+            piecorner=10
+          ),
         width = 100,
         height = 100,
         columns=5
       )
 ```
 
-![barpanel](assets/barpanel.svg)
+![barpanel](assets/piepanel.svg)
 
 
 ```julia
