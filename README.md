@@ -330,7 +330,7 @@ sgplot(
         Pie(category=:x7,
             label=:both,
             labelsize=8,
-            innerradius=20
+            innerradius=0.4
           ),
         width = 100,
         height = 100,

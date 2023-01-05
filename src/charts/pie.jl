@@ -7,7 +7,8 @@ PIE_DEFAULT = Dict{Symbol,Any}(:category => nothing,
     :opacity => 1,
     :outlinethickness => 1,
 
-    :innerradius=>0, # donut pie
+    :outerradius=>1, # [0,1], proportion of the pie radius compared to the maximum possilbe
+    :innerradius=>0, # donut pie [0,1]
     :piecorner=>0,
     :startangle => 0, # can be between[0,1], or :nest to display each group nested in the other one
     :endangle=>360,
@@ -105,8 +106,15 @@ function _push_plots!(vspec, plt::Pie, all_args; idx=1)
     s_spec_marks[:encode][:enter][:startAngle] = Dict{Symbol,Any}(:field => "$(sg_col_prefix)pie__startangle__")
     s_spec_marks[:encode][:enter][:endAngle] = Dict{Symbol,Any}(:field => "$(sg_col_prefix)pie__endangle__")
     s_spec_marks[:encode][:enter][:padAngle] = Dict{Symbol,Any}(:value => opts[:space])
-    s_spec_marks[:encode][:enter][:innerRadius] = Dict{Symbol,Any}(:value => opts[:innerradius])
-    s_spec_marks[:encode][:enter][:outerRadius] = Dict{Symbol,Any}(:signal => "min(width,height) / 2")
+
+    total_radius = "min(width,height) / 2"
+
+    outer_radius = "$(opts[:outerradius])*$total_radius"
+    inner_radius = "$(opts[:innerradius])*$total_radius"
+
+
+    s_spec_marks[:encode][:enter][:innerRadius] = Dict{Symbol,Any}(:signal => inner_radius)
+    s_spec_marks[:encode][:enter][:outerRadius] = Dict{Symbol,Any}(:signal => outer_radius)
     s_spec_marks[:encode][:enter][:cornerRadius] = Dict{Symbol,Any}(:value => opts[:piecorner])
 
     s_spec_marks[:encode][:enter][:x] = Dict{Symbol,Any}(:signal => "width / 2")
@@ -125,7 +133,7 @@ function _push_plots!(vspec, plt::Pie, all_args; idx=1)
 
         w_label_pos = opts[:labelpos]
 
-        s_spec_marks[:encode][:enter][:radius] = Dict{Symbol,Any}(:signal => "($(w_label_pos)*min(width,height) / 2 + (1-$(w_label_pos))*$(opts[:innerradius]))")
+        s_spec_marks[:encode][:enter][:radius] = Dict{Symbol,Any}(:signal => "($(w_label_pos)*$outer_radius + (1-$(w_label_pos))*$inner_radius)")
         s_spec_marks[:encode][:enter][:theta] = Dict{Symbol,Any}(:signal => "(datum['$(sg_col_prefix)pie__endangle__'] + datum['$(sg_col_prefix)pie__startangle__'])/2 ")
         if opts[:label] == :category
             t_val = "datum['$(opts[:category])']"
