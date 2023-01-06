@@ -259,7 +259,7 @@ function _check_and_normalize!(plt::Pie, all_args)
         insertcols!(group_info_ds, "$(sg_col_prefix)_pie__innerradius" => inner_radius)
         insertcols!(group_info_ds, "$(sg_col_prefix)_pie__outerradius" => inner_radius .+ radius_eachgroup)
         insertcols!(group_info_ds, "$(sg_col_prefix)_pie__labelradius" => inner_radius .+ _w_ * radius_eachgroup)
-        leftjoin!(pie_ds, group_info_ds, on = opts[:group], mapformats=all_args.mapformats, threads=false)
+        leftjoin!(pie_ds, group_info_ds, on = opts[:group], mapformats=all_args.mapformats, threads=false, method=:hash)
     end
 
     return  col, pie_ds
