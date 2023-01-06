@@ -2,7 +2,7 @@ PIE_DEFAULT = Dict{Symbol,Any}(:category => nothing,
     :response => nothing,
     :stat => nothing, #by default, if response is given we use sum, if not we use freq - the function passed as stat must accept two arguments f and x, f is a function and x is a abstract vector. function apply f on each elements of x and return the aggregations
     :group => nothing,
-    :groupspace=>0.05, # space between groups
+    :groupspace=>0.01, # space between groups
 
     :sort => false,
 
