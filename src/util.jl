@@ -129,6 +129,16 @@ function addto_group_scale!(group_scale, source, col, all_args)
     end
 end
 
+function addto_radius_scale!(vspec, name)
+    new_scale = Dict{Symbol,Any}()
+    new_scale[:domain] = [0,1]
+    new_scale[:range] = Dict{Symbol, Any}()
+    new_scale[:range][:signal] = "[0, min(width,height) / 2]"
+    new_scale[:type] = "linear"
+    new_scale[:name] = "fixed_radius_$name"
+    push!(vspec[:scales], new_scale)
+end
+
 # the following function is to convert some specific types before sending to js
 _convert_values_for_js(x::Union{Date, DateTime}) = datetime2unix(DateTime(x)) * 1000 # JS cannot read Julia datetime
 _convert_values_for_js(x::Bool) = x ? 1 : 0 # filewrite writes bools as 0/1

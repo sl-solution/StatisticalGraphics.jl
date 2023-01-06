@@ -188,6 +188,7 @@ function _sgpanel(ds, panelby::IMD.MultiColumnIndex, plts::Vector{<:SGMarks}; ma
         newmark[:marks] = deepcopy(sgplot_result[:marks])
         new_scales = _modify_scales_for_panel(deepcopy(sgplot_result[:scales]), panel_info[i, :])
         newmark[:scales] = new_scales[1:4]
+        append!(newmark[:scales], filter(x->contains(x[:name], "fixed_radius_"), new_scales)) # pie chart used fixed_radius_ pattern
         new_axes = _modify_axes_for_panel(all_args, deepcopy(sgplot_result[:axes]), panel_info[i, :])
         newmark[:axes] = new_axes
 

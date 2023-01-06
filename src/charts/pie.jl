@@ -1,7 +1,9 @@
 PIE_DEFAULT = Dict{Symbol,Any}(:category => nothing,
     :response => nothing,
     :stat => nothing, #by default, if response is given we use sum, if not we use freq - the function passed as stat must accept two arguments f and x, f is a function and x is a abstract vector. function apply f on each elements of x and return the aggregations
-   
+    :group => nothing,
+    :groupspace=>0.05, # space between groups
+
     :sort => false,
 
     :opacity => 1,
@@ -93,6 +95,7 @@ function _push_plots!(vspec, plt::Pie, all_args; idx=1)
     s_spec_marks[:encode][:enter][:opacity] = Dict{Symbol,Any}(:value => opts[:opacity])
     s_spec_marks[:encode][:enter][:stroke] = Dict{Symbol,Any}(:value => opts[:outlinecolor])
     s_spec_marks[:encode][:enter][:strokeWidth] = Dict{Symbol,Any}(:value => opts[:outlinethickness])
+    addto_radius_scale!(vspec, "$idx")
     if opts[:tooltip]
         s_spec_marks[:encode][:enter][:tooltip] = Dict{Symbol,Any}(:field => "$(sg_col_prefix)__pie__val__")
     end
@@ -113,8 +116,8 @@ function _push_plots!(vspec, plt::Pie, all_args; idx=1)
     inner_radius = "$(opts[:innerradius])*$total_radius"
 
 
-    s_spec_marks[:encode][:enter][:innerRadius] = Dict{Symbol,Any}(:signal => inner_radius)
-    s_spec_marks[:encode][:enter][:outerRadius] = Dict{Symbol,Any}(:signal => outer_radius)
+    s_spec_marks[:encode][:enter][:innerRadius] = Dict{Symbol,Any}(:field => "$(sg_col_prefix)_pie__innerradius", :scale=>"fixed_radius_$idx")
+    s_spec_marks[:encode][:enter][:outerRadius] = Dict{Symbol,Any}(:field => "$(sg_col_prefix)_pie__outerradius", :scale=>"fixed_radius_$idx")
     s_spec_marks[:encode][:enter][:cornerRadius] = Dict{Symbol,Any}(:value => opts[:piecorner])
 
     s_spec_marks[:encode][:enter][:x] = Dict{Symbol,Any}(:signal => "width / 2")
@@ -133,7 +136,7 @@ function _push_plots!(vspec, plt::Pie, all_args; idx=1)
 
         w_label_pos = opts[:labelpos]
 
-        s_spec_marks[:encode][:enter][:radius] = Dict{Symbol,Any}(:signal => "($(w_label_pos)*$outer_radius + (1-$(w_label_pos))*$inner_radius)")
+        s_spec_marks[:encode][:enter][:radius] = Dict{Symbol,Any}(:field => "$(sg_col_prefix)_pie__labelradius", :scale=> "fixed_radius_$idx")
         s_spec_marks[:encode][:enter][:theta] = Dict{Symbol,Any}(:signal => "(datum['$(sg_col_prefix)pie__endangle__'] + datum['$(sg_col_prefix)pie__startangle__'])/2 ")
         if opts[:label] == :category
             t_val = "datum['$(opts[:category])']"
@@ -191,6 +194,12 @@ function _check_and_normalize!(plt::Pie, all_args)
     elseif opts[:response] !== nothing
         @goto argerr
     end
+
+    if opts[:group] !== nothing && length(IMD.index(ds)[opts[:group]]) == 1
+        opts[:group] = _colname_as_string(ds, opts[:group])
+    elseif opts[:group] !== nothing
+        @goto argerr
+    end
     
     if all_args.mapformats
         _f = getformat(ds, col)
@@ -203,6 +212,12 @@ function _check_and_normalize!(plt::Pie, all_args)
     # we need to refer to the names in bar_ds not ds - so index are not useful
     _extra_col_for_panel_names_ = names(ds, _extra_col_for_panel)
     unique!(pushfirst!(g_col, IMD.index(ds)[col]))
+
+    if opts[:group] !== nothing
+        unique!(pushfirst!(g_col, IMD.index(ds)[opts[:group]]))
+        unique!(pushfirst!(_extra_col_for_panel_names_, opts[:group]))
+    end
+
 
     if opts[:response] === nothing
         # TODO we should move this to constructor
@@ -227,6 +242,26 @@ function _check_and_normalize!(plt::Pie, all_args)
     end
     modify!(gatherby(pie_ds, _extra_col_for_panel_names_, mapformats=all_args.mapformats, threads=false), "$(sg_col_prefix)__pie__val__" =>byrow(identity)=>"$(sg_col_prefix)__pie__val__", "$(sg_col_prefix)__pie__val__" => (x->_pie_transform(x, deg2rad(opts[:startangle]), deg2rad(opts[:endangle])))=> "$(sg_col_prefix)pie__info__", "$(sg_col_prefix)pie__info__"=>splitter=>["$(sg_col_prefix)pie__startangle__","$(sg_col_prefix)pie__endangle__", "$(sg_col_prefix)pie__percentage__", "$(sg_col_prefix)pie__textangle__"])
     select!(pie_ds, Not("$(sg_col_prefix)pie__info__"))
+
+    _w_ = opts[:labelpos]
+
+    if opts[:group] === nothing
+        insertcols!(pie_ds, "$(sg_col_prefix)_pie__innerradius" => opts[:innerradius])
+        insertcols!(pie_ds, "$(sg_col_prefix)_pie__outerradius" => opts[:outerradius])
+        insertcols!(pie_ds, "$(sg_col_prefix)_pie__labelradius" => _w_ * opts[:outerradius] + (1- _w_) * opts[:innerradius])
+    else
+        group_info_ds = unique(ds[!, [opts[:group]]], threads=threads, mapformats=all_args.mapformats)
+        n_groups = nrow(group_info_ds)
+        total_radius = opts[:outerradius] - opts[:innerradius] # TODO should we use abs value?
+        total_radius -= (n_groups-1) * opts[:groupspace] # subtract the space between groups
+        radius_eachgroup = total_radius / n_groups
+        inner_radius = [(i-1)*(opts[:groupspace] + radius_eachgroup) + opts[:innerradius] for i in 1:n_groups]
+        insertcols!(group_info_ds, "$(sg_col_prefix)_pie__innerradius" => inner_radius)
+        insertcols!(group_info_ds, "$(sg_col_prefix)_pie__outerradius" => inner_radius .+ radius_eachgroup)
+        insertcols!(group_info_ds, "$(sg_col_prefix)_pie__labelradius" => inner_radius .+ _w_ * radius_eachgroup)
+        leftjoin!(pie_ds, group_info_ds, on = opts[:group], mapformats=all_args.mapformats, threads=false)
+    end
+
     return  col, pie_ds
     @label argerr
     throw(ArgumentError("only a single column must be selected"))
