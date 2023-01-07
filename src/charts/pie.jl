@@ -207,7 +207,7 @@ function _check_and_normalize!(plt::Pie, all_args)
         _f = identity
     end
 
-    g_col = _extra_col_for_panel
+    g_col = copy(_extra_col_for_panel)
   
     # we need to refer to the names in bar_ds not ds - so index are not useful
     _extra_col_for_panel_names_ = names(ds, _extra_col_for_panel)
