@@ -193,7 +193,7 @@ function _check_and_normalize!(plt::Heatmap, all_args)
         _f_y = identity
     end
 
-    g_col = _extra_col_for_panel
+    g_col = copy(_extra_col_for_panel)
 
     heatmap_ds = combine(gatherby(ds, g_col, threads=threads, mapformats=all_args.mapformats), (opts[:x], opts[:y]) => ((x, y) -> _hist2d_counts(x, y, opts[:xbincount], opts[:ybincount], _f_x, _f_y; default_method = opts[:bincountmethod])) => :__bin__information__, threads=threads)
 

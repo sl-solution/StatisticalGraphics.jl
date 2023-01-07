@@ -268,7 +268,7 @@ function _check_and_normalize!(plt::Histogram, all_args)
             @goto argerr
         end
     else
-        g_col = _extra_col_for_panel
+        g_col = copy(_extra_col_for_panel)
         hist_ds = modify!(combine(gatherby(ds, g_col, threads = threads, mapformats = all_args.mapformats), col => (x->fit_hist(x, plt.opts[:midpoints], plt.opts[:scale], _f))=>:__bin_start, threads = threads), :__bin_start=>splitter=>[:__bin_start, :__bin_end, :__weight], threads = threads)
     end
 

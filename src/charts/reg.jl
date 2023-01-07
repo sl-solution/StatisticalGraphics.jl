@@ -278,7 +278,7 @@ function _check_and_normalize!(plt::Reg, all_args)
             @goto argerr
         end
     else
-        g_col = _extra_col_for_panel
+        g_col = copy(_extra_col_for_panel)
     end
     _f_x = identity
     _f_y = identity
