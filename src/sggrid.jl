@@ -4,8 +4,10 @@ end
 SGGRID_DEFAULT = Dict{Symbol, Any}(:align => :none, # :all, :each, :none
     :columns => nothing,
     :backcolor=>nothing,
-    :center=>[false, false],
-    :bounds=>:full # :full/:flush see vega docs
+    :center=>[false, false], # for row-column
+    :bounds=>:full, # :full/:flush see vega docs
+    :rowspace=>0,
+    :columnspace=>0
 )
 
 
@@ -17,13 +19,16 @@ function sggrid(sgp::Vector{T}; opts...) where T <: SGPlots
         global_opts[:center] = fill(global_opts[:center], 2)
     end
 
+
     vspec = Dict{Symbol,Any}()
     vspec[:background] = something(global_opts[:backcolor], sgp[1].json_spec[:background])
     vspec[Symbol("\$schema")] = "https://vega.github.io/schema/vega/v5.json"
     vspec[:layout] = Dict{Symbol, Any}(:align => global_opts[:align], 
                                        :center => Dict{Symbol, Any}(:row=>global_opts[:center][1],
                                        :column=>global_opts[:center][2]),
-                                       :bounds => global_opts[:bounds])
+                                       :bounds => global_opts[:bounds],
+                                       :padding => Dict{Symbol, Any}(:row=>global_opts[:rowspace],
+                                       :column=>global_opts[:columnspace]))
     if global_opts[:columns] !== nothing
         vspec[:layout][:columns] = global_opts[:columns]
     end
@@ -51,7 +56,7 @@ function sggrid(sgp::Vector{T}; opts...) where T <: SGPlots
             spec[:encode][:update][:height] = Dict{Symbol, Any}(:value=>p.json_spec[:height])
         end
         if haskey(p.json_spec, :config) && haskey(p.json_spec[:config], :group)
-            # wallcolor is the only configuration we set - this may need revise in future
+            # wallcolor is the only configuration we set - this may need to be revised in future
             spec[:encode][:update][:fill] = Dict{Symbol, Any}(:value => p.json_spec[:config][:group][:fill]) 
         end
 
