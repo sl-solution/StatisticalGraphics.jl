@@ -1,5 +1,5 @@
 
-function _write_html(vspec::Union{SGPlot, SGPanel})
+function _write_html(vspec::Union{SGPlot, SGPanel, SGGrid})
     out_html = tempname() * ".html"
     html_out = """
     <!DOCTYPE html>
@@ -24,7 +24,7 @@ function _write_html(vspec::Union{SGPlot, SGPanel})
     out_html
 end
 
-function _write_script(io::IO, vspec::Union{SGPlot, SGPanel})
+function _write_script(io::IO, vspec::Union{SGPlot, SGPanel, SGGrid})
     divid=string(rand(UInt128), base=16)
     write(io, 
     """
@@ -42,12 +42,12 @@ function _write_script(io::IO, vspec::Union{SGPlot, SGPanel})
 end
 
 
-function Base.display(::REPL.REPLDisplay, vspec::Union{SGPlot, SGPanel})
+function Base.display(::REPL.REPLDisplay, vspec::Union{SGPlot, SGPanel, SGGrid})
     tmppath = _write_html(vspec)
     launch_browser(tmppath) # Open the browser
 end
 
-Base.showable(::MIME"text/html", ::Union{SGPlot, SGPanel}) = isdefined(Main, :PlutoRunner)
-function Base.show(io::IO, ::MIME"text/html", vspec::Union{SGPlot, SGPanel})
+Base.showable(::MIME"text/html", ::Union{SGPlot, SGPanel, SGGrid}) = isdefined(Main, :PlutoRunner)
+function Base.show(io::IO, ::MIME"text/html", vspec::Union{SGPlot, SGPanel, SGGrid})
     _write_script(io, vspec)
 end

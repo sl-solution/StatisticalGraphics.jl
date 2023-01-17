@@ -26,6 +26,7 @@ module StatisticalGraphics
         Axis,
         Legend,
         sgplot,
+        sggrid,
         freq # freq is a function used in Bar plot
   
     abstract type SGMarks end
@@ -50,6 +51,7 @@ module StatisticalGraphics
     include("charts/pie.jl")
     include("sgplot.jl")
     include("sgpanel.jl")
+    include("sggrid.jl")
     include("show.jl")
     include("precompile/warmup.jl")
     if VERSION >= v"1.8"
