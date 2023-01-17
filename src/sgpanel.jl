@@ -214,6 +214,14 @@ function _sgpanel(ds, panelby::IMD.MultiColumnIndex, plts::Vector{<:SGMarks}; ma
     vspec[Symbol("\$schema")] = "https://vega.github.io/schema/vega/v5.json"
     prepend!(vspec[:data], sgplot_result[:data])
 
+    arg_max_width = argmax(panel_info[:, "$(sg_col_prefix)x"])
+    _width = panel_info[arg_max_width, "$(sg_col_prefix)x"] + panel_info[arg_max_width, "$(sg_col_prefix)width"]
+    arg_max_height = argmax(panel_info[:, "$(sg_col_prefix)y"])
+    _height = panel_info[arg_max_height, "$(sg_col_prefix)y"] + panel_info[arg_max_height, "$(sg_col_prefix)height"]
+
+    vspec[:width] = _width
+    vspec[:height] = _height
+
     SGPanel(vspec)
 end
 
