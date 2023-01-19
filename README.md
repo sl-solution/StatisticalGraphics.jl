@@ -528,7 +528,7 @@ end
 
 ![polygon_example](assets/polygon_example.svg)
 
-## the sggrid function
+## the `sggrid` function
 
 ```julia
 ds = Dataset(x=randn(100), y=randn(100));
