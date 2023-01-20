@@ -6,6 +6,12 @@ function warmup()
     sgplot(ds, Bar(x = :x, response=:y2, stat=IMD.mean))
     sgplot(ds, Bar(x=:x, response=:y2, stat=IMD.mean, group=:group, groupdisplay=:cluster))
     sgplot(ds, Histogram(y=:y))
+    sgplot(ds, Density(x=:y, group=:group, type=:kernel), nominal=:group)
+    sgplot(ds, Bubble(x=:y, y=:y2, size=:x, labelresponse=:x))
     sgplot(groupby(ds, 1), BoxPlot(y=r"y", category=:group, outliers = true), groupcolormodel = Dict(:scheme => "category20b"))
+    sgplot(groupby(ds, :group), Bar(y=:x, response=:y2, barcorner=20), groupcolormodel = Dict(:scheme => "category20b"), layout=:row)
+    p1 = sgplot(ds, Reg(x=:x, y=:y, degree=3))
+    p2 = sgplot(ds, Pie(category=:x, group=:group, sort=true), width=200)
+    sggrid([p1, p2], columns=1, center=true, align=:all)
     nothing
 end
