@@ -170,11 +170,11 @@ function addto_scale!(all_args, which_scale, ds, col)
 
     #TODO we should have option about how to handle missings
     if all_args.axes[which_scale].opts[:order] == :ascending
-        _temp_fun = x -> sort(filter(!ismissing, _fun_.(unique(_fun_, x))))
+        _temp_fun = x -> sort(_fun_.(unique(_fun_, x)))
     elseif all_args.axes[which_scale].opts[:order] == :descending
-        _temp_fun = x -> sort(filter(!ismissing, _fun_.(unique(_fun_, x))), rev=true)
+        _temp_fun = x -> sort( _fun_.(unique(_fun_, x)), rev=true)
     else
-        _temp_fun = x -> filter(!ismissing, _fun_.(unique(_fun_, x)))
+        _temp_fun = x -> _fun_.(unique(_fun_, x))
     end
 
     if all_args.uniscale_col === nothing
