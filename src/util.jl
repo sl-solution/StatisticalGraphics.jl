@@ -170,11 +170,17 @@ function addto_scale!(all_args, which_scale, ds, col)
 
     #TODO we should have option about how to handle missings
     if all_args.axes[which_scale].opts[:order] == :ascending
-        _temp_fun = x -> sort(_fun_.(unique(_fun_, x)))
+        _temp_fun_1 = x -> sort(_fun_.(unique(_fun_, x)))
     elseif all_args.axes[which_scale].opts[:order] == :descending
-        _temp_fun = x -> sort( _fun_.(unique(_fun_, x)), rev=true)
+        _temp_fun_1 = x -> sort(_fun_.(unique(_fun_, x)), rev=true)
     else
-        _temp_fun = x -> _fun_.(unique(_fun_, x))
+        _temp_fun_1 = x -> _fun_.(unique(_fun_, x))
+    end
+
+    if all_args.axes[which_scale].opts[:dropmissing]
+        _temp_fun = x -> filter(!ismissing, _temp_fun_1(x))
+    else
+        _temp_fun = _temp_fun_1
     end
 
     if all_args.uniscale_col === nothing
@@ -184,15 +190,15 @@ function addto_scale!(all_args, which_scale, ds, col)
             if all_args.axes[which_scale].opts[:range] === nothing
                 append!(all_args.scale_ds[which_scale], combine(ds, col => (x -> [IMD.minimum(_fun_, x), IMD.maximum(_fun_, x)]) => "$(sg_col_prefix)__scale_col__"), promote=true, cols=:union)
             else
-                _axis_limits=all_args.axes[which_scale].opts[:range]
-                (!(_axis_limits isa AbstractVector) || length(_axis_limits) != 2 ) && throw(ArgumentError("axis range limits must be a vector of min and max values of the axis domain"))
+                _axis_limits = all_args.axes[which_scale].opts[:range]
+                (!(_axis_limits isa AbstractVector) || length(_axis_limits) != 2) && throw(ArgumentError("axis range limits must be a vector of min and max values of the axis domain"))
                 append!(all_args.scale_ds[which_scale], combine(ds, col => (x -> _convert_values_for_js.([_axis_limits[1], _axis_limits[2]])) => "$(sg_col_prefix)__scale_col__"), promote=true, cols=:union)
             end
         end
     else
         # for shared axes we do not use gatheby to keep the order of axes based on Axis.opts[:order]
         if !(which_scale in all_args.independent_axes)
-             if all_args.scale_type[which_scale] in [:band, :point]
+            if all_args.scale_type[which_scale] in [:band, :point]
                 append!(all_args.scale_ds[which_scale], combine(ds, col => (_temp_fun) => "$(sg_col_prefix)__scale_col__"), promote=true, cols=:union)
             else
                 append!(all_args.scale_ds[which_scale], combine(ds, col => (x -> [IMD.minimum(_fun_, x), IMD.maximum(_fun_, x)]) => "$(sg_col_prefix)__scale_col__"), promote=true, cols=:union)
@@ -200,9 +206,9 @@ function addto_scale!(all_args, which_scale, ds, col)
         else
 
             if all_args.scale_type[which_scale] in [:band, :point]
-                append!(all_args.scale_ds[which_scale], combine(gatherby(ds, all_args.uniscale_col, mapformats = all_args.mapformats), col => (_temp_fun) => "$(sg_col_prefix)__scale_col__"), promote=true, cols=:union)
+                append!(all_args.scale_ds[which_scale], combine(gatherby(ds, all_args.uniscale_col, mapformats=all_args.mapformats), col => (_temp_fun) => "$(sg_col_prefix)__scale_col__"), promote=true, cols=:union)
             else
-                append!(all_args.scale_ds[which_scale], combine(gatherby(ds, all_args.uniscale_col, mapformats = all_args.mapformats), col => (x -> [IMD.minimum(_fun_, x), IMD.maximum(_fun_, x)]) => "$(sg_col_prefix)__scale_col__"), promote=true, cols=:union)
+                append!(all_args.scale_ds[which_scale], combine(gatherby(ds, all_args.uniscale_col, mapformats=all_args.mapformats), col => (x -> [IMD.minimum(_fun_, x), IMD.maximum(_fun_, x)]) => "$(sg_col_prefix)__scale_col__"), promote=true, cols=:union)
             end
         end
     end

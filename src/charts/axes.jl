@@ -9,6 +9,7 @@ AXES_DEFAULT = Dict{Symbol, Any}(:type => :linear,
 
                                  :reverse=>false,
                                  :order => :data, # we support :ascending, and :descending too
+                                 :dropmissing=>false, #for discrete axes drop missing from domain
                                  
                                  :offset => 1,
 
