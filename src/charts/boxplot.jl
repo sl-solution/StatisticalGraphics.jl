@@ -5,6 +5,7 @@ BOXPLOT_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0, :category => nothing, # x o
     :opacity => 1,
     :outlinethickness => 1,
     :boxwidth => 1, # can be between[0,1]
+    :boxcorner=>0,
     :filled => true,
     :fill => "null",
     :color => "#4682b4",
@@ -44,6 +45,11 @@ mutable struct BoxPlot <: SGMarks
         haskey(cp_BOXPLOT_DEFAULT, :group) && throw(ArgumentError("BoxPlot does not support the group keyword argument, pass category for creating box plot across different level of a column"))
         if (cp_BOXPLOT_DEFAULT[:x] == 0 && cp_BOXPLOT_DEFAULT[:y] == 0) || (cp_BOXPLOT_DEFAULT[:x] != 0 && cp_BOXPLOT_DEFAULT[:y] != 0)
             throw(ArgumentError("Box plot needs one of x or y keyword arguments"))
+        end
+        if !(cp_BOXPLOT_DEFAULT[:boxcorner] isa AbstractVector)
+            cp_BOXPLOT_DEFAULT[:boxcorner] = fill(cp_BOXPLOT_DEFAULT[:boxcorner], 4)
+        else
+            length(cp_BOXPLOT_DEFAULT[:boxcorner]) != 4 && throw(ArgumentError("the boxcorner option must be a single value or a vector of length four of values"))
         end
         new(cp_BOXPLOT_DEFAULT)
     end
@@ -107,12 +113,16 @@ function _push_boxplot_box!(vspec, plt, all_args, cols, new_ds; idx=1)
     s_spec[:clip] = something(opts[:clip], all_args.opts[:clip])
     s_spec_marks = Dict{Symbol,Any}()
     s_spec_marks[:type] = "rect"
-    s_spec_marks[:from] = Dict{Symbol, Any}(:data => "box_data_$idx")
+    s_spec_marks[:from] = Dict{Symbol,Any}(:data => "box_data_$idx")
     s_spec_marks[:encode] = Dict{Symbol,Any}()
     s_spec_marks[:encode][:enter] = Dict{Symbol,Any}()
-    s_spec_marks[:encode][:enter][:opacity] = Dict{Symbol, Any}(:value => opts[:opacity])
-    s_spec_marks[:encode][:enter][:stroke] = Dict{Symbol, Any}(:value => opts[:outlinecolor])
-    s_spec_marks[:encode][:enter][:strokeWidth] = Dict{Symbol, Any}(:value => opts[:outlinethickness])
+    s_spec_marks[:encode][:enter][:cornerRadiusTopLeft] = Dict{Symbol,Any}(:value => opts[:boxcorner][1])
+    s_spec_marks[:encode][:enter][:cornerRadiusTopRight] = Dict{Symbol,Any}(:value => opts[:boxcorner][2])
+    s_spec_marks[:encode][:enter][:cornerRadiusBottomLeft] = Dict{Symbol,Any}(:value => opts[:boxcorner][3])
+    s_spec_marks[:encode][:enter][:cornerRadiusBottomRight] = Dict{Symbol,Any}(:value => opts[:boxcorner][4])
+    s_spec_marks[:encode][:enter][:opacity] = Dict{Symbol,Any}(:value => opts[:opacity])
+    s_spec_marks[:encode][:enter][:stroke] = Dict{Symbol,Any}(:value => opts[:outlinecolor])
+    s_spec_marks[:encode][:enter][:strokeWidth] = Dict{Symbol,Any}(:value => opts[:outlinethickness])
     s_spec_marks[:encode][:enter][:fill] = Dict{Symbol,Any}()
 
     # extract the information about the box chart
@@ -184,8 +194,8 @@ function _push_boxplot_box!(vspec, plt, all_args, cols, new_ds; idx=1)
     s_spec_marks[:encode][:enter][_var_2_][:field] = "__box__vars__q1"
     s_spec_marks[:encode][:enter][Symbol(_var_2_, 2)][:field] = "__box__vars__q3"
     if opts[:tooltip]
-        s_spec_marks[:encode][:enter][:tooltip] = Dict{Symbol, Any}(:signal => "{min : datum['__box__vars__min'], q1 :  datum['__box__vars__q1']
-        , median : datum['__box__vars__med'], mean : datum['__box__vars__mean'], q3 : datum['__box__vars__q3'], max : datum['__box__vars__max']}")
+        s_spec_marks[:encode][:enter][:tooltip] = Dict{Symbol,Any}(:signal => "{min : datum['__box__vars__min'], q1 :  datum['__box__vars__q1']
+       , median : datum['__box__vars__med'], mean : datum['__box__vars__mean'], q3 : datum['__box__vars__q3'], max : datum['__box__vars__max']}")
     end
 
 
