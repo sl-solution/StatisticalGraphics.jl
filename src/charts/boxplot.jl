@@ -25,7 +25,8 @@ BOXPLOT_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0, :category => nothing, # x o
     :fencecolor=>:black,
     :meansymbol=>:diamond,
     :meansymbolsize=>40,
-    :outliercolor => :white,
+    :outliercolor => nothing,
+    :outlieroutlinecolor=>nothing,
     :outlierthickness=>1,
     :outliersymbolsize=>30,
     :outlierjitter=>0,
@@ -321,7 +322,7 @@ function _push_boxplot_outliers!(vspec, plt, all_args, cols, outlier_ds; idx=1)
     s_spec_marks[:encode][:enter] = Dict{Symbol,Any}()
     s_spec_marks[:encode][:enter][:shape] = Dict{Symbol, Any}(:value => opts[:outliersymbol])
     s_spec_marks[:encode][:enter][:opacity] = Dict{Symbol,Any}(:value => opts[:outlieropacity])
-    s_spec_marks[:encode][:enter][:stroke] = Dict{Symbol,Any}(:value => opts[:outliercolor])
+    s_spec_marks[:encode][:enter][:stroke] = Dict{Symbol,Any}(:value => something(opts[:outlieroutlinecolor], :white))
     s_spec_marks[:encode][:enter][:strokeWidth] = Dict{Symbol,Any}(:value => opts[:outlierthickness])
     s_spec_marks[:encode][:enter][:size] = Dict{Symbol,Any}(:value => opts[:outliersymbolsize])
     s_spec_marks[:encode][:enter][:fill] = Dict{Symbol,Any}()
@@ -391,8 +392,12 @@ function _push_boxplot_outliers!(vspec, plt, all_args, cols, outlier_ds; idx=1)
     s_spec[:from][:facet][:data] = "box_data_outlier_$idx"
     s_spec[:from][:facet][:groupby] = groupcol
     s_spec_marks[:from][:data] = "group_facet_source"
-    s_spec_marks[:encode][:enter][:fill][:scale] = "group_scale"
-    s_spec_marks[:encode][:enter][:fill][:field] = "__box__groups__variable__"
+    if opts[:outliercolor] !== nothing
+        s_spec_marks[:encode][:enter][:fill] = Dict{Symbol, Any}(:value => opts[:outliercolor])
+    else
+        s_spec_marks[:encode][:enter][:fill][:scale] = "group_scale"
+        s_spec_marks[:encode][:enter][:fill][:field] = "__box__groups__variable__"
+    end
 
     s_spec[:encode] = Dict{Symbol,Any}()
     s_spec[:encode][:enter] = Dict{Symbol,Any}()

@@ -5,14 +5,11 @@ BUBBLE_DEFAULT = Dict{Symbol, Any}(:x => 0, :y => 0, :size=>0,
                                     :opacity=>1,
                                     :opacityresponse=>nothing,
                                     :thickness=>1, # symbol outline thickness
-                                    :filled=>true,
-                                    :fill=>"null",
-                                    :fillcolor=> :white,
                                     :minsize=>nothing, #min and max size control the bubble size
                                     :maxsize=>nothing, 
                                    
-                               
-                                    :color=>"#4682b4",
+                                    :outlinecolor=>nothing,
+                                    :color=>nothing,
                                     :colorresponse => nothing,
                                     :colormodel=>:diverging,
 
@@ -101,7 +98,7 @@ function _push_plots!(vspec, plt::Bubble, all_args; idx=1)
 
     s_spec_marks[:encode][:enter][:fill] = Dict{Symbol,Any}()
     if opts[:colorresponse] === nothing
-        s_spec_marks[:encode][:enter][:fill][:value] = ifelse(opts[:filled], opts[:fillcolor], "transparent")
+        s_spec_marks[:encode][:enter][:fill][:value] = something(opts[:color], :white)
     else
         s_spec_marks[:encode][:enter][:fill][:scale] = "color_scale_$idx"
         s_spec_marks[:encode][:enter][:fill][:field] = opts[:colorresponse]
@@ -111,7 +108,7 @@ function _push_plots!(vspec, plt::Bubble, all_args; idx=1)
     s_spec_marks[:encode][:enter][:stroke] = Dict{Symbol,Any}()
     # group in all plots uses the same scale
     if opts[:group] === nothing
-        s_spec_marks[:encode][:enter][:stroke][:value] = opts[:color]
+        s_spec_marks[:encode][:enter][:stroke][:value] = something(opts[:outlinecolor], :steelblue)
     else
         s_spec_marks[:encode][:enter][:stroke][:scale] = "group_scale"
         s_spec_marks[:encode][:enter][:stroke][:field] = opts[:group]

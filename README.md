@@ -57,7 +57,7 @@ sgplot(
           Line(x=:date, y=:min, color="#4682b4", thickness=1),
           Line(x=:date, y=:max, color="#ff7f0e", thickness=0.5),
           Line(x=:date, y=:pressure, color="#2ca02c", y2axis=true, breaks=true),
-          Scatter(x=:date, y=:pressure, color="#2ca02c", size=10, y2axis=true)
+          Scatter(x=:date, y=:pressure, outlinecolor="#2ca02c", size=10, y2axis=true)
         ],
         xaxis=Axis(offset=10, type=:date, grid=true, griddash=[1, 1], title="Date"),
         yaxis=Axis(offset=10, grid=true, griddash=[1, 1], title="Temperature(°C)"),
@@ -474,7 +474,7 @@ nations = filereader("assets/nations.csv", emptycolname=true, quotechar='"')
            colorresponse=:region,
            colormodel=:category,
            size=:population,
-           color=:white,
+           outlinecolor=:white,
            labelresponse=:country,
            labelsize=8,
            labelcolor=:colorresponse,

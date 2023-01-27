@@ -5,15 +5,14 @@ SCATTER_DEFAULT = Dict{Symbol, Any}(:x => 0, :y => 0,
                                     :opacity=>1,
                                     :opacityresponse=>nothing,
                                     :thickness=>1, # symbol outline thickness
-                                    :filled=>true,
-                                    :fill=>"null",
-                                    :fillcolor=> :white,
+                               
+                                    :color=> nothing,
                                     :size=>50,
                                     :symbol=>"circle",
                                     :symbolresponse=>nothing,
                                     :angle=>0,
                                     :angleresponse=>nothing,
-                                    :color=>"#4682b4",
+                                    :outlinecolor=>nothing,
                                     :colorresponse => nothing,
                                     :colormodel=>:diverging,
                                     :legend => nothing , #user must give a name to this if further customisation is needed for the legend
@@ -101,7 +100,7 @@ function _push_plots!(vspec, plt::Scatter, all_args; idx=1)
     end
     s_spec_marks[:encode][:enter][:fill] = Dict{Symbol,Any}()
     if opts[:colorresponse] === nothing
-        s_spec_marks[:encode][:enter][:fill][:value] = ifelse(opts[:filled], opts[:fillcolor], "transparent")
+        s_spec_marks[:encode][:enter][:fill][:value] = something(opts[:color], :white)
     else
         s_spec_marks[:encode][:enter][:fill][:scale] = "color_scale_$idx"
         s_spec_marks[:encode][:enter][:fill][:field] = opts[:colorresponse]
@@ -119,7 +118,7 @@ function _push_plots!(vspec, plt::Scatter, all_args; idx=1)
     s_spec_marks[:encode][:enter][:stroke] = Dict{Symbol,Any}()
     # group in all plots uses the same scale
     if opts[:group] === nothing
-        s_spec_marks[:encode][:enter][:stroke][:value] = opts[:color]
+        s_spec_marks[:encode][:enter][:stroke][:value] = something(opts[:outlinecolor], :steelblue)
     else
         s_spec_marks[:encode][:enter][:stroke][:scale] = "group_scale"
         s_spec_marks[:encode][:enter][:stroke][:field] = opts[:group]
