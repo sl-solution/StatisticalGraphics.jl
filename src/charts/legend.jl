@@ -11,6 +11,8 @@ LEGEND_DEFAULT = Dict{Symbol, Any}(
                                  :columnspace=>1,
                                  :values=>nothing, # allow manually insert values
 
+                                 :limit=>nothing, # number of element to display in legend
+
                                  :font=>nothing,
                                  :italic=>nothing,
                                  :fontweight=>nothing,

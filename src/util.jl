@@ -354,6 +354,11 @@ function _build_legen!(out_leg, leg_opts, _symbol, _title, _id, all_args; opts..
     else
         out_leg[:symbolType] = leg_opts[:symbol]
     end
+
+    if leg_opts[:limit] !== nothing
+        out_leg[:symbolLimit] = leg_opts[:limit]
+    end
+
     if leg_opts[:orient] isa AbstractVector
         out_leg[:orient] = :none
         out_leg[:legendX] = leg_opts[:orient][1]
