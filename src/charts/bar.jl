@@ -57,7 +57,7 @@ function _push_plots!(vspec, plt::Bar, all_args; idx=1)
     _add_legends!(plt, all_args, idx)
     data_csv = tempname()
     filewriter(data_csv, new_ds, mapformats=all_args.mapformats, quotechar='"')
-    push!(vspec[:data], Dict{Symbol,Any}(:name => "bar_data_$idx", :values => read(data_csv, String), :format => Dict(:type => "csv", :delimiter => ",", :parse => :auto)))
+    push!(vspec[:data], Dict{Symbol,Any}(:name => "bar_data_$idx", :values => read(data_csv, String), :format => Dict(:type => "csv", :delimiter => ",", :parse => _write_parse_js(new_ds, all_args))))
 
     # # we add baseline to new_ds to make sure that domains calculation are adjusted
     # append!(new_ds, map(new_ds, x->plt.opts[:baseline], :__height__bar__, threads=false), promote = true)

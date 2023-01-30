@@ -45,17 +45,31 @@ SGPLOT_DEFAULT = Dict(:width => 600,
                       )
 
 function sgplot(ds::Union{AbstractDataset, IMD.GroupBy, IMD.GatherBy}, plts::Vector{<:SGMarks}; mapformats=true, nominal::Union{Nothing,IMD.ColumnIndex, IMD.MultiColumnIndex}=nothing, xaxis=Axis(), x2axis=Axis(), yaxis=Axis(), y2axis=Axis(), legend::Union{Bool, Legend, Vector{Legend}}=true, threads=nrow(ds) > 10^6, opts...)
-    if nominal === nothing
-        nominal = String[]
-        # if user does not pass `nominal` we add it.
-        for col in names(ds)
-            if eltype(parent(ds)[!,col]) <: Union{<:AbstractString, Missing} || IMD.DataAPI.refpool(parent(ds)[!, col]) !== nothing
-                push!(nominal, col)
-            end
-        end 
-    else
-        nominal = names(ds)[IMD.index(ds)[nominal]]
+    
+    nominal_tmp = String[]
+    if nominal !== nothing
+        if nominal isa IMD.ColumnIndex
+            nominal = [nominal]
+        end
+        _all_names = names(ds)[IMD.index(ds)[nominal]]
+        for col in _all_names
+            push!(nominal_tmp, col)
+        end
     end
+    nominal = copy(nominal_tmp)
+    for col in names(ds)
+        _f = identity
+        if mapformats
+            _f = getformat(ds, col)
+        end
+        # strings and pooled array are assumed to be nominal
+        # TODO user may want to use pa as a quantitative column, and we do not allow this here
+        if Core.Compiler.return_type(_f, Tuple{eltype(parent(ds)[!,col])}) <: Union{<:AbstractString, Missing} || IMD.DataAPI.refpool(parent(ds)[!, col]) !== nothing
+            push!(nominal, col)
+        end
+    end 
+    
+    unique!(nominal)
 
     if !(nominal isa AbstractVector)
         nominal = [nominal]
@@ -162,7 +176,7 @@ function _sgplot!(all_args)
         data_csv = tempname()
         filewriter(data_csv, ds[!, unique(referred_cols_in_ds)], mapformats=mapformats, quotechar='"')
         # use parse=:auto for letting vega guess the data type
-        main_data = Dict{Symbol,Any}(:name => "source_0", :values => read(data_csv, String), :format => Dict{Symbol,Any}(:type => "csv", :delimiter => ",", :parse => :auto))
+        main_data = Dict{Symbol,Any}(:name => "source_0", :values => read(data_csv, String), :format => Dict{Symbol,Any}(:type => "csv", :delimiter => ",", :parse => _write_parse_js(ds[!, unique(referred_cols_in_ds)], all_args)))
 
         prepend!(vspec[:data], [main_data])
 

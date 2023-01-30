@@ -144,6 +144,33 @@ _convert_values_for_js(x::Union{Date, DateTime}) = datetime2unix(DateTime(x)) * 
 _convert_values_for_js(x::Bool) = x ? 1 : 0 # filewrite writes bools as 0/1
 _convert_values_for_js(x) = x
 
+# functions for parsing values in JS
+function _parse_type(f, x)
+    T = eltype(x)
+    CT = Core.Compiler.return_type(f, Tuple{T})
+    if CT <: Union{IMD.INTEGERS, IMD.FLOATS, Bool, Missing}
+        return "number"
+    elseif CT <: Union{Missing, Date}
+        return "utc:'%Y-%m-%d'"
+    elseif CT <: Union{Missing, DateTime}
+        return "utc:'%Y-%m-%dT%H:%M:%S'"
+    else
+        return "string"
+    end
+end
+function _write_parse_js(ds, all_args)
+    _all_names = names(ds)
+    parse_dict = Dict{Symbol, Any}()
+    for col in _all_names
+        _f = identity
+        if all_args.mapformats
+            _f = getformat(ds, col)
+        end
+        parse_dict[Symbol(col)] = _parse_type(_f, ds[!, col])
+    end
+    parse_dict
+end
+
 function addto_scale!(all_args, which_scale, ds, col)
     if all_args.scale_type[which_scale] === nothing
         if col in all_args.nominal

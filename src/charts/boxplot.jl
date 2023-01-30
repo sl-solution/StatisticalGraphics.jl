@@ -90,13 +90,14 @@ function _push_plots!(vspec, plt::BoxPlot, all_args; idx=1)
     _add_legends!(plt, all_args, idx)
     data_csv = tempname()
     filewriter(data_csv, new_ds, mapformats=all_args.mapformats, quotechar='"')
-    push!(vspec[:data], Dict{Symbol,Any}(:name => "box_data_$idx", :values => read(data_csv, String), :format => Dict(:type => "csv", :delimiter => ",", :parse => :auto)))
+    push!(vspec[:data], Dict{Symbol,Any}(:name => "box_data_$idx", :values => read(data_csv, String), :format => Dict(:type => "csv", :delimiter => ",", :parse => _write_parse_js(new_ds, all_args))))
 
     if plt.opts[:outliers] # show outliers
         data_csv = tempname()
         # flatten outliers and put them in vspec
-        filewriter(data_csv, flatten(outlier_ds, "__box__vars__outliers__"), mapformats=all_args.mapformats, quotechar='"')
-        push!(vspec[:data], Dict{Symbol,Any}(:name => "box_data_outlier_$idx", :values => read(data_csv, String), :format => Dict(:type => "csv", :delimiter => ",", :parse => :auto)))
+        _tm_ds = flatten(outlier_ds, "__box__vars__outliers__")
+        filewriter(data_csv, _tm_ds, mapformats=all_args.mapformats, quotechar='"')
+        push!(vspec[:data], Dict{Symbol,Any}(:name => "box_data_outlier_$idx", :values => read(data_csv, String), :format => Dict(:type => "csv", :delimiter => ",", :parse => _write_parse_js(_tm_ds, all_args))))
     end
 
     # now we push every component of the box plot

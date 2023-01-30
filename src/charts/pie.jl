@@ -79,7 +79,7 @@ function _push_plots!(vspec, plt::Pie, all_args; idx=1)
     _add_legends!(plt, all_args, idx)
     data_csv = tempname()
     filewriter(data_csv, new_ds, mapformats=all_args.mapformats, quotechar='"')
-    push!(vspec[:data], Dict{Symbol,Any}(:name => "pie_data_$idx", :values => read(data_csv, String), :format => Dict(:type => "csv", :delimiter => ",", :parse => :auto)))
+    push!(vspec[:data], Dict{Symbol,Any}(:name => "pie_data_$idx", :values => read(data_csv, String), :format => Dict(:type => "csv", :delimiter => ",", :parse => _write_parse_js(new_ds, all_args))))
 
 
     opts = plt.opts
@@ -129,7 +129,7 @@ function _push_plots!(vspec, plt::Pie, all_args; idx=1)
         s_spec_marks[:from] = Dict(:data => "pie_data_$idx")
         s_spec_marks[:encode] = Dict{Symbol,Any}()
         s_spec_marks[:encode][:enter] = Dict{Symbol,Any}()
-        s_spec_marks[:encode][:enter][:opacity] = Dict{Symbol,Any}(:value => opts[:opacity])
+        # s_spec_marks[:encode][:enter][:opacity] = Dict{Symbol,Any}(:value => opts[:opacity])
 
         s_spec_marks[:encode][:enter][:x] = Dict{Symbol,Any}(:signal => "width / 2")
         s_spec_marks[:encode][:enter][:y] = Dict{Symbol,Any}(:signal => "height / 2")
