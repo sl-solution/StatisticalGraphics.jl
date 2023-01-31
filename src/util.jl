@@ -148,7 +148,7 @@ _convert_values_for_js(x) = x
 function _parse_type(f, x)
     T = eltype(x)
     CT = Core.Compiler.return_type(f, Tuple{T})
-    if CT <: Union{IMD.INTEGERS, IMD.FLOATS, Bool, Missing}
+    if CT <: Union{Real, Bool, Missing}
         return "number"
     elseif CT <: Union{Missing, Date}
         return "utc:'%Y-%m-%d'"
