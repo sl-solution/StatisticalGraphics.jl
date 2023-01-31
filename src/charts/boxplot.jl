@@ -63,7 +63,7 @@ end
 
 function _box_plot_fun(x, outliers; olf = 1.5, fun = identity)
     y = collect(fun(_val_) for _val_ in skipmissing(x))
-    isempty(y) && throw(ArgumentError("the input vector is empty"))
+    isempty(y) && return (missing, missing, missing, missing, missing, missing, missing, missing, Any[])#throw(ArgumentError("the input vector is empty"))
     if outliers
         q1, med, q3 = quantile(y, [0.25, 0.5, 0.75])
         mu = IMD.mean(y)
@@ -124,7 +124,7 @@ function _push_boxplot_box!(vspec, plt, all_args, cols, new_ds; idx=1)
     s_spec_marks[:encode][:enter][:cornerRadiusBottomRight] = Dict{Symbol,Any}(:value => opts[:boxcorner][4])
     s_spec_marks[:encode][:enter][:opacity] = Dict{Symbol,Any}(:value => opts[:opacity])
     s_spec_marks[:encode][:enter][:stroke] = Dict{Symbol,Any}(:value => opts[:outlinecolor])
-    s_spec_marks[:encode][:enter][:strokeWidth] = Dict{Symbol,Any}(:value => opts[:outlinethickness])
+    s_spec_marks[:encode][:enter][:strokeWidth] = Dict{Symbol,Any}(:signal => "isValid(datum.__box__vars__q1) ? $(opts[:outlinethickness]) : 0")
     s_spec_marks[:encode][:enter][:fill] = Dict{Symbol,Any}()
 
     # extract the information about the box chart
@@ -245,7 +245,7 @@ function _push_boxplot_box!(vspec, plt, all_args, cols, new_ds; idx=1)
     delete!(s_box_plot_med[:encode][:enter], Symbol(_var_2_, 2))
     s_box_plot_med[:type] = "rule"
     s_box_plot_med[:encode][:enter][:stroke][:value] = opts[:mediancolor]
-    s_box_plot_med[:encode][:enter][:strokeWidth][:value] = opts[:medianthickness]
+    s_box_plot_med[:encode][:enter][:strokeWidth][:signal] = "isValid(datum.__box__vars__q1) ? $(opts[:medianthickness]) : 0"
     s_box_plot_med[:encode][:enter][_var_2_][:field] = "__box__vars__med"
     s_box_plot_med[:encode][:enter][Symbol(_var_, 2)] = deepcopy(s_box_plot_med[:encode][:enter][_var_])
     median_pos = "bandwidth('$(s_box_plot_med[:encode][:enter][_var_][:scale])')*$(opts[:boxwidth]/2)"
@@ -262,7 +262,7 @@ function _push_boxplot_box!(vspec, plt, all_args, cols, new_ds; idx=1)
     s_box_plot_mean[:encode][:enter][_var_2_][:field] = "__box__vars__mean"
     s_box_plot_mean[:encode][:enter][_var_][:offset] = Dict{Symbol,Any}(:signal => "bandwidth('$(s_box_plot_mean[:encode][:enter][_var_][:scale])')*$(opts[:boxwidth]/2)")
     s_box_plot_mean[:encode][:enter][:shape] = Dict{Symbol,Any}(:value => opts[:meansymbol])
-    s_box_plot_mean[:encode][:enter][:size] = Dict{Symbol,Any}(:value => opts[:meansymbolsize])
+    s_box_plot_mean[:encode][:enter][:size] = Dict{Symbol,Any}(:signal => "isValid(datum.__box__vars__q1) ? $(opts[:meansymbolsize]) : 0")
 
     push!(s_spec[:marks], s_box_plot_mean)
 
@@ -274,7 +274,7 @@ function _push_boxplot_box!(vspec, plt, all_args, cols, new_ds; idx=1)
     s_box_plot_whisker[:encode][:enter][_var_][:offset] = Dict{Symbol,Any}(:signal => "bandwidth('$(s_box_plot_whisker[:encode][:enter][_var_][:scale])')*$(opts[:boxwidth]/2)")
     s_box_plot_whisker[:encode][:enter][:stroke][:value] = opts[:whiskercolor]
     s_box_plot_whisker[:encode][:enter][:strokeDash] = Dict{Symbol,Any}(:value => opts[:whiskerdash])
-    s_box_plot_whisker[:encode][:enter][:strokeWidth] = Dict{Symbol,Any}(:value => opts[:whiskerthickness])
+    s_box_plot_whisker[:encode][:enter][:strokeWidth] = Dict{Symbol,Any}(:signal => "isValid(datum.__box__vars__q1) ? $(opts[:whiskerthickness]) : 0")
 
     push!(s_spec[:marks], s_box_plot_whisker)
 
