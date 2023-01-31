@@ -3,8 +3,8 @@
 function _histogram_counts(x::AbstractVector{Union{T,Missing}}, k, _f) where {T<:Real}
     max_val = IMD.maximum(_f, x)
     min_val = IMD.minimum(_f, x)
-    any(isequal.(max_val, (missing, NaN, Inf, -Inf))) && throw(ArgumentError("x shouldn't be all missing or contains any NaN or infinite value"))
-    any(isequal.(min_val, (missing, NaN, Inf, -Inf))) && throw(ArgumentError("x shouldn't be all missing or contains any NaN or infinite value"))
+    any(isequal.(max_val, (missing, NaN, Inf, -Inf))) && throw(ArgumentError("input column cannot be all missing or contains any NaN or infinite value"))
+    any(isequal.(min_val, (missing, NaN, Inf, -Inf))) && throw(ArgumentError("input column cannot be all missing or contains any NaN or infinite value"))
     isequal(max_val, min_val) && throw(ArgumentError("at least two different values are needed"))
     min_val_act = min(min_val, max_val)
     max_val_act = max(min_val, max_val)
@@ -41,7 +41,8 @@ end
 
 function _histogram(x::AbstractVector{Union{T, Missing}}, method::Symbol, _f) where T <: Real
     if method in (:Sturges, :sturges)
-        k = max(2, Int(ceil(log2(IMD.n(x)))+1))
+        _n_ = IMD.n(x)
+        _n_ == 0 ? k = 2 : k = max(2, Int(ceil(log2(_n_))+1))
     else
         throw(ArgumentError("method $method is unknown"))
     end
