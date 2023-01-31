@@ -30,6 +30,9 @@ PIE_DEFAULT = Dict{Symbol,Any}(:category => nothing,
     :labellimit=>nothing,
     :labelalign=>:center,
     :labelbaseline=>:middle,
+    :labelopacity => 1,
+    :labelthreshold => 0.0,
+    :labelrotate=>false, # rotate labels 90 degree, when is true
 
    
     :outlinecolor => :white,
@@ -58,6 +61,11 @@ mutable struct Pie <: SGMarks
     end
 end
 
+_rad2deg(x) = rad2deg(x)
+_rad2deg(::Missing) = missing
+_deg2rad(x) = deg2rad(x)
+_deg2rad(::Missing) = missing
+
 function _pie_transform(x, startangle, endangle)::Vector{Tuple}
     total_angle = abs(endangle - startangle)
     xprop = x ./ IMD.sum(x)
@@ -66,7 +74,7 @@ function _pie_transform(x, startangle, endangle)::Vector{Tuple}
     _startangles_ = [0.0; _endangles_[1:end-1]]
     _endangles_ .+= startangle
     _startangles_ .+= startangle
-    tuple.(_startangles_, _endangles_, x ./ IMD.sum(x), rad2deg.((_endangles_ .+ _startangles_) ./ 2))
+    tuple.(_startangles_, _endangles_, x ./ IMD.sum(x), _rad2deg.((_endangles_ .+ _startangles_) ./ 2))
 end
 
 # Pie produces a simple Pie Chart
@@ -151,9 +159,15 @@ function _push_plots!(vspec, plt::Pie, all_args; idx=1)
         s_spec_marks[:encode][:enter][:fontWeight] = Dict{Symbol,Any}(:value => something(opts[:labelfontweight], all_args.opts[:fontweight]))
         s_spec_marks[:encode][:enter][:fontStyle] = Dict{Symbol,Any}(:value => something(opts[:labelitalic], all_args.opts[:italic]) ? "italic" : "normal")
         s_spec_marks[:encode][:enter][:baseline] = Dict{Symbol,Any}(:value => "$(opts[:labelbaseline])")
+        s_spec_marks[:encode][:enter][:opacity] = Dict{Symbol, Any}(:signal => "isValid(datum['$(sg_col_prefix)__pie__val__']) ? datum['$(sg_col_prefix)pie__percentage__'] < $(opts[:labelthreshold]) ? 0 : $(opts[:labelopacity]) : 0")
 
         if opts[:labelangle] === nothing
-            s_spec_marks[:encode][:enter][:angle] = Dict{Symbol,Any}(:field => "$(sg_col_prefix)pie__textangle__")
+            if opts[:labelrotate]
+                _txt_ang_ = "datum['$(sg_col_prefix)pie__textangle__']"
+                s_spec_marks[:encode][:enter][:angle] = Dict{Symbol,Any}(:signal => "$(_txt_ang_) > 180 ? $(_txt_ang_) + 90 : $(_txt_ang_) - 90")
+            else
+                s_spec_marks[:encode][:enter][:angle] = Dict{Symbol,Any}(:signal => "datum['$(sg_col_prefix)pie__textangle__']")
+            end
         else
             s_spec_marks[:encode][:enter][:angle] = Dict{Symbol,Any}(:value => opts[:labelangle])
         end
@@ -240,7 +254,7 @@ function _check_and_normalize!(plt::Pie, all_args)
     if opts[:sort]
         sort!(pie_ds, "$(sg_col_prefix)__pie__val__", threads=false)
     end
-    modify!(gatherby(pie_ds, _extra_col_for_panel_names_, mapformats=all_args.mapformats, threads=false), "$(sg_col_prefix)__pie__val__" =>byrow(identity)=>"$(sg_col_prefix)__pie__val__", "$(sg_col_prefix)__pie__val__" => (x->_pie_transform(x, deg2rad(opts[:startangle]), deg2rad(opts[:endangle])))=> "$(sg_col_prefix)pie__info__", "$(sg_col_prefix)pie__info__"=>splitter=>["$(sg_col_prefix)pie__startangle__","$(sg_col_prefix)pie__endangle__", "$(sg_col_prefix)pie__percentage__", "$(sg_col_prefix)pie__textangle__"])
+    modify!(gatherby(pie_ds, _extra_col_for_panel_names_, mapformats=all_args.mapformats, threads=false), "$(sg_col_prefix)__pie__val__" =>byrow(identity)=>"$(sg_col_prefix)__pie__val__", "$(sg_col_prefix)__pie__val__" => (x->_pie_transform(x, _deg2rad(opts[:startangle]), _deg2rad(opts[:endangle])))=> "$(sg_col_prefix)pie__info__", "$(sg_col_prefix)pie__info__"=>splitter=>["$(sg_col_prefix)pie__startangle__","$(sg_col_prefix)pie__endangle__", "$(sg_col_prefix)pie__percentage__", "$(sg_col_prefix)pie__textangle__"])
     select!(pie_ds, Not("$(sg_col_prefix)pie__info__"))
 
     _w_ = opts[:labelpos]
