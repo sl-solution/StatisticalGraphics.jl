@@ -10,8 +10,8 @@ SGPANEL_DEFAULT = Dict(:layout=>:panel, # it can be :panel, :lattice - panel sho
         :rows=>nothing, # number of rows
         :linkaxis=>:both, # how to resolve the row and column axes' scales - :both, :x, :y
         :font=>"sans-serif",
-        :width=>400,
-        :height=>400,
+        :width=>300,
+        :height=>200,
         :stepsize=>nothing,
         :panelborder => true,
         :panelbordercolor=>"gray",
