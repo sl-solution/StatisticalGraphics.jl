@@ -63,6 +63,7 @@ DENSITY_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0, :group => nothing,
     :weights => :gaussian,
     :bw => nothing, # automatically calculate
     :scale => :pdf, # user can pass any function to this option, the function must be in the form of fun(density; midpoints, npoints, samplesize, binwidth) , for :pdf the function is defined as f(x; args...) = x, for :count we compute the expected counts, f(x; args...) = x .* binwidth .* npoints , :cdf (x; binwidth, args...) -> cumsum(x .* binwidth)
+    :baseline => 0.0,
 
     :opacity => 1,
     :fillopacity=>0.5,
@@ -209,7 +210,7 @@ function _push_plots!(vspec, plt::Density, all_args; idx=1)
 
     s_spec_marks[:encode][:enter][_var_][:field] = "$(sg_col_prefix)midpoint__density"
     s_spec_marks[:encode][:enter][_var_2_][:field] = "$(sg_col_prefix)height__density"
-    s_spec_marks[:encode][:enter][Symbol(_var_2_, 2)][:value] = 0.0
+    s_spec_marks[:encode][:enter][Symbol(_var_2_, 2)][:value] = opts[:baseline]
 
 
     s_spec[:marks] = [s_spec_marks]
