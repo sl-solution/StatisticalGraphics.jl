@@ -330,7 +330,7 @@ function _label_for_points(source, opts, all_args; idx=1)
     s_mark_transform = Dict{Symbol,Any}()
     s_mark_transform[:type] = "label"
     s_mark_transform[:avoidMarks] = [source]
-    s_mark_transform[:size] = Dict{Symbol,Any}(:signal => "[$(all_args.opts[:width]), $(all_args.opts[:height])]")
+    s_mark_transform[:size] = Dict{Symbol,Any}(:signal => "[width, height]")
     s_mark_transform[:anchor] = opts[:labelanchor]
     s_mark_transform[:method] = opts[:labelalgorithm]
     push!(s_mark[:transform], s_mark_transform)
