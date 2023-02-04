@@ -1,6 +1,6 @@
 # StatisticalGraphics
 
-The motivation of the `StatisticalGraphics` package is to develop a powerful, yet easy-to-use solution for creating statistical graphics. 
+The motivation behind the `StatisticalGraphics` package is the desire to develop a powerful, yet easy-to-use solution for creating statistical graphics in Julia. 
 The package uses [`vega`](https://vega.github.io/vega/) (see also [D3](https://d3js.org/)) for producing the final outputs.
 
 ![siteexamples](assets/site.png)
