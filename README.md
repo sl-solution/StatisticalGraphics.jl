@@ -101,7 +101,7 @@ sgplot(
             [
               Violin(x=i, category=5, color=:white),
               BoxPlot(x=i, category=5, boxwidth=0.1, whiskerdash=[0]),
-              Scatter(y=5, x=i, jitter=[0,20], color=c[i], outlinecolor=:white, opacity=0.5)
+              Scatter(x=i, y=5, jitter=[0,20], color=colors[i], outlinecolor=:white, opacity=0.5)
             ]
             for i in 1:4
           ]
