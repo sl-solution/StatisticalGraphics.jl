@@ -17,6 +17,7 @@ module StatisticalGraphics
         Heatmap,
         Bar,
         BoxPlot,
+        Violin,
         RefLine,
         TextPlot,
         Bubble,
@@ -43,6 +44,7 @@ module StatisticalGraphics
     include("charts/density.jl")
     include("charts/bar.jl")
     include("charts/boxplot.jl")
+    include("charts/violin.jl")
     include("charts/refline.jl")
     include("charts/textplot.jl")
     include("charts/bubble.jl")
