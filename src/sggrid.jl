@@ -7,7 +7,8 @@ SGGRID_DEFAULT = Dict{Symbol, Any}(:align => :none, # :all, :each, :none
     :center=>[false, false], # for row-column
     :bounds=>:full, # :full/:flush see vega docs
     :rowspace=>0,
-    :columnspace=>0
+    :columnspace=>0,
+    :bordercolor=>:transparent
 )
 
 
@@ -41,6 +42,7 @@ function sggrid(sgp::Vector{T}; opts...) where T <: SGPlots
         spec[:type] = "group"
         spec[:encode] = Dict{Symbol, Any}()
         spec[:encode][:update] = Dict{Symbol, Any}()
+        spec[:encode][:update][:stroke] = Dict(:value=>global_opts[:bordercolor])
         for mk in mks
             if haskey(p.json_spec, mk)
                 spec[mk] = p.json_spec[mk]
