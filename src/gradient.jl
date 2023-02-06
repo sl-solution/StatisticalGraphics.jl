@@ -17,4 +17,4 @@ function gradient(args...; direction = [0,1,0,0])
     res
 end
 
-gradient() = gradient(:steelblue, :darkred)
+gradient(;direction=[0,1,0,0]) = gradient(:steelblue, :darkred; direction = direction)
