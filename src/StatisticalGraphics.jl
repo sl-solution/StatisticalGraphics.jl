@@ -28,12 +28,14 @@ module StatisticalGraphics
         Legend,
         sgplot,
         sggrid,
-        freq # freq is a function used in Bar plot
+        freq, # freq is a function used in Bar plot
+        gradient
   
     abstract type SGMarks end
 
     include("util.jl")
     include("util_reg.jl")
+    include("gradient.jl")
     include("charts/axes.jl")
     include("charts/legend.jl")
     include("charts/scatter.jl")
