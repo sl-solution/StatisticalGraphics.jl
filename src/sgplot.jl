@@ -38,7 +38,7 @@ SGPLOT_DEFAULT = Dict(:width => 600,
                       :groupcolormodel => "category",
                       
                       :clip => true,
-                      :backcolor => :transparent, # the background color for the whole graph area
+                      :backcolor => :white, # the background color for the whole graph area
                       :wallcolor => :transparent, # the background of the plot area / or panel area
 
 

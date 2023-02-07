@@ -20,7 +20,7 @@ SGPANEL_DEFAULT = Dict(:layout=>:panel, # it can be :panel, :lattice - panel sho
         :columnspace => 30,
         :groupcolormodel => "category", #default color model for groupspace
 
-        :backcolor => :transparent, # the background color for the whole graph area
+        :backcolor => :white, # the background color for the whole graph area
         :wallcolor => :transparent, # the background of the plot area / or panel area
 
 

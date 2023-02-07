@@ -82,9 +82,9 @@ Base.showable(::MIME"text/html", ::Union{SGPlot, SGPanel, SGGrid}) = isdefined(M
 #     show(io, Vega.VGSpec(vspec.json_spec))
 # end
 
-function Base.show(io::IO, m::MIME"text/plain", v::Union{SGPlot, SGPanel, SGGrid})
-    show(io, m, v)
-end
+# function Base.show(io::IO, m::MIME"text/plain", v::Union{SGPlot, SGPanel, SGGrid})
+#     show(io, m, v)
+# end
 function Base.show(io::IO,  v::Union{SGPlot, SGPanel, SGGrid})
     v.json_spec
 end
