@@ -31,6 +31,7 @@ end
 #scale should be a function with one positional argument (density) and can accept the following keyword arguments: midpoints, npoints, samplesize, binwidth
 function fit_density(x, type, kernel, bw, f, npoints, scale)::Vector{Tuple}
     _sample_size = count(y->!ismissing(f(y)), x)
+    _sample_size < 2 && return fill((missing, missing), npoints)
     if type==:normal 
         mu = IMD.mean(f, x)
         sigma = IMD.std(f, x)
@@ -46,7 +47,6 @@ function fit_density(x, type, kernel, bw, f, npoints, scale)::Vector{Tuple}
         bw = something(bw, 1.06*IMD.std(f, x)*_sample_size^(-0.2))
         kernel_type = kernel == :gaussian ? normal_kernel : kernel == :epanechnikov ? epan_kernel : kernel == :triangular ? triangular_kernel : throw(ArgumentError("only :gaussian, :epanechnikov and :triangular kernels are supported"))
         res = _compute_kde(x, npoints; f=f, kernel = kernel_type, bw=bw)
-      
         tuple.(res[1],  scale(res[2]; midpoints=res[1], npoints=npoints, samplesize=_sample_size, binwidth = res[1][2]-res[1][1]))
     else
         throw(ArgumentError("type can be either :normal or :kernel"))

@@ -11,6 +11,7 @@ VIOLIN_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0, :category => nothing, # x or
     :bw => nothing,
     :npoints=>100, # the grid number of points
     :interpolate => :linear,
+    :scale => (x; args...) -> x, # see Density for more information
 
     :fillopacity=>0.5,
     :opacity=>1,
@@ -20,8 +21,8 @@ VIOLIN_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0, :category => nothing, # x or
 
 
     :color => nothing,
-    :space => 0.1, # the space between box 
-    :groupspace => 0.05, # the space between boxes inside each group 
+    :space => 0.1, # the space between violins 
+    :groupspace => 0.05, # the space between violins inside each group 
     :categoryorder => :ascending, # :data, :ascending, :descending
   
     :legend => nothing,
@@ -148,7 +149,7 @@ function _push_violin!(vspec, plt, all_args, new_ds, max_density; idx=1)
 
     s_spec_marks[:signals] = [Dict{Symbol, Any}(:name=>_orient_v, :update => "bandwidth('pos_with_in_group')")]
 
-    s_spec_marks[:scales] = [Dict{Symbol, Any}(:name=>"violin_$idx", :range=>_orient_v, :domain => [-max_density, max_density], :type=>:linear)]
+    s_spec_marks[:scales] = [Dict{Symbol, Any}(:name=>"violin_$idx", :range=>_orient_v, :domain => sort([-max_density, max_density]), :type=>:linear)]
 
     s_spec_marks[:encode] = Dict{Symbol, Any}()
     s_spec_marks[:encode][:enter] = Dict{Symbol, Any}()
@@ -194,12 +195,17 @@ function _push_violin!(vspec, plt, all_args, new_ds, max_density; idx=1)
 
     # s_violin[:encode][:enter][_var_] = Dict{Symbol, Any}(:signal => "datum['$(sg_col_prefix)height__density__']", :scale => "violin_$idx")
 
-    if opts[:side] in (:right, :top, :both)
+    if opts[:side] == :both 
+        s_violin[:encode][:enter][_var_] = Dict{Symbol, Any}(:signal => "datum['$(sg_col_prefix)height__density__']", :scale => "violin_$idx")
+        s_violin[:encode][:enter][Symbol(_var_,2)] = Dict{Symbol, Any}(:signal => "-datum['$(sg_col_prefix)height__density__']", :scale => "violin_$idx")
+        push!(s_spec_marks[:marks], s_violin)
+    end
+    if opts[:side] in (:right, :top)
         s_violin_l = deepcopy(s_violin)
         s_violin_l[:encode][:enter][_var_] = Dict{Symbol, Any}(:signal => "datum['$(sg_col_prefix)height__density__']", :scale => "violin_$idx")
         push!(s_spec_marks[:marks], s_violin_l)
     end
-    if opts[:side] in (:left, :bottom, :both)
+    if opts[:side] in (:left, :bottom)
         s_violin_r = deepcopy(s_violin)
         s_violin_r[:encode][:enter][_var_] = Dict{Symbol, Any}(:signal => "-datum['$(sg_col_prefix)height__density__']", :scale => "violin_$idx")
         push!(s_spec_marks[:marks], s_violin_r)
@@ -255,13 +261,12 @@ function _check_and_normalize!(plt::Violin, all_args)
     else
         g_col = _extra_col_for_panel_names_
     end
-    
-    violin_ds = combine(gatherby(ds, g_col, mapformats=all_args.mapformats, threads=threads), cols .=> [x -> fit_density(x, :kernel, opts[:weights], opts[:bw], __f, opts[:npoints], (x; args...)->x) for __f in _f] .=> ["$(sg_col_prefix)density_info__$col" for col in cols])
+    violin_ds = combine(gatherby(ds, g_col, mapformats=all_args.mapformats, threads=threads), cols .=> [x -> fit_density(x, :kernel, opts[:weights], opts[:bw], __f, opts[:npoints], opts[:scale]) for __f in _f] .=> ["$(sg_col_prefix)density_info__$col" for col in cols], threads = threads)
     modify!(violin_ds, ["$(sg_col_prefix)density_info__$col" for col in cols] .=> splitter .=> [["$(sg_col_prefix)midpoint__density__$col", "$(sg_col_prefix)height__density__$col"] for col in cols])
 
     select!(violin_ds, Not(["$(sg_col_prefix)density_info__$col" for col in cols]))
     # transpose data to put all analysis columns in a single group - the name for the new group column will be "__violin__groups__variable__"
-    violin_ds = transpose(gatherby(violin_ds, g_col, mapformats=all_args.mapformats, threads=false, eachrow=true), (["$(sg_col_prefix)midpoint__density__$col" for col in cols], ["$(sg_col_prefix)height__density__$col" for col in cols]), variable_name = ["__violin__groups__variable__", nothing], renamerowid = x -> replace(x, "$(sg_col_prefix)midpoint__density__"=>""), renamecolid = (x,y)->contains(y[1], "$(sg_col_prefix)midpoint__density__") ? "$(sg_col_prefix)midpoint__density__" : "$(sg_col_prefix)height__density__")
+    violin_ds = transpose(gatherby(violin_ds, g_col, mapformats=all_args.mapformats, threads=false, eachrow=true), (["$(sg_col_prefix)midpoint__density__$col" for col in cols], ["$(sg_col_prefix)height__density__$col" for col in cols]), variable_name = ["__violin__groups__variable__", nothing], renamerowid = x -> replace(x, "$(sg_col_prefix)midpoint__density__"=>""), renamecolid = (x,y)->contains(y[1], "$(sg_col_prefix)midpoint__density__") ? "$(sg_col_prefix)midpoint__density__" : "$(sg_col_prefix)height__density__", threads = false)
    
    
     if opts[:category] === nothing
