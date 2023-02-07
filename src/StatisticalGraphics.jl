@@ -3,6 +3,7 @@ module StatisticalGraphics
     using DLMReader
     using JSON
     using REPL # display plot
+    using Vega # showing plots
 
     const SG = StatisticalGraphics
     export

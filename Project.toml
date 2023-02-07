@@ -9,12 +9,14 @@ Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 DLMReader = "e1d33f9a-7203-49d2-8e1a-e3c4f85197b8"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 REPL = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
+Vega = "239c3e63-733f-47ad-beb7-a12fde22c578"
 
 [compat]
 InMemoryDatasets = "0.7"
 Distributions = "0.16, 0.17, 0.18, 0.19, 0.20, 0.21, 0.22, 0.23, 0.24, 0.25"
 DLMReader = "0.4"
 JSON = "0.19, 0.20, 0.21"
+Vega = "2"
 julia = "1.6"
 
 [extras]
