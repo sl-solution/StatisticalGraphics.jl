@@ -19,7 +19,7 @@ makedocs(
     pages = Any[
         "Introduction" => "index.md",
        
-        "Gallery" => "man/gallery.md"
+        "Examples" => "man/scatter.md"
         
         # "API" => Any[
         #     "Functions" => "lib/functions.md"
