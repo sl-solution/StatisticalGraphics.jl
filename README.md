@@ -1,3 +1,6 @@
+[![](https://img.shields.io/badge/docs-dev-blue.svg)](https://sl-solution.github.io/StatisticalGraphics.jl/dev)
+
+
 # StatisticalGraphics
 
 The motivation behind the `StatisticalGraphics` package is the desire to develop a powerful, yet easy-to-use solution for creating statistical graphics in Julia. 
