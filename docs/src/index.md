@@ -10,7 +10,7 @@ This resource aims to teach you everything you need to know to get up and runnin
 
 ```@contents
 Pages = [
-          "man/gallery.md"]
+          "man/scatter.md"]
 Depth = 2
 ```
 
