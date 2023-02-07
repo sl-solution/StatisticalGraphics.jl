@@ -10,7 +10,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
-      matrix:
+      # matrix:
         # version:
           # - '1.6'
           # - '1' # automatically expands to the latest stable 1.x release of Julia

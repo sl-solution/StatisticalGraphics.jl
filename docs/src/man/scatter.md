@@ -23,6 +23,10 @@ sgplot(ds, Scatter(x=:x, y=:y, group=:g))
 ## Customising the points
 
 ```@example
+using InMemoryDatasets, StatisticalGraphics
+
+ds = Dataset(x=[1.1, 1.5, 2.7, 3.1], y=[1.1, -3.4, 2.1, 2.55], g=['A', 'B', 'A', 'B'])
+
 sgplot(ds, Scatter(x=:x, y=:y, group=:g, size=500, thickness=3))
 ```
 
