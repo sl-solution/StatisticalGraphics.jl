@@ -30,7 +30,12 @@ module StatisticalGraphics
         sgplot,
         sggrid,
         freq, # freq is a function used in Bar plot
-        gradient
+        gradient,
+        # saving the output
+        pdf,
+        svg,
+        png,
+        savefig
   
     abstract type SGMarks end
 
@@ -58,6 +63,7 @@ module StatisticalGraphics
     include("sgpanel.jl")
     include("sggrid.jl")
     include("show.jl")
+    include("io.jl")
     include("precompile/warmup.jl")
     if VERSION >= v"1.8"
         SG.warmup()
