@@ -1,0 +1,8 @@
+{
+    "theme": "list",
+    "order":[
+        "Scatter",
+        "Line",
+        "Bar"
+    ]
+}

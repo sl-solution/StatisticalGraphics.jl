@@ -2,15 +2,6 @@
 
 Welcome to the StatisticalGraphics.jl documentation!
 
-This resource aims to teach you everything you need to know to get up and running with the StatisticalGraphics.jl package.
+This resource aims to teach you everything you need to know to get up and running with the `StatisticalGraphics.jl` package.
 
-
-
-## Package manual
-
-```@contents
-Pages = [
-          "man/scatter.md"]
-Depth = 2
-```
-
+If you are new to `StatisticalGraphics.jl`, probably the **Usage** section in manual should be a good starting point.

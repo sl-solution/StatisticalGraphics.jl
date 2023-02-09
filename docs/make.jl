@@ -1,10 +1,15 @@
 using Documenter
 using StatisticalGraphics
+using DemoCards
 
 # DocMeta.setdocmeta!(InMemoryDatasets, :DocTestSetup, :(using InMemoryDatasets); recursive=true)
 
 # Build documentation.
 # ====================
+scatter, scatter_cb, scatter_assets = makedemos(joinpath("gallery", "Plots"))
+# line, line_cb, line_assets = makedemos(joinpath("gallery", "Line"))
+
+
 
 makedocs(
     # options
@@ -19,7 +24,9 @@ makedocs(
     pages = Any[
         "Introduction" => "index.md",
        
-        "Examples" => "man/scatter.md"
+        "Usage" => [
+            scatter
+        ]
         
         # "API" => Any[
         #     "Functions" => "lib/functions.md"
