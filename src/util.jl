@@ -396,6 +396,12 @@ function _build_legen!(out_leg, leg_opts, _symbol, _title, _id, all_args; opts..
     out_leg[:columns] = leg_opts[:columns]
     out_leg[:direction] = leg_opts[:direction]
     out_leg[:symbolSize] = leg_opts[:size]
+    if leg_opts[:gradientlength] !== nothing
+        out_leg[:gradientLength]=leg_opts[:gradientlength]
+    end
+    if leg_opts[:gradientthickness] !== nothing
+        out_leg[:gradientThickness]=leg_opts[:gradientthickness]
+    end
     for opt in opts
         push!(out_leg, opt)
     end
