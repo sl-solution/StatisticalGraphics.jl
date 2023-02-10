@@ -3,6 +3,7 @@
     "order":[
         "Scatter",
         "Line",
-        "Bar"
+        "Bar",
+        "BoxPlot"
     ]
 }

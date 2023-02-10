@@ -31,3 +31,32 @@ sgplot(movies, Bar(y="Major Genre", response="Worldwide Gross", stat=IMD.maximum
 sgplot(movies, Bar(y="Major Genre", response="Worldwide Gross",
                      stat=IMD.maximum, orderresponse="Worldwide Gross",
                      orderstat=IMD.maximum))
+
+# Similar to other marks there are many keyword arguments to fine tune the final output
+
+sgplot(movies, Bar(y="Major Genre", response="Worldwide Gross",
+                     stat=IMD.maximum, orderresponse="Worldwide Gross",
+                     orderstat=IMD.maximum, colorresponse="Worldwide Gross",
+                     colorstat=mean,
+                     colormodel=Dict(:scheme=>:blues)))
+                    
+# And
+
+sgplot(movies, Bar(y="Major Genre", response="Worldwide Gross",
+                     stat=IMD.maximum, orderresponse="Worldwide Gross",
+                     orderstat=IMD.maximum, colorresponse="Worldwide Gross",
+                     colorstat=mean,
+                     colormodel=Dict(:scheme=>:browns),
+                     barcorner=[0,5,0,5],
+                     space=0.4,
+                     outlinecolor=:black,
+                     legend=:bar_leg
+                     ),
+                     xaxis=Axis(title="Maximum Worldwide Gross",
+                        domain=false, d3format="\$,f", grid=true),
+                     yaxis=Axis(dropmissing=true,
+                        domain=false, grid=true),
+                     legend=Legend(name=:bar_leg, d3format="\$,f",
+                        title="Average Worldwide Gross", orient=:bottom,
+                     direction=:horizontal, gradientlength=600),
+                     clip=false)

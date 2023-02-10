@@ -23,3 +23,21 @@ sgplot(dubai_weather, Line(x=:date, y=:pressure, breaks=true), xaxis=Axis(type=:
 
 sgplot(dubai_weather, [Line(x=:date, y=:pressure, breaks=true), Scatter(x=:date, y=:pressure)], xaxis=Axis(type=:date))
 
+# The `interpolate` keyword argument can be used to intepolate line,
+
+ds = Dataset(x=1:10, y=rand(10))
+
+color=Dict( :linear=>:blue,
+            :basis=>:red,
+            :step=>:green,
+            :natural=>:darkorange
+            )
+
+sgplot(ds, [
+            [
+              Line(x=:x, y=:y, interpolate=v, thickness=2, color=color[v])
+              for v in [:linear, :basis, :step, :natural]
+            ]; Scatter(x=:x, y=:y, color=:steelblue, size=100)
+            ],
+            clip=false
+        )

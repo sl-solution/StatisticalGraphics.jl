@@ -7,7 +7,7 @@
 
 using InMemoryDatasets, StatisticalGraphics, DLMReader, Chain
 
-svg("assets/scatter_plot_label1.svg", sgplot(filter(filereader(joinpath(dirname(pathof(StatisticalGraphics)),"..", "docs", "assets", "nations.csv"), emptycolname=true, quotechar='"'), :year, by = ==(2010)), Scatter(x=:gdpPercap,y=:lifeExp, size=5, group=:region, labelresponse=:country, labelfont="Times", labelsize=5, labelcolor=:group), clip=false, xaxis=Axis(grid=true, domain=false, labelcolor=:white, titlecolor=:white, tickcolor=:white, gridcolor=:lightgray, gridthickness=0.1, offset=0, tickcount=20), yaxis=Axis(grid=true, gridcolor=:lightgray,gridthickness=0.1, offset=0, tickcount=20,domain=false, labelcolor=:white, titlecolor=:white, tickcolor=:white), width=100, height=100, legend=false)) #hide #md
+svg("assets/scatter_plot_label1.svg", sgplot(filter(filereader(joinpath(dirname(pathof(StatisticalGraphics)),"..", "docs", "assets", "nations.csv"), emptycolname=true, quotechar='"'), :year, by = ==(2010))[1:5:100, :], Scatter(x=:gdpPercap,y=:lifeExp, size=40, group=:region, labelresponse=:country, labelfont="Times", labelsize=8, labelcolor=:group), clip=false, xaxis=Axis(grid=true, domain=false, labelcolor=:white, titlecolor=:white, tickcolor=:white, gridcolor=:lightgray, gridthickness=0.4, offset=0, tickcount=10), yaxis=Axis(grid=true, gridcolor=:lightgray,gridthickness=0.4, offset=0, tickcount=10,domain=false, labelcolor=:white, titlecolor=:white, tickcolor=:white), width=100, height=100, legend=false)) #hide #md
 
 # `Scatter` automatically put labels of data points around them when a column is passed as `labelresponse`.
 
