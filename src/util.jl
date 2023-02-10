@@ -411,7 +411,9 @@ function _build_legen!(out_leg, leg_opts, _symbol, _title, _id, all_args; opts..
     if leg_opts[:values] !== nothing && leg_opts[:values] isa AbstractVector
         out_leg[:values] = leg_opts[:values]
     end
-
+    if leg_opts[:d3format] !== nothing
+        out_leg[:format] = leg_opts[:d3format]
+    end
 
     out_leg[:titleFont] = something(leg_opts[:titlefont], leg_opts[:font], all_args.opts[:font])
     out_leg[:titleFontStyle] = something(leg_opts[:titleitalic], leg_opts[:italic], all_args.opts[:italic]) ? "italic" : "normal"
