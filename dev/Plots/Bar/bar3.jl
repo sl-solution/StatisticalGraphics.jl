@@ -1,5 +1,34 @@
 using InMemoryDatasets, StatisticalGraphics, DLMReader
 
+
+population = filereader(joinpath(dirname(pathof(StatisticalGraphics)),
+                              "..", "docs", "assets", "population.csv"))
+
+sex(x) = x == 1 ? "male" : "female" # format for :sex
+
+setformat!(population, :sex => sex)
+
+pop2000 = filter(population, :year, by = ==(2000))
+
+first(pop2000, 6)
+
+tpop = transpose(groupby(pop2000, :age), :people, id = :sex)
+
+setformat!(tpop, :female => -)
+
+sgplot(tpop, [Bar(y=:age, response=:female),
+                  Bar(y=:age, response=:male, color=:darkorange)],
+                  yaxis=Axis(reverse=true),
+                  xaxis=Axis(title="Population", values=((-12:3:12).*10^6, string.(abs.(-12:3:12), "M"))))
+
+base_stat(f, x) = -last(x) # use the negative value of female pop as baseline
+
+sgplot(pop2000, Bar(y=:age, response=:people, group=:sex,
+                            baselineresponse = :people,
+                            baselinestat=base_stat),
+                            yaxis=Axis(reverse=true),
+                            xaxis=Axis(title="Population", values=((-12:3:12).*10^6, string.(abs.(-12:3:12), "M"))))
+
 ds = filereader(joinpath(dirname(pathof(StatisticalGraphics)),
                               "..", "docs", "assets", "politifact.csv"))
 ds_order = Dataset(ruling = ["true", "mostly-true", "half-true","barely-true", "false", "full-flop", "pants-fire"],
