@@ -1,5 +1,5 @@
 
-function _write_html(vspec::SGPlots)
+function _write_html(vspec::Union{SGPlots, SGManipulate})
     out_html = tempname() * ".html"
     html_out = """
     <!DOCTYPE html>
@@ -24,7 +24,7 @@ function _write_html(vspec::SGPlots)
     out_html
 end
 
-function _write_script(io::IO, vspec::SGPlots)
+function _write_script(io::IO, vspec::Union{SGPlots, SGManipulate})
     divid=string(rand(UInt128), base=16)
     write(io, 
     """
@@ -69,7 +69,7 @@ function _convert_to_pdf(vspec; s = 1)
     res
 end
 
-function Base.display(::REPL.REPLDisplay, vspec::SGPlots)
+function Base.display(::REPL.REPLDisplay, vspec::Union{SGPlots, SGManipulate})
     tmppath = _write_html(vspec)
     launch_browser(tmppath) # Open the browser
 end

@@ -29,6 +29,7 @@ module StatisticalGraphics
         Legend,
         sgplot,
         sggrid,
+        sgmanipulate, # interactive graphs
         freq, # freq is a function used in Bar plot
         gradient,
         # saving the output
@@ -61,6 +62,7 @@ module StatisticalGraphics
     include("charts/pie.jl")
     include("sgplot.jl")
     include("sgpanel.jl")
+    include("sgmanipulate.jl")
     include("sggrid.jl")
     include("show.jl")
     include("io.jl")

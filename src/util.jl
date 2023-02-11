@@ -828,6 +828,53 @@ function _modify_data_for_panel!(vspec, marks, info, idx)
     end
 end
 
+###### SGManipulate needs its own filtering ######
+# we must create suitable binding based on the values in panel_info columns
+function _sgmanipulate_bindings(panel_info, mapformats, rangetype)
+    bind = Dict{Symbol, Any}[]
+    _var_names = names(panel_info)
+    for i in 1:ncol(panel_info)
+        _f = identity
+        if mapformats
+            _f = getformat(panel_info, i)
+        end
+        all_vals = _f.(unique(panel_info, i, mapformats=mapformats)[:, i])
+
+        if eltype(all_vals) <: Union{Missing, <: Number} && !any(ismissing, all_vals)
+            if _var_names[i] in rangetype || issorted(all_vals) || issorted(all_vals, rev=true)
+                all_diff = diff(all_vals)
+                if _var_names[i] in rangetype || length(unique(all_diff)) == 1 # we can be more flexible here
+                    push!(bind, Dict{Symbol, Any}(:name => _var_names[i], :description=>"INTERACTION", :bind=>Dict{Symbol, Any}(:input=>:range, :min=>IMD.minimum(all_vals), :max=>IMD.maximum(all_vals), :step=>minimum(all_diff)), :value=>all_vals[1]))
+                    continue
+                end
+            end
+        end
+        
+        push!(bind, Dict{Symbol, Any}(:name => _var_names[i], :description=>"INTERACTION", :bind=>Dict{Symbol, Any}(:input=>:select, :options=>all_vals), :value=>all_vals[1]))
+    end
+    bind
+end
+
+
+function add_filters_to_sgmanipulate_info_fun(val...; colname, f)
+    expr  = ""
+    for i in eachindex(colname)
+        expr *= " datum['$(colname[i])'] == $(colname[i]) " # we must have a signal with suitable binding with the name "colname[i]"
+       
+        if i != lastindex(colname)
+            expr *= " && "
+        end
+    end
+    expr
+end
+
+
+function add_filters_sgmanipulate!(panel_info, all_args)
+    _f = all_args.mapformats ? getformat.(Ref(all_args.ds), all_args.panelby) : repeat([identity], length(all_args.panelby))
+    modify!(panel_info, (all_args.panelby...,) => byrow((x...) -> add_filters_to_sgmanipulate_info_fun(x...; colname=all_args.panelby, f = _f )) => "$(sg_col_prefix)__filtering_formula__")
+end
+
+#######################
 function _find_height_proportion!(panel_info, all_args)
     if all_args.opts[:proportional] && all_args.opts[:linkaxis] == :x
         #check we both scale 3 and 4 are discrete
