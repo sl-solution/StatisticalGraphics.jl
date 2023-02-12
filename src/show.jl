@@ -1,5 +1,6 @@
 
 function _write_html(vspec::Union{SGPlots, SGManipulate})
+    divid="vg"*string(rand(UInt128), base=16)
     out_html = tempname() * ".html"
     html_out = """
     <!DOCTYPE html>
@@ -11,11 +12,11 @@ function _write_html(vspec::Union{SGPlots, SGManipulate})
         <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
     </head>
     <body>
-        <div id="vis"></div>
+        <div id="$divid"></div>
 
         <script>
         var spec = $(json(vspec.json_spec));
-        vegaEmbed('#vis', spec);
+        vegaEmbed('#$divid', spec);
         </script>
     </body>
     </html>
@@ -25,7 +26,7 @@ function _write_html(vspec::Union{SGPlots, SGManipulate})
 end
 
 function _write_script(io::IO, vspec::Union{SGPlots, SGManipulate})
-    divid=string(rand(UInt128), base=16)
+    divid="vg"*string(rand(UInt128), base=16)
     write(io, 
     """
     <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
