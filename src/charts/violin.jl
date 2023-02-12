@@ -54,7 +54,7 @@ function _push_plots!(vspec, plt::Violin, all_args; idx=1)
     _add_legends!(plt, all_args, idx)
     data_csv = tempname()
     filewriter(data_csv, new_ds, mapformats=all_args.mapformats, quotechar='"')
-    push!(vspec[:data], Dict{Symbol,Any}(:name => "violin_data_$idx", :values => read(data_csv, String), :format => Dict(:type => "csv", :delimiter => ",", :parse => _write_parse_js(new_ds, all_args))))
+    push!(vspec[:data], _prepare_data("violin_data_$idx", data_csv, new_ds, all_args))
 
     # now we push every component of the box plot
     _push_violin!(vspec, plt, all_args, new_ds, max_density; idx=idx)

@@ -45,6 +45,7 @@ AXES_DEFAULT = Dict{Symbol, Any}(:type => :linear,
                                  
                                  :nice => true,
                                  :d3format => nothing, # allow users to directly pass an axis format - it must be consistent with d3.format()
+                                 :d3formattype=>nothing,
                                  :labeloverlap => true,
 
                                  :angle => 0,

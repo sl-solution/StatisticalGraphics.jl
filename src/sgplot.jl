@@ -176,7 +176,7 @@ function _sgplot!(all_args)
         data_csv = tempname()
         filewriter(data_csv, ds[!, unique(referred_cols_in_ds)], mapformats=mapformats, quotechar='"')
         # use parse=:auto for letting vega guess the data type
-        main_data = Dict{Symbol,Any}(:name => "source_0", :values => read(data_csv, String), :format => Dict{Symbol,Any}(:type => "csv", :delimiter => ",", :parse => _write_parse_js(ds[!, unique(referred_cols_in_ds)], all_args)))
+        main_data =  _prepare_data("source_0", data_csv, ds[!, unique(referred_cols_in_ds)], all_args) 
 
         prepend!(vspec[:data], [main_data])
 

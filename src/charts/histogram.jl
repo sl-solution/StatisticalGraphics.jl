@@ -123,7 +123,7 @@ function _push_plots!(vspec, plt::Histogram, all_args; idx = 1)
     _add_legends!(plt, all_args, idx)
     data_csv = tempname()
     filewriter(data_csv, new_ds, mapformats = all_args.mapformats, quotechar = '"')
-    push!(vspec[:data], Dict{Symbol, Any}(:name => "hist_data_$idx", :values => read(data_csv, String), :format => Dict(:type => "csv", :delimiter => ",", :parse=> _write_parse_js(new_ds, all_args))))
+    push!(vspec[:data], _prepare_data("hist_data_$idx", data_csv, new_ds, all_args))
     opts = plt.opts
 
     s_spec = Dict{Symbol,Any}()

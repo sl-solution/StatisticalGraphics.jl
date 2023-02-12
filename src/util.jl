@@ -151,7 +151,7 @@ function _parse_type(f, x)
     if CT <: Union{Real, Bool, Missing}
         return "number"
     elseif CT <: Union{Missing, Date}
-        return "utc:'%Y-%m-%d'"
+        return "date"
     elseif CT <: Union{Missing, DateTime}
         return "utc:'%Y-%m-%dT%H:%M:%S'"
     else
@@ -169,6 +169,26 @@ function _write_parse_js(ds, all_args)
         parse_dict[Symbol(col)] = _parse_type(_f, ds[!, col])
     end
     parse_dict
+end
+
+function _prepare_data(name, fileloc, ds, all_args)
+    res = Dict{Symbol, Any}()
+    res[:name] = name
+    res[:values] = read(fileloc, String)
+    res[:format] = Dict{Symbol, Any}()
+    res[:format][:type] = "csv"
+    res[:format][:delimiter] = ","
+    res[:format][:parse] = _write_parse_js(ds, all_args)
+    if any(==("utc:'%Y-%m-%dT%H:%M:%S'"), values(res[:format][:parse]))
+        res[:transform] = Dict{Symbol, Any}[]
+        # we must make sure that utc times are converted to numbers, o.w. we have problems in different places like filtering
+        for (k, v) in res[:format][:parse]
+            if v == "utc:'%Y-%m-%dT%H:%M:%S'"
+                push!(res[:transform], Dict{Symbol, Any}(:type=>"formula", :as=>"$k", :expr=>"toNumber(datum['$k'])"))
+            end
+        end
+    end
+    res
 end
 
 function addto_scale!(all_args, which_scale, ds, col)
@@ -339,6 +359,9 @@ function addto_axis!(in_axis, axis, title)
         if axis.opts[:d3format] !== nothing
             in_axis[:format] = axis.opts[:d3format]
         end
+        if axis.opts[:d3formattype] !== nothing
+            in_axis[:formatType] = axis.opts[:d3formattype]
+        end
 
         if axis.opts[:values] !== nothing && axis.opts[:label_scale] === nothing
             !(axis.opts[:values] isa AbstractVector) && throw(ArgumentError("Axis values must be a vector of values"))
@@ -413,6 +436,9 @@ function _build_legen!(out_leg, leg_opts, _symbol, _title, _id, all_args; opts..
     end
     if leg_opts[:d3format] !== nothing
         out_leg[:format] = leg_opts[:d3format]
+    end
+    if leg_opts[:d3formattype] !== nothing
+        out_leg[:formatType] = leg_opts[:d3formattype]
     end
 
     out_leg[:titleFont] = something(leg_opts[:titlefont], leg_opts[:font], all_args.opts[:font])
@@ -850,16 +876,34 @@ function _sgmanipulate_bindings(panel_info, mapformats, rangetype)
             end
         end
         
-        push!(bind, Dict{Symbol, Any}(:name => _var_names[i], :description=>"INTERACTION", :bind=>Dict{Symbol, Any}(:input=>:select, :options=>all_vals), :value=>all_vals[1]))
+        push!(bind, Dict{Symbol, Any}(:name => _var_names[i], :description=>"INTERACTION", :bind=>Dict{Symbol, Any}(:input=>:select, :options=>_convert_values_for_js.(all_vals), :labels=>all_vals), :value=>_convert_values_for_js(all_vals[1])))
     end
     bind
 end
 
+function add_title_signal(val...;ds, colname, fun, filtertype)
+    expr = ""
+    for i in eachindex(colname)
+        # we must have a signal with suitable binding with the name "colname[i]"
+        T = _parse_type(fun[i], ds[!, colname[i]])
+        if T == "date"
+            expr *= " utcFormat($(colname[i]), '%Y-%m-%d') "
+        elseif T == "utc:'%Y-%m-%dT%H:%M:%S'"
+            expr *= " utcFormat($(colname[i]), '%Y-%m-%dT%H:%M:%S') "
+        else
+            expr *= " toString($(colname[i]))"
+        end
+        if i != lastindex(colname)
+            expr *= " + ' - ' + "
+        end
+    end
+    expr
+end
 
-function add_filters_to_sgmanipulate_info_fun(val...; colname, f)
+function add_filters_to_sgmanipulate_info_fun(val...; colname, f, filtertype)
     expr  = ""
     for i in eachindex(colname)
-        expr *= " datum['$(colname[i])'] == $(colname[i]) " # we must have a signal with suitable binding with the name "colname[i]"
+        expr *= " datum['$(colname[i])'] $filtertype $(colname[i]) " # we must have a signal with suitable binding with the name "colname[i]"
        
         if i != lastindex(colname)
             expr *= " && "
@@ -869,11 +913,66 @@ function add_filters_to_sgmanipulate_info_fun(val...; colname, f)
 end
 
 
-function add_filters_sgmanipulate!(panel_info, all_args)
+function add_filters_sgmanipulate!(panel_info, all_args; filtertype="==")
     _f = all_args.mapformats ? getformat.(Ref(all_args.ds), all_args.panelby) : repeat([identity], length(all_args.panelby))
-    modify!(panel_info, (all_args.panelby...,) => byrow((x...) -> add_filters_to_sgmanipulate_info_fun(x...; colname=all_args.panelby, f = _f )) => "$(sg_col_prefix)__filtering_formula__")
+    modify!(panel_info, (all_args.panelby...,) => byrow((x...) -> add_filters_to_sgmanipulate_info_fun(x...; colname=all_args.panelby, f = _f, filtertype=filtertype )) => "$(sg_col_prefix)__filtering_formula__")
 end
 
+function _add_title_for_sgmanipulate!(newmark, info, all_args, all_axes)
+    the_existing_orients = [haskey(IMD.index(info), "$(sg_col_prefix)cell_title_$(orient)")  for orient in [:top, :bottom, :left, :right]]
+    
+    
+    for orient in [:top, :bottom, :left, :right][the_existing_orients]
+        if orient in (:top, :bottom)
+            _range = [0, info["$(sg_col_prefix)width"]]
+            _limit=info["$(sg_col_prefix)width"]
+        else 
+            _range = [info["$(sg_col_prefix)height"],0]
+            _limit=info["$(sg_col_prefix)height"]
+        end
+        ismissing(info["$(sg_col_prefix)cell_title_$(orient)"]) && continue
+
+
+        _font = something(all_args.opts[:headerfont], all_args.opts[:font])
+        _fweight = something(all_args.opts[:headerfontweight], all_args.opts[:fontweight])
+        _fitalic = something(all_args.opts[:headeritalic], all_args.opts[:italic])
+
+        dummy_scale = Dict{Symbol, Any}(:name=>"title_panel_scale_$(orient)", :range=>_range)
+        _f = all_args.mapformats ? getformat.(Ref(all_args.ds), all_args.panelby) : repeat([identity], length(all_args.panelby))
+        dummy_axis = Dict{Symbol, Any}(:ticks => false,
+                                   :labels=>false,
+                                   :domain=>false,
+                                   :scale => "title_panel_scale_$(orient)",
+                                   :orient => orient,
+                                   :title=> Dict{Symbol, Any}(:signal => add_title_signal(all_args.panelby...;ds=all_args.ds, colname=all_args.panelby, fun=_f, filtertype=all_args.opts[:filtertype])),
+                                   :titleFontSize=>all_args.opts[:headersize],
+                                   :titleFont=>_font,
+                                   :titleFontStyle=>_fitalic ? "italic" : "normal",
+                                   :titleFontWeight=>_fweight,
+                                   :titlePadding=>orient in (:top, :bottom) ? all_args.opts[:headeroffset][1] : all_args.opts[:headeroffset][2])
+        if all_args.opts[:headerangle] !== nothing
+            dummy_axis[:titleAngle] = all_args.opts[:headerangle]
+        else
+            dummy_axis[:titleLimit] = _limit
+        end
+        if all_args.opts[:headerbaseline] !== nothing
+            dummy_axis[:titleBaseline] = all_args.opts[:headerbaseline]
+        end
+        if all_args.opts[:headeralign] !== nothing
+            dummy_axis[:titleAlign] = all_args.opts[:headeralign]
+        end
+        if all_args.opts[:headercolor] !== nothing
+            dummy_axis[:titleColor] = all_args.opts[:headercolor]
+        end
+        if all_args.opts[:headerloc] !== nothing
+            dummy_axis[:titleAnchor] = all_args.opts[:headerloc]
+        end
+
+        push!(newmark[:scales], dummy_scale)
+        push!(newmark[:axes], dummy_axis)
+    end
+   
+end
 #######################
 function _find_height_proportion!(panel_info, all_args)
     if all_args.opts[:proportional] && all_args.opts[:linkaxis] == :x

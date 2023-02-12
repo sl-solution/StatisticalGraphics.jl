@@ -20,7 +20,7 @@ SGMANIPULATE_DEFAULT = Dict(
 
         :rangetype=>nothing, # user can pass the name of columns which are forced to be treated as range input
 
-        :showheaders => true,
+        :showheaders => false,
         :headercolname=>true,
 
         :headersize => 10,
@@ -33,13 +33,15 @@ SGMANIPULATE_DEFAULT = Dict(
         :headercolor=>nothing,
         :headerloc=>nothing,
         
-        :headerorient=>nothing, # :top, :bottom, :left, :right,/ for lattice :topleft, :topright, :bottomleft, :bottomright
+        :headerorient=>:top, # :top, :bottom, :left, :right,/ for lattice :topleft, :topright, :bottomleft, :bottomright
         :headeroffset=>[0,0], # [top/bottom, left/right]
 
         # the global font specification
         :font => "sans-serif",
         :italic=>false,
         :fontweight=>400,
+
+        :filtertype=> "==", # NOTE: it is useful only for cases where the whole data are sent to vega - other possible values "<=","<",">=",">" - the data are filtered based on this
 
         :clip=>true
         )
@@ -98,7 +100,7 @@ function _sgmanipulate(ds, panelby::IMD.MultiColumnIndex, plts::Vector{<:SGMarks
 
     sgplot_result = _sgplot!(all_args).json_spec
     add_dummy_col!(all_args)
-    add_filters_sgmanipulate!(panel_info, all_args)
+    add_filters_sgmanipulate!(panel_info, all_args; filtertype=global_opts[:filtertype])
     add_title_panel!(panel_info, all_args)
     join_scale_info!(panel_info, all_args)
     add_height_width_x_y!(panel_info, all_args)
@@ -171,7 +173,7 @@ function _sgmanipulate(ds, panelby::IMD.MultiColumnIndex, plts::Vector{<:SGMarks
 
         # put panel or lattice headers
         if all_args.opts[:showheaders]
-            _add_title_for_panel!(newmark, panel_info[i, :], all_args, sgplot_result[:axes])
+            _add_title_for_sgmanipulate!(newmark, panel_info[i, :], all_args, sgplot_result[:axes])
         end
         # i is send to create unique name for filtered data
         _modify_data_for_panel!(vspec, newmark[:marks], panel_info[i, :], i)

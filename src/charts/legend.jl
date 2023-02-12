@@ -16,6 +16,7 @@ LEGEND_DEFAULT = Dict{Symbol, Any}(
                                  :limit=>nothing, # number of element to display in legend
 
                                  :d3format=>nothing,
+                                 :d3formattype=>nothing,
 
                                  :font=>nothing,
                                  :italic=>nothing,
