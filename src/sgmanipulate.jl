@@ -154,9 +154,9 @@ function _sgmanipulate(ds, panelby::IMD.MultiColumnIndex, plts::Vector{<:SGMarks
         newmark[:encode][:enter][:height] = Dict{Symbol,Any}(:value => panel_info[i, "$(sg_col_prefix)height"])
         newmark[:encode][:enter][:width] = Dict{Symbol,Any}(:value => panel_info[i, "$(sg_col_prefix)width"])
         # we create a separate group for each panel and apply wallcolor there
-        # if global_opts[:wallcolor] != :transparent
-        #     newmark[:encode][:enter][:fill] = Dict{Symbol, Any}(:value => global_opts[:wallcolor])
-        # end
+        if global_opts[:wallcolor] != :transparent
+            newmark[:encode][:enter][:fill] = Dict{Symbol, Any}(:value => global_opts[:wallcolor])
+        end
 
         if all_args.opts[:panelborder]
             newmark[:encode][:enter][:stroke] = Dict{Symbol,Any}(:value => all_args.opts[:panelbordercolor])
