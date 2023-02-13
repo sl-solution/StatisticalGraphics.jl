@@ -1,4 +1,5 @@
-[![](https://img.shields.io/badge/docs-dev-blue.svg)](https://sl-solution.github.io/StatisticalGraphics.jl/dev)
+
+[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://sl-solution.github.io/StatisticalGraphics.jl/stable/)  [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://sl-solution.github.io/StatisticalGraphics.jl/dev)
 
 
 # StatisticalGraphics
