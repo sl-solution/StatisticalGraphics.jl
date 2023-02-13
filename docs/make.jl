@@ -55,8 +55,10 @@ makedocs(
         "Usage" => [
             scatter
         ],
-        "Interactive" => "man/interactive.md"
-        
+        "Interactive" => [
+            "Pyramid" => "man/pyramid.md",
+            "Nations" => "man/nations.md"
+        ]
         # "API" => Any[
         #     "Functions" => "lib/functions.md"
         # ]
