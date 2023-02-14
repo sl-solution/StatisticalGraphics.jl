@@ -27,6 +27,27 @@ BAR_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0, :group => nothing,
     :baseline => 0,
     :baselineresponse => nothing,  # each bar (or each group when groupped) can have its own baseline 
     :baselinestat => nothing, # same rule as :stat
+
+    #data label
+    :label=>:none, # :height or :category
+    :labelfont=>nothing,
+    :labelbaseline=>:middle,
+    :labelfontweight=>nothing,
+    :labelitalic=>nothing,
+    :labelsize=>nothing,
+    :labelcolor=>:black,# allow :group, :colorresponse to use their color if available 
+    :labelangle=>nothing,
+    :labeldir=>:ltr,
+    :labellimit=>nothing,
+    :labeloffset=>0,
+    :labelpos => :end, # :end, :start
+    :labelloc=>0.5, # between 0 and 1
+    :labeld3format=>"",
+    :labelopacity=>1,
+    :labelalign=>nothing,
+    :tooltip => false, # it can be true, only if labelresponse is provided
+
+
     :legend => nothing, :barcorner => [0, 0, 0, 0], #corner radius (cornerRadiusTopLeft, cornerRadiusTopRight, cornerRadiusBottomLeft, cornerRadiusBottomRight)
     :clip => nothing
 )
@@ -207,6 +228,12 @@ function _push_plots!(vspec, plt::Bar, all_args; idx=1)
     end
     s_spec[:marks] = [s_spec_marks]
     push!(vspec[:marks], s_spec)
+    if opts[:label] in (:height, :category)
+        whole_mk = deepcopy(s_spec)
+        _segment_label!(whole_mk[:marks][1], _var_, _var_2_, all_args, opts)
+        push!(vspec[:marks], whole_mk)
+    end
+    
 end
 
 
@@ -473,3 +500,63 @@ function _add_legends!(plt::Bar, all_args, idx)
         push!(all_args.out_legends, leg_spec_cp)
     end
 end   
+
+
+function _segment_label!(mk, cat, var, all_args, opts)
+    mk[:type] = "text"
+
+    mk_encode = mk[:encode][:enter]
+
+    for prop in [:stroke, :strokeWidth, :height, :width, :cornerRadiusBottomLeft, :cornerRadiusTopLeft, :cornerRadiusBottomRight, :cornerRadiusTopRight]
+        delete!(mk_encode, prop)
+    end
+
+    mk_encode[:opacity] = Dict{Symbol, Any}(:value => opts[:labelopacity])
+
+    mk_encode[:fill] = Dict{Symbol, Any}(:signal =>  "isValid(datum['__height__bar__']) ? '$(opts[:labelcolor])' : 'transparent'" )
+    mk_encode[:text] =  deepcopy(mk_encode[var])
+    delete!(mk_encode[:text], :scale)
+    delete!(mk_encode[:text], :field)
+    delete!(mk_encode[var], :field)
+
+    if opts[:label] == :height 
+        mk_encode[:text][:signal] = "format(datum['__height__bar__'] - datum['__height__bar__start__'], '$(opts[:labeld3format])')"
+    else
+        if opts[:group] === nothing
+            mk_encode[:text][:field] = "$(opts[cat])"
+        else
+            mk_encode[:text][:field] = "$(opts[:group])"
+        end
+    end
+
+
+    mk_encode[var][:offset] =  opts[:labeloffset]
+    if opts[:labelpos] == :end 
+        mk_encode[var][:field] = "__height__bar__"
+    else
+        mk_encode[var][:field] = "__height__bar__start__"
+    end
+    delete!(mk_encode, Symbol(var,2))
+
+    mk_encode[cat][:band] = opts[:labelloc]
+   
+    if opts[:labelangle] !== nothing
+        mk_encode[:angle] = Dict{Symbol, Any}(:value => opts[:labelangle])
+    end
+    if opts[:labelalign] !== nothing
+        mk_encode[:align] = Dict{Symbol, Any}(:value => opts[:labelalign])
+    end
+    mk_encode[:baseline] = Dict{Symbol, Any}(:value => opts[:labelbaseline])
+    mk_encode[:font] = Dict{Symbol, Any}(:value => something(opts[:labelfont], all_args.opts[:font]))
+    mk_encode[:fontWeight] = Dict{Symbol, Any}(:value => something(opts[:labelfontweight], all_args.opts[:fontweight]))
+    mk_encode[:fontStyle] = Dict{Symbol, Any}(:value => something(opts[:labelitalic], all_args.opts[:italic] ? "italic" : "normal"))
+
+    if opts[:labelsize] !== nothing
+        mk_encode[:fontSize] = Dict{Symbol, Any}(:value => opts[:labelsize])
+    end
+    mk_encode[:dir] = Dict{Symbol,Any}(:value => opts[:labeldir])
+    if opts[:labellimit] !== nothing
+        mk_encode[:limit] = Dict{Symbol,Any}(:value => opts[:labellimit])
+    end
+    mk
+end

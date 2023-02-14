@@ -848,7 +848,8 @@ function _modify_data_for_panel!(vspec, marks, info, idx)
         else
             needchange = false
         end
-        if needchange
+        # if the new_name already exist we do not need any change
+        if needchange && !any(x->x[:name] == new_name, vspec[:data])
             push!(vspec[:data], Dict{Symbol, Any}(:name => new_name, :source => old_name, :transform => Dict{Symbol, Any}[Dict{Symbol, Any}(:type=>:filter, :expr => info["$(sg_col_prefix)__filtering_formula__"])]))
         end
     end
