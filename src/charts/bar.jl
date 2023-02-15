@@ -31,7 +31,7 @@ BAR_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0, :group => nothing,
     #data label
     :label=>:none, # :height or :category
     :labelfont=>nothing,
-    :labelbaseline=>:middle,
+    :labelbaseline=>nothing,
     :labelfontweight=>nothing,
     :labelitalic=>nothing,
     :labelsize=>nothing,
@@ -40,7 +40,7 @@ BAR_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0, :group => nothing,
     :labeldir=>:ltr,
     :labellimit=>nothing,
     :labeloffset=>0,
-    :labelpos => :end, # :end, :start
+    :labelpos => :end, # :end, :start, :middle
     :labelloc=>0.5, # between 0 and 1
     :labeld3format=>"",
     :labelopacity=>1,
@@ -65,6 +65,16 @@ mutable struct Bar <: SGMarks
             length(cp_BAR_DEFAULT[:barcorner]) != 4 && throw(ArgumentError("the barcorner option must be a single value or a vector of length four of values"))
         end
         !(cp_BAR_DEFAULT[:groupdisplay] in (:stack, :none, :cluster, :step)) && throw(ArgumentError("the groupdisplay option can be one of :stack, :cluster, :step, or :none"))
+        if cp_BAR_DEFAULT[:x] == 0
+            cp_BAR_DEFAULT[:labelbaseline] = something(cp_BAR_DEFAULT[:labelbaseline], :middle)
+            _tmp_align = Dict(:end=>:right, :start=>:left, :middle=>:center)
+            cp_BAR_DEFAULT[:labelalign] = something(cp_BAR_DEFAULT[:labelalign], _tmp_align[cp_BAR_DEFAULT[:labelpos]])
+
+        else
+            _tmp_align = Dict(:end=>:top, :start=>:bottom, :middle=>:middle)
+            cp_BAR_DEFAULT[:labelbaseline] = something(cp_BAR_DEFAULT[:labelbaseline], _tmp_align[cp_BAR_DEFAULT[:labelpos]])
+            cp_BAR_DEFAULT[:labelalign] = something(cp_BAR_DEFAULT[:labelalign], :center)
+        end
         new(cp_BAR_DEFAULT)
     end
 end
@@ -512,8 +522,14 @@ function _segment_label!(mk, cat, var, all_args, opts)
     end
 
     mk_encode[:opacity] = Dict{Symbol, Any}(:value => opts[:labelopacity])
-
-    mk_encode[:fill] = Dict{Symbol, Any}(:signal =>  "isValid(datum['__height__bar__']) ? '$(opts[:labelcolor])' : 'transparent'" )
+    if opts[:labelcolor] == :auto && opts[:group] !== nothing
+        mk_encode[:fill] = Dict{Symbol, Any}(:signal =>  "isValid(datum['__height__bar__']) ? contrast('black', scale('group_scale', datum['$(opts[:group])'])) > contrast('white', scale('group_scale', datum['$(opts[:group])'])) ? 'black' : 'white' : 'transparent'" )
+    else
+        if opts[:labelcolor] == :auto
+            opts[:labelcolor] = :black
+        end
+        mk_encode[:fill] = Dict{Symbol, Any}(:signal =>  "isValid(datum['__height__bar__']) ? '$(opts[:labelcolor])' : 'transparent'" )
+    end
     mk_encode[:text] =  deepcopy(mk_encode[var])
     delete!(mk_encode[:text], :scale)
     delete!(mk_encode[:text], :field)
@@ -533,8 +549,10 @@ function _segment_label!(mk, cat, var, all_args, opts)
     mk_encode[var][:offset] =  opts[:labeloffset]
     if opts[:labelpos] == :end 
         mk_encode[var][:field] = "__height__bar__"
-    else
+    elseif opts[:labelpos] == :start 
         mk_encode[var][:field] = "__height__bar__start__"
+    elseif opts[:labelpos] == :middle 
+        mk_encode[var][:signal] = "(datum['__height__bar__'] + datum['__height__bar__start__'])/2"
     end
     delete!(mk_encode, Symbol(var,2))
 
