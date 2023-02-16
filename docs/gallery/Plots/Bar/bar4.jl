@@ -74,3 +74,18 @@ sgplot(ds, Bar(x=:x1, group=:x2, label=:height), nominal=:x2)
 # Passing `labelcolor=:auto` to assign label color based on the contrast of colors
 
 sgplot(ds, Bar(x=:x1, group=:x2, label=:height, labelcolor=:auto), nominal=:x2)
+
+# example
+
+ds = Dataset(rand(1:4, 100, 10), :auto)
+
+sgplot(ds, Bar(y=:x1, group=:x3, label=:height,
+                labelcolor=:auto, response=:x2, space=0.1,
+                labelpos=:middle, barcorner=10, normalize=true,
+                labeld3format=".1%", outlinecolor=:black,
+                groupspace=0.1, groupdisplay=:cluster),
+                groupcolormodel=Dict(:scheme=>:darkgreen),
+                xaxis=Axis(title="Normalized sum of x2", domain=false, d3format="%"),
+                yaxis=Axis(domain=false, ticksize=0, order=:ascending),
+                legend=false,
+                clip=false)
