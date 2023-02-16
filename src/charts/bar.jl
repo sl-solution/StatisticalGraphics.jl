@@ -23,7 +23,7 @@ BAR_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0, :group => nothing,
     :groupdisplay => :stack, #:stack, :cluster, :step (i.e. stacked and cluster), or :none
     :grouporder => :ascending, # :data, :ascending, :descending, userdefined order (by giving a vector of group level) - having a group column in panelby can cause some issues
     :orderresponse => nothing, # by default axis order control it, but it can be controlled by a column
-    :orderstat => freq, # freq is default aggregator, however, it can be any other function 
+    :orderstat => nothing, # freq is default aggregator, however, it can be any other function 
     :baseline => 0,
     :baselineresponse => nothing,  # each bar (or each group when groupped) can have its own baseline 
     :baselinestat => nothing, # same rule as :stat
@@ -45,6 +45,7 @@ BAR_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0, :group => nothing,
     :labeld3format=>"",
     :labelopacity=>1,
     :labelalign=>nothing,
+    :labelalternate=>true, # if true, it automatically change the baseline, align and offset of the label text
     :tooltip => false, # it can be true, only if labelresponse is provided
 
 
@@ -65,15 +66,21 @@ mutable struct Bar <: SGMarks
             length(cp_BAR_DEFAULT[:barcorner]) != 4 && throw(ArgumentError("the barcorner option must be a single value or a vector of length four of values"))
         end
         !(cp_BAR_DEFAULT[:groupdisplay] in (:stack, :none, :cluster, :step)) && throw(ArgumentError("the groupdisplay option can be one of :stack, :cluster, :step, or :none"))
-        if cp_BAR_DEFAULT[:x] == 0
-            cp_BAR_DEFAULT[:labelbaseline] = something(cp_BAR_DEFAULT[:labelbaseline], :middle)
-            _tmp_align = Dict(:end=>:right, :start=>:left, :middle=>:center)
-            cp_BAR_DEFAULT[:labelalign] = something(cp_BAR_DEFAULT[:labelalign], _tmp_align[cp_BAR_DEFAULT[:labelpos]])
-
-        else
-            _tmp_align = Dict(:end=>:top, :start=>:bottom, :middle=>:middle)
-            cp_BAR_DEFAULT[:labelbaseline] = something(cp_BAR_DEFAULT[:labelbaseline], _tmp_align[cp_BAR_DEFAULT[:labelpos]])
-            cp_BAR_DEFAULT[:labelalign] = something(cp_BAR_DEFAULT[:labelalign], :center)
+      
+        if cp_BAR_DEFAULT[:colorresponse] !== nothing
+            cp_BAR_DEFAULT[:colorstat] = something(cp_BAR_DEFAULT[:colorstat], IMD.sum)
+        end
+        if cp_BAR_DEFAULT[:baselineresponse] !== nothing
+            cp_BAR_DEFAULT[:baselinestat] = something(cp_BAR_DEFAULT[:baselinestat], IMD.sum)
+        end
+        if cp_BAR_DEFAULT[:orderresponse] !== nothing
+            cp_BAR_DEFAULT[:orderstat] = something(cp_BAR_DEFAULT[:orderstat], IMD.sum)
+        end
+        if isequal(cp_BAR_DEFAULT[:label], true) 
+            cp_BAR_DEFAULT[:label] = :height
+        end
+        if isequal(cp_BAR_DEFAULT[:label], false) 
+            cp_BAR_DEFAULT[:label] = :none
         end
         new(cp_BAR_DEFAULT)
     end
@@ -240,7 +247,7 @@ function _push_plots!(vspec, plt::Bar, all_args; idx=1)
     push!(vspec[:marks], s_spec)
     if opts[:label] in (:height, :category)
         whole_mk = deepcopy(s_spec)
-        _segment_label!(whole_mk[:marks][1], _var_, _var_2_, all_args, opts)
+        _segment_label!(whole_mk[:marks][1], _var_, _var_2_, all_args, opts, idx)
         push!(vspec[:marks], whole_mk)
     end
     
@@ -317,6 +324,12 @@ function _check_and_normalize!(plt::Bar, all_args)
         base_stat = freq
     else
         base_stat = opts[:baselinestat]
+    end
+
+    if opts[:orderresponse] === nothing
+        opts[:orderstat] = freq
+    else
+        opts[:orderstat] = opts[:orderstat]
     end
 
     if all_args.mapformats
@@ -512,7 +525,21 @@ function _add_legends!(plt::Bar, all_args, idx)
 end   
 
 
-function _segment_label!(mk, cat, var, all_args, opts)
+function _segment_label!(mk, cat, var, all_args, opts, idx)
+
+    if opts[:x] == 0
+        opts[:labelbaseline] = something(opts[:labelbaseline], :middle)
+        _tmp_align = Dict(:end=>:right, :start=>:left, :middle=>:center)
+        opts[:labelalign] = something(opts[:labelalign], _tmp_align[opts[:labelpos]])
+
+    else
+        _tmp_align = Dict(:end=>:top, :start=>:bottom, :middle=>:middle)
+        opts[:labelbaseline] = something(opts[:labelbaseline], _tmp_align[opts[:labelpos]])
+        opts[:labelalign] = something(opts[:labelalign], :center)
+    end
+    # if opts[:labelalternate] is passed this can help to adjust text position
+    _opp = Dict(:top=>:bottom, :bottom=>:top, :middle=>:middle, :left=>:right, :right=>:left, :center=>:center, :alphabetic=>:alphabetic)
+
     mk[:type] = "text"
 
     mk_encode = mk[:encode][:enter]
@@ -524,6 +551,8 @@ function _segment_label!(mk, cat, var, all_args, opts)
     mk_encode[:opacity] = Dict{Symbol, Any}(:value => opts[:labelopacity])
     if opts[:labelcolor] == :auto && opts[:group] !== nothing
         mk_encode[:fill] = Dict{Symbol, Any}(:signal =>  "isValid(datum['__height__bar__']) ? contrast('black', scale('group_scale', datum['$(opts[:group])'])) > contrast('white', scale('group_scale', datum['$(opts[:group])'])) ? 'black' : 'white' : 'transparent'" )
+    elseif opts[:labelcolor] == :auto && opts[:colorresponse] !== nothing
+        mk_encode[:fill] = Dict{Symbol, Any}(:signal =>  "isValid(datum['__height__bar__']) ? contrast('black', scale('color_scale_$idx', datum['__color__value__'])) > contrast('white', scale('color_scale_$idx', datum['__color__value__'])) ? 'black' : 'white' : 'transparent'" )
     else
         if opts[:labelcolor] == :auto
             opts[:labelcolor] = :black
@@ -545,8 +574,11 @@ function _segment_label!(mk, cat, var, all_args, opts)
         end
     end
 
-
-    mk_encode[var][:offset] =  opts[:labeloffset]
+    if opts[:labelalternate]
+        mk_encode[var][:offset] = Dict{Symbol, Any}(:signal => "(datum['__height__bar__'] - datum['__height__bar__start__']) < 0 ? -1*$(opts[:labeloffset]) : $(opts[:labeloffset])")
+    else
+        mk_encode[var][:offset] =  opts[:labeloffset]
+    end
     if opts[:labelpos] == :end 
         mk_encode[var][:field] = "__height__bar__"
     elseif opts[:labelpos] == :start 
@@ -559,12 +591,22 @@ function _segment_label!(mk, cat, var, all_args, opts)
     mk_encode[cat][:band] = opts[:labelloc]
    
     if opts[:labelangle] !== nothing
-        mk_encode[:angle] = Dict{Symbol, Any}(:value => opts[:labelangle])
+        if opts[:labelalternate]
+            mk_encode[:angle] = Dict{Symbol, Any}(:signal => "(datum['__height__bar__'] - datum['__height__bar__start__']) < 0 ? -1*$(opts[:labelangle]) : $(opts[:labelangle])")
+        else
+            mk_encode[:angle] = Dict{Symbol, Any}(:value => opts[:labelangle])
+        end
     end
-    if opts[:labelalign] !== nothing
+    if opts[:labelalternate] && opts[:y] != 0
+        mk_encode[:align] = Dict{Symbol, Any}(:signal => "(datum['__height__bar__'] - datum['__height__bar__start__']) < 0 ? '$(_opp[opts[:labelalign]])' : '$(opts[:labelalign])'")
+    else
         mk_encode[:align] = Dict{Symbol, Any}(:value => opts[:labelalign])
     end
-    mk_encode[:baseline] = Dict{Symbol, Any}(:value => opts[:labelbaseline])
+    if opts[:labelalternate] && opts[:x] != 0
+        mk_encode[:baseline] = Dict{Symbol, Any}(:signal => "(datum['__height__bar__'] - datum['__height__bar__start__']) < 0 ? '$(_opp[opts[:labelbaseline]])' : '$(opts[:labelbaseline])'")
+    else
+        mk_encode[:baseline] = Dict{Symbol, Any}(:value => opts[:labelbaseline])
+    end
     mk_encode[:font] = Dict{Symbol, Any}(:value => something(opts[:labelfont], all_args.opts[:font]))
     mk_encode[:fontWeight] = Dict{Symbol, Any}(:value => something(opts[:labelfontweight], all_args.opts[:fontweight]))
     mk_encode[:fontStyle] = Dict{Symbol, Any}(:value => something(opts[:labelitalic], all_args.opts[:italic] ? "italic" : "normal"))

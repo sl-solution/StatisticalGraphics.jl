@@ -276,9 +276,7 @@ sgplot(
               group=:Ruling,
               grouporder=:data,
               baselineresponse=:baseline,
-              baselinestat=IMD.sum,
               orderresponse=:baseline,
-              orderstat=IMD.sum,
               outlinethickness=0.1,
               legend = :bar_leg,
               x2axis=true
@@ -330,7 +328,9 @@ sgplot(
         
         headercolname = false,
         headersize=12,
-        headerfontweight=900,                     
+        headerfontweight=900,
+        
+        height=400,
       )
 ```
 
