@@ -83,9 +83,23 @@ sgplot(ds, Bar(y=:x1, group=:x3, label=:height,
                 labelcolor=:auto, response=:x2, space=0.1,
                 labelpos=:middle, barcorner=10, normalize=true,
                 labeld3format=".1%", outlinecolor=:black,
-                groupspace=0.1, groupdisplay=:cluster),
+                groupspace=0.1),
                 groupcolormodel=Dict(:scheme=>:darkgreen),
                 xaxis=Axis(title="Normalized sum of x2", domain=false, d3format="%"),
                 yaxis=Axis(domain=false, ticksize=0, order=:ascending),
                 legend=false,
                 clip=false)
+
+# Passing default `groupdisplay`
+
+sgplot(ds, Bar(y=:x1, group=:x3, label=:height,
+                labelcolor=:auto, response=:x2, space=0.1,
+                labelpos=:middle, barcorner=10, normalize=true,
+                labeld3format=".1%", outlinecolor=:black,
+                groupspace=0.1),
+                groupcolormodel=Dict(:scheme=>:darkgreen),
+                xaxis=Axis(title="Normalized sum of x2", domain=false, d3format="%"),
+                yaxis=Axis(domain=false, ticksize=0, order=:ascending),
+                legend=false,
+                clip=false)
+                
