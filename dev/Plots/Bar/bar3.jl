@@ -50,9 +50,7 @@ sgplot(
               group=:Ruling,
               grouporder=:data,
               baselineresponse=:baseline,
-              baselinestat=IMD.sum,
               orderresponse=:baseline,
-              orderstat=IMD.sum,
               outlinethickness=0.1,
               legend = :bar_leg,
               x2axis=true
