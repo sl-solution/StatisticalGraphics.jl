@@ -5,7 +5,7 @@
 # cover: assets/bar_chart4.svg
 # ---
 
-using InMemoryDatasets, StatisticalGraphics, DLMReader
+using InMemoryDatasets, StatisticalGraphics, DLMReader, Chain
 
 svg("assets/bar_chart4.svg", sgplot(Dataset(x=repeat(1:5, inner=2), y=[5,6,7,8,6,3,2,4,2,1], g=repeat(1:2, 5),z=[-5,0,-7,0,-6,0,-4,0,-2,0]), Bar(y=:x, response=:y, group=:g, normalize=true, label=:height, labeld3format=".0%", labelpos=:middle, labelcolor=:auto), nominal=:g, yaxis=Axis(reverse=true, domain=false, titlecolor=:white, labelcolor=:white, tickcolor=:white), xaxis=Axis(domain=true, offset=5, titlecolor=:white, tickcolor=:white, d3format="%"), width=100, height=100, legend=false, groupcolormodel=Dict(:scheme=>:darkred))) #hide #md
 
@@ -95,11 +95,41 @@ sgplot(ds, Bar(y=:x1, group=:x3, label=:height,
 sgplot(ds, Bar(y=:x1, group=:x3, label=:height,
                 labelcolor=:auto, response=:x2, space=0.1,
                 labelpos=:middle, barcorner=10, normalize=true,
-                labeld3format=".1%", outlinecolor=:black,
-                groupspace=0.1),
+                labeld3format=".1%", outlinecolor=:black),
                 groupcolormodel=Dict(:scheme=>:darkgreen),
                 xaxis=Axis(title="Normalized sum of x2", domain=false, d3format="%"),
                 yaxis=Axis(domain=false, ticksize=0, order=:ascending),
                 legend=false,
                 clip=false)
-                
+
+# Population Change
+
+state_pop = filereader(joinpath(dirname(pathof(StatisticalGraphics)),
+                              "..", "docs", "assets", "state-population-2010-2019.tsv"),
+                              delimiter='\t')
+
+@chain state_pop  begin
+    modify!([2,3] => byrow(x->(x[1]-x[2])/x[2])=>:Change,
+                 :Change=>byrow(>(0))=>:Color)
+    sgplot([
+            Bar(y=:State, response=:Change,
+                orderresponse=:Change,
+                colorresponse=:Color, colormodel=[:darkorange, :steelblue],
+                label=:height, labeld3format="+.1%", labeloffset=5,
+                labelalign=:left,
+                labelsize=8,
+                x2axis=true),
+            Bar(y=:State, response=:Change, opacity=0,
+                label=:category, labeloffset=-5, labelalign=:right,
+                labelsize=8,labelpos=:start,
+                x2axis=true)
+            ],
+            x2axis=Axis(title="Change", domain=false, d3format="%", grid=true),
+            yaxis=Axis(show=false),
+            clip=false,
+            legend=false,
+            fontweight=100,
+            height=600,
+            width=400
+        )
+end                            
