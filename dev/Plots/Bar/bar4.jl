@@ -1,4 +1,4 @@
-using InMemoryDatasets, StatisticalGraphics, DLMReader
+using InMemoryDatasets, StatisticalGraphics, DLMReader, Chain
 
 cars = filereader(joinpath(dirname(pathof(StatisticalGraphics)),
                               "..", "docs", "assets", "cars.csv"))
@@ -67,13 +67,42 @@ sgplot(ds, Bar(y=:x1, group=:x3, label=:height,
 sgplot(ds, Bar(y=:x1, group=:x3, label=:height,
                 labelcolor=:auto, response=:x2, space=0.1,
                 labelpos=:middle, barcorner=10, normalize=true,
-                labeld3format=".1%", outlinecolor=:black,
-                groupspace=0.1),
+                labeld3format=".1%", outlinecolor=:black),
                 groupcolormodel=Dict(:scheme=>:darkgreen),
                 xaxis=Axis(title="Normalized sum of x2", domain=false, d3format="%"),
                 yaxis=Axis(domain=false, ticksize=0, order=:ascending),
                 legend=false,
                 clip=false)
+
+state_pop = filereader(joinpath(dirname(pathof(StatisticalGraphics)),
+                              "..", "docs", "assets", "state-population-2010-2019.tsv"),
+                              delimiter='\t')
+
+@chain state_pop  begin
+    modify!([2,3] => byrow(x->(x[1]-x[2])/x[2])=>:Change,
+                 :Change=>byrow(>(0))=>:Color)
+    sgplot([
+            Bar(y=:State, response=:Change,
+                orderresponse=:Change,
+                colorresponse=:Color, colormodel=[:darkorange, :steelblue],
+                label=:height, labeld3format="+.1%", labeloffset=5,
+                labelalign=:left,
+                labelsize=8,
+                x2axis=true),
+            Bar(y=:State, response=:Change, opacity=0,
+                label=:category, labeloffset=-5, labelalign=:right,
+                labelsize=8,labelpos=:start,
+                x2axis=true)
+            ],
+            x2axis=Axis(title="Change", domain=false, d3format="%", grid=true),
+            yaxis=Axis(show=false),
+            clip=false,
+            legend=false,
+            fontweight=100,
+            height=600,
+            width=400
+        )
+end
 
 # This file was generated using Literate.jl, https://github.com/fredrikekre/Literate.jl
 
