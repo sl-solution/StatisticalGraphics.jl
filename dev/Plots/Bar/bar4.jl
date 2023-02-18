@@ -49,7 +49,8 @@ ds = Dataset(rand(1:4, 100, 2), :auto)
 
 sgplot(ds, Bar(x=:x1, group=:x2, label=:height), nominal=:x2)
 
-sgplot(ds, Bar(x=:x1, group=:x2, label=:height, labelcolor=:auto), nominal=:x2)
+sgplot(ds, Bar(x=:x1, group=:x2, label=:height, labelcolor=:auto),
+                    nominal=:x2, groupcolormodel=Dict(:scheme=>:greys))
 
 ds = Dataset(rand(1:4, 100, 10), :auto)
 
