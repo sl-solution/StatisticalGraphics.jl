@@ -28,6 +28,8 @@ BAR_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0, :group => nothing,
     :baselineresponse => nothing,  # each bar (or each group when groupped) can have its own baseline 
     :baselinestat => nothing, # same rule as :stat
 
+    :missingmode => 0, # how to handle missings in category or group.  0 = nothing, 1 = no missing in category, 2 = no missing in group, 3 = no missing in category or group, 4 = no missing in both category and group
+
     #data label
     :label=>:none, # :height or :category
     :labelfont=>nothing,
@@ -92,6 +94,7 @@ end
 function _push_plots!(vspec, plt::Bar, all_args; idx=1)
     # check if the required arguments are passed / create a new ds and push it to out_ds
     col, new_ds = _check_and_normalize!(plt, all_args)
+
     _add_legends!(plt, all_args, idx)
     data_csv = tempname()
     filewriter(data_csv, new_ds, mapformats=all_args.mapformats, quotechar='"')
@@ -362,9 +365,22 @@ function _check_and_normalize!(plt::Bar, all_args)
     else
         g_col = copy(_extra_col_for_panel)
     end
-    # we need to refer to the names in bar_ds not ds - so index are not useful
-    _extra_col_for_panel_names_ = names(ds, _extra_col_for_panel)
-    unique!(pushfirst!(g_col, IMD.index(ds)[col]))
+
+
+    if opts[:missingmode] in (1, 3)
+        cp_ds = dropmissing(ds, col, threads = false, mapformats=all_args.mapformats, view=true)
+    elseif opts[:missingmode] in (2, 3) && opts[:group] !== nothing
+        cp_ds = dropmissing(ds, opts[:group], threads = false, mapformats=all_args.mapformats, view=true)
+    elseif opts[:missingmode] == 4
+        _cols = unique([col, something(opts[:group], col) ])
+        cp_ds = dropmissing(ds, _cols, threads = false, mapformats=all_args.mapformats, view=true)
+    else
+        cp_ds = ds
+    end
+
+    # we need to refer to the names in bar_ds not cp_ds - so index are not useful
+    _extra_col_for_panel_names_ = names(cp_ds, _extra_col_for_panel)
+    unique!(pushfirst!(g_col, IMD.index(cp_ds)[col]))
 
     if opts[:response] === nothing
         # TODO we should move this to constructor
@@ -372,7 +388,7 @@ function _check_and_normalize!(plt::Bar, all_args)
             opts[:stat] = freq
         end
 
-        bar_ds = combine(gatherby(ds, g_col, mapformats=all_args.mapformats, threads=threads), col => (x -> opts[:stat](_f, x)) => :__height__bar__, color_response => (x -> color_stat(_f_color, x)) => :__color__value__, threads=threads)
+        bar_ds = combine(gatherby(cp_ds, g_col, mapformats=all_args.mapformats, threads=threads), col => (x -> opts[:stat](_f, x)) => :__height__bar__, color_response => (x -> color_stat(_f_color, x)) => :__color__value__, threads=threads)
         if opts[:normalize] && opts[:group] !== nothing
             modify!(gatherby(bar_ds, [col; _extra_col_for_panel_names_], mapformats=all_args.mapformats, threads=false), :__height__bar__ => opts[:normalizer], threads=false)
         elseif opts[:normalize] && opts[:group] === nothing
@@ -380,7 +396,7 @@ function _check_and_normalize!(plt::Bar, all_args)
         end
         #baseline must be computed within each group
         #we use hash method, since we are not sure the panel columns are sortable
-        bar_ds_base = combine(gatherby(ds, unique([col; _extra_col_for_panel_names_]), mapformats=all_args.mapformats, threads=threads), base_response => (x -> base_stat(_f_base, x)) => :__baseline__value__, threads=threads)
+        bar_ds_base = combine(gatherby(cp_ds, unique([col; _extra_col_for_panel_names_]), mapformats=all_args.mapformats, threads=threads), base_response => (x -> base_stat(_f_base, x)) => :__baseline__value__, threads=threads)
         leftjoin!(bar_ds, bar_ds_base[!, unique(["__baseline__value__"; col; _extra_col_for_panel_names_])], on=unique([col; _extra_col_for_panel_names_]), method=:hash, mapformats=all_args.mapformats)
         if opts[:group] !== nothing
             if opts[:grouporder] == :ascending
@@ -401,12 +417,12 @@ function _check_and_normalize!(plt::Bar, all_args)
     else
         _f_response = identity
         if all_args.mapformats
-            _f_response = getformat(ds, opts[:response])
+            _f_response = getformat(cp_ds, opts[:response])
         end
         if opts[:stat] === nothing
             opts[:stat] = IMD.sum
         end
-        bar_ds = combine(gatherby(ds, g_col, mapformats=all_args.mapformats, threads=threads), opts[:response] => (x -> opts[:stat](_f_response, x)) => :__height__bar__, color_response => (x -> color_stat(_f_color, x)) => :__color__value__, threads=threads)
+        bar_ds = combine(gatherby(cp_ds, g_col, mapformats=all_args.mapformats, threads=threads), opts[:response] => (x -> opts[:stat](_f_response, x)) => :__height__bar__, color_response => (x -> color_stat(_f_color, x)) => :__color__value__, threads=threads)
         if opts[:normalize] && opts[:group] !== nothing
             modify!(gatherby(bar_ds, [col; _extra_col_for_panel_names_], mapformats=all_args.mapformats, threads=false), :__height__bar__ => opts[:normalizer], threads=false)
         elseif opts[:normalize] && opts[:group] === nothing
@@ -414,7 +430,7 @@ function _check_and_normalize!(plt::Bar, all_args)
         end
         #baseline must be computed within each group
         #we use hash method, since we are not sure the panel columns are sortable
-        bar_ds_base = combine(gatherby(ds, unique([col; _extra_col_for_panel_names_]), mapformats=all_args.mapformats, threads=false), base_response => (x -> base_stat(_f_base, x)) => :__baseline__value__)
+        bar_ds_base = combine(gatherby(cp_ds, unique([col; _extra_col_for_panel_names_]), mapformats=all_args.mapformats, threads=false), base_response => (x -> base_stat(_f_base, x)) => :__baseline__value__)
         leftjoin!(bar_ds, bar_ds_base[!, unique(["__baseline__value__"; col; _extra_col_for_panel_names_])], on=unique([col; _extra_col_for_panel_names_]), method=:hash, mapformats=all_args.mapformats, threads=false)
         if opts[:group] !== nothing
             if opts[:grouporder] == :ascending
@@ -435,7 +451,7 @@ function _check_and_normalize!(plt::Bar, all_args)
     end
     # the axes order must be :data for the following to be effective
     if opts[:orderresponse] !== nothing
-        bar_order = combine(gatherby(ds, unique([col; _extra_col_for_panel_names_]), mapformats=all_args.mapformats, threads=all_args.threads), opts[:orderresponse] => (x -> opts[:orderstat](_f_order, x)) => :__bar__order__column__, threads=threads)
+        bar_order = combine(gatherby(cp_ds, unique([col; _extra_col_for_panel_names_]), mapformats=all_args.mapformats, threads=all_args.threads), opts[:orderresponse] => (x -> opts[:orderstat](_f_order, x)) => :__bar__order__column__, threads=threads)
         leftjoin!(bar_ds, bar_order, on=unique([col; _extra_col_for_panel_names_]), mapformats=all_args.mapformats, threads=false, method=:hash)
         sort!(bar_ds, :__bar__order__column__)
     end
@@ -467,8 +483,8 @@ function _check_and_normalize!(plt::Bar, all_args)
     end
     # make sure that values are recorded properly - sometime the column type may be Any and this will cause problem later when we are obtaining the domains
     #TODO we need to take the same approach for other chart types
-    modify!(bar_ds, [:__height__bar__, :__height__bar__start__, :__baseline__value__, :__color__value__] .=> byrow(identity), threads=false)
-    modify!(bar_ds, [:__height__bar__, :__height__bar__start__] .=> byrow(Float64), threads=false)
+    modify!(bar_ds, [:__height__bar__, :__height__bar__start__, :__baseline__value__, :__color__value__] .=> byrow(Float64), threads=false)
+    # modify!(bar_ds, [:__height__bar__, :__height__bar__start__] .=> byrow(Float64), threads=false)
 
     return col, bar_ds
     @label argerr

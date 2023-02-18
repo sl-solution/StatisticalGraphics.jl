@@ -17,6 +17,9 @@ PIE_DEFAULT = Dict{Symbol,Any}(:category => nothing,
     :opacity => 1,
     :space => 0,
 
+    :missingmode => 0, # how to handle missings in category or group.  0 = nothing, 1 = no missing in category, 2 = no missing in group, 3 = no missing in category or group, 4 = no missing in both category and group
+
+
     :label=>nothing,  # show labels for each piecorner - :category, :percent, :both are valid options
     :decimal=>1, # number of digits after the decimal when percentages are shown
     :labelpos => 0.5, # where to put the labels
@@ -232,6 +235,18 @@ function _check_and_normalize!(plt::Pie, all_args)
         unique!(pushfirst!(_extra_col_for_panel_names_, opts[:group]))
     end
 
+     # we should handle missings here before passing ds for further analysis
+    if opts[:missingmode] in (1, 3)
+        cp_ds = dropmissing(ds, col, threads = threads, mapformats=all_args.mapformats, view=true)
+    elseif opts[:missingmode] in (2, 3) && opts[:group] !== nothing
+        cp_ds = dropmissing(ds, opts[:group], threads = threads, mapformats=all_args.mapformats, view=true)
+    elseif opts[:missingmode] == 4
+        _cols = unique([col, something(opts[:group], col) ])
+        cp_ds = dropmissing(ds, _cols, threads = threads, mapformats=all_args.mapformats, view=true)
+    else
+        cp_ds = ds
+    end
+
 
     if opts[:response] === nothing
         # TODO we should move this to constructor
@@ -239,21 +254,22 @@ function _check_and_normalize!(plt::Pie, all_args)
             opts[:stat] = freq
         end
 
-        pie_ds = combine(gatherby(ds, g_col, mapformats=all_args.mapformats, threads=threads), col => (x -> opts[:stat](_f, x)) => "$(sg_col_prefix)__pie__val__", threads=threads)
+        pie_ds = combine(gatherby(cp_ds, g_col, mapformats=all_args.mapformats, threads=threads), col => (x -> opts[:stat](_f, x)) => "$(sg_col_prefix)__pie__val__", threads=threads)
     else
         _f_response = identity
         if all_args.mapformats
-            _f_response = getformat(ds, opts[:response])
+            _f_response = getformat(cp_ds, opts[:response])
         end
         if opts[:stat] === nothing
             opts[:stat] = IMD.sum
         end
-        pie_ds = combine(gatherby(ds, g_col, mapformats=all_args.mapformats, threads=threads), opts[:response] => (x -> opts[:stat](_f_response, x)) => "$(sg_col_prefix)__pie__val__", threads=threads)
+        pie_ds = combine(gatherby(cp_ds, g_col, mapformats=all_args.mapformats, threads=threads), opts[:response] => (x -> opts[:stat](_f_response, x)) => "$(sg_col_prefix)__pie__val__", threads=threads)
      
     end
     if opts[:sort]
         sort!(pie_ds, "$(sg_col_prefix)__pie__val__", threads=false)
     end
+    
     modify!(gatherby(pie_ds, _extra_col_for_panel_names_, mapformats=all_args.mapformats, threads=false), "$(sg_col_prefix)__pie__val__" =>byrow(identity)=>"$(sg_col_prefix)__pie__val__", "$(sg_col_prefix)__pie__val__" => (x->_pie_transform(x, _deg2rad(opts[:startangle]), _deg2rad(opts[:endangle])))=> "$(sg_col_prefix)pie__info__", "$(sg_col_prefix)pie__info__"=>splitter=>["$(sg_col_prefix)pie__startangle__","$(sg_col_prefix)pie__endangle__", "$(sg_col_prefix)pie__percentage__", "$(sg_col_prefix)pie__textangle__"])
     select!(pie_ds, Not("$(sg_col_prefix)pie__info__"))
 
@@ -264,7 +280,7 @@ function _check_and_normalize!(plt::Pie, all_args)
         insertcols!(pie_ds, "$(sg_col_prefix)_pie__outerradius" => opts[:outerradius])
         insertcols!(pie_ds, "$(sg_col_prefix)_pie__labelradius" => _w_ * opts[:outerradius] + (1- _w_) * opts[:innerradius])
     else
-        group_info_ds = unique(ds[!, [opts[:group]]], threads=threads, mapformats=all_args.mapformats)
+        group_info_ds = unique(cp_ds[!, [opts[:group]]], threads=threads, mapformats=all_args.mapformats)
         n_groups = nrow(group_info_ds)
         total_radius = opts[:outerradius] - opts[:innerradius] # TODO should we use abs value?
         total_radius -= (n_groups-1) * opts[:groupspace] # subtract the space between groups

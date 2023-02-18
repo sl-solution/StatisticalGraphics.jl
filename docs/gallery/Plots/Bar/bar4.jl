@@ -73,7 +73,8 @@ sgplot(ds, Bar(x=:x1, group=:x2, label=:height), nominal=:x2)
 
 # Passing `labelcolor=:auto` to assign label color based on the contrast of colors
 
-sgplot(ds, Bar(x=:x1, group=:x2, label=:height, labelcolor=:auto), nominal=:x2)
+sgplot(ds, Bar(x=:x1, group=:x2, label=:height, labelcolor=:auto), 
+                    nominal=:x2, groupcolormodel=Dict(:scheme=>:greys))
 
 # example
 

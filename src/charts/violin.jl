@@ -27,6 +27,8 @@ VIOLIN_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0, :category => nothing, # x or
   
     :legend => nothing,
 
+    :missingmode => 0, # how to handle missings in category.  0 = nothing, 1 = no missing in category
+
     :tooltip=>false,
     :clip=>nothing
 
@@ -51,6 +53,9 @@ end
 function _push_plots!(vspec, plt::Violin, all_args; idx=1)
     # check if the required arguments are passed / create a new ds and push it to out_ds
     cols, new_ds, max_density = _check_and_normalize!(plt, all_args)
+    if plt.opts[:missingmode] == 1 && plt.opts[:category] !== nothing
+        dropmissing!(new_ds, plt.opts[:category], threads = false, mapformats=all_args.mapformats)
+    end
     _add_legends!(plt, all_args, idx)
     data_csv = tempname()
     filewriter(data_csv, new_ds, mapformats=all_args.mapformats, quotechar='"')
