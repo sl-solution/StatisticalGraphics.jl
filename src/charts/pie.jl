@@ -157,7 +157,11 @@ function _push_plots!(vspec, plt::Pie, all_args; idx=1)
             t_val = "[datum['$(opts[:category])'], format(datum['$(sg_col_prefix)pie__percentage__'], '0.$(opts[:decimal])%')]"
         end
         s_spec_marks[:encode][:enter][:text] = Dict{Symbol,Any}(:signal => t_val)
-        s_spec_marks[:encode][:enter][:fill] = Dict{Symbol,Any}(:value => "$(opts[:labelcolor])")
+        if opts[:labelcolor] == :auto
+            s_spec_marks[:encode][:enter][:fill] = Dict{Symbol,Any}(:signal => "contrast('black', scale('color_scale_$idx', datum['$col'])) > contrast('white', scale('color_scale_$idx', datum['$col'])) ? 'black' : 'white'")
+        else
+            s_spec_marks[:encode][:enter][:fill] = Dict{Symbol,Any}(:value => "$(opts[:labelcolor])")
+        end
         s_spec_marks[:encode][:enter][:font] = Dict{Symbol,Any}(:value => something(opts[:labelfont], all_args.opts[:font]))
         s_spec_marks[:encode][:enter][:fontWeight] = Dict{Symbol,Any}(:value => something(opts[:labelfontweight], all_args.opts[:fontweight]))
         s_spec_marks[:encode][:enter][:fontStyle] = Dict{Symbol,Any}(:value => something(opts[:labelitalic], all_args.opts[:italic]) ? "italic" : "normal")

@@ -25,6 +25,19 @@ sgplot(ds, Bar(x=:x, response=:y, group=:g,
                          groupdisplay=:none, barwidth=:nest),
                             groupcolormodel=Dict(:scheme=>:darkgreen))
 
+# Using generated data
+
+ds = Dataset(rand(1:40, 1000, 2), :auto)
+
+sgplot(ds, Bar(y=:x1, group=:x2, normalize=true, space=0),
+                groupcolormodel=:scheme=>:darkred,
+                xaxis=Axis(nice=false, show=false),
+                yaxis=Axis(show=false),
+                height=600,
+                legend=false,
+
+                )
+
 # **[Revenue by Music Format, 1973–2018](https://observablehq.com/@mbostock/revenue-by-music-format-1973-2018)**
 
 # Reproducing an example from the [`D3`](http://d3js.org)`s examples collection.
