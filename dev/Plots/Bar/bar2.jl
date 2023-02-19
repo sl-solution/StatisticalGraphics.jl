@@ -10,6 +10,17 @@ sgplot(ds, Bar(x=:x, response=:y, group=:g,
                          groupdisplay=:none, barwidth=:nest),
                             groupcolormodel=Dict(:scheme=>:darkgreen))
 
+ds = Dataset(rand(1:40, 1000, 2), :auto)
+
+sgplot(ds, Bar(y=:x1, group=:x2, normalize=true, space=0),
+                groupcolormodel=:scheme=>:darkred,
+                xaxis=Axis(nice=false, show=false),
+                yaxis=Axis(show=false),
+                height=600,
+                legend=false,
+
+                )
+
 music = filereader(joinpath(dirname(pathof(StatisticalGraphics)),
                                  "..", "docs", "assets", "music.csv"))
 color_ds = filereader(joinpath(dirname(pathof(StatisticalGraphics)),
