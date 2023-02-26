@@ -1,9 +1,9 @@
 {
     "theme": "list",
     "order":[
-        "Scatter",
         "Line",
-        "Bar",
-        "BoxPlot"
+        "Scatter",
+        "BoxPlot",
+        "Bar"
     ]
 }
