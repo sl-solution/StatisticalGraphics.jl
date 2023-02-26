@@ -240,13 +240,16 @@ function _check_and_normalize!(plt::Pie, all_args)
     end
 
      # we should handle missings here before passing ds for further analysis
-    if opts[:missingmode] in (1, 3)
+    if opts[:missingmode] == 1
         cp_ds = dropmissing(ds, col, threads = threads, mapformats=all_args.mapformats, view=true)
-    elseif opts[:missingmode] in (2, 3) && opts[:group] !== nothing
+    elseif opts[:missingmode] == 2 && opts[:group] !== nothing
         cp_ds = dropmissing(ds, opts[:group], threads = threads, mapformats=all_args.mapformats, view=true)
-    elseif opts[:missingmode] == 4
+    elseif opts[:missingmode] == 3
         _cols = unique([col, something(opts[:group], col) ])
         cp_ds = dropmissing(ds, _cols, threads = threads, mapformats=all_args.mapformats, view=true)
+    elseif opts[:missingmode] == 4
+        _cols = unique([col, something(opts[:group], col) ])
+        cp_ds = delete(ds, _cols, by = ismissing, threads = threads, mapformats=all_args.mapformats, view=true)
     else
         cp_ds = ds
     end
