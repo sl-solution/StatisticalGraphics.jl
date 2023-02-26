@@ -1,59 +1,10 @@
-BAR_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0, :group => nothing,
-    :response => nothing,
-    :stat => nothing, #by default, if response is given we use sum, if not we use freq - the function passed as stat must accept two arguments f and x, f is a function and x is a abstract vector. function apply f on each elements of x and return the aggregations
-    :normalize => false, # use normalizer for more control about how to do it
-    :normalizer => x -> x ./ sum(x), # within each level of x/y 
-    :x2axis => false,
-    :y2axis => false,
-    :opacity => 1,
-    :outlinethickness => 1,
-    :barwidth => 1, # can be between[0,1], or :nest to display each group nested in the other one
-    :nestfactor => nothing,
-    :filled => true,
-    :fill => "null",
-    :fillcolor => :white,
-    :opacity => 1,
-    :color => "#4682b4",
-    :colorresponse => nothing,
-    :colorstat => nothing, # the same rule as :stat
-    :colormodel => :diverging, # we use linear scale to produce colors
-    :space => 0.1, # the space between bars - the space is calculated as space * total_bandwidth
-    :groupspace => 0.05, # the space between bars inside each group - for groupdisplay = :cluster
-    :outlinecolor => :white,
-    :groupdisplay => :stack, #:stack, :cluster, :step (i.e. stacked and cluster), or :none
-    :grouporder => :ascending, # :data, :ascending, :descending, userdefined order (by giving a vector of group level) - having a group column in panelby can cause some issues
-    :orderresponse => nothing, # by default axis order control it, but it can be controlled by a column
-    :orderstat => nothing, # freq is default aggregator, however, it can be any other function 
-    :baseline => 0,
-    :baselineresponse => nothing,  # each bar (or each group when groupped) can have its own baseline 
-    :baselinestat => nothing, # same rule as :stat
+"""
+    Bar(args...)
 
-    :missingmode => 0, # how to handle missings in category or group.  0 = nothing, 1 = no missing in category, 2 = no missing in group, 3 = no missing in category or group, 4 = no missing in both category and group
+Represent a Bar chart with given arguments.
 
-    #data label
-    :label=>:none, # :height or :category
-    :labelfont=>nothing,
-    :labelbaseline=>nothing,
-    :labelfontweight=>nothing,
-    :labelitalic=>nothing,
-    :labelsize=>nothing,
-    :labelcolor=>:black,# allow :group, :colorresponse to use their color if available 
-    :labelangle=>nothing,
-    :labeldir=>:ltr,
-    :labellimit=>nothing,
-    :labeloffset=>0,
-    :labelpos => :end, # :end, :start, :middle
-    :labelloc=>0.5, # between 0 and 1
-    :labeld3format=>"",
-    :labelopacity=>1,
-    :labelalign=>nothing,
-    :labelalternate=>true, # if true, it automatically change the baseline, align and offset of the label text
-    :tooltip => false, # it can be true, only if labelresponse is provided
-
-
-    :legend => nothing, :barcorner => [0, 0, 0, 0], #corner radius (cornerRadiusTopLeft, cornerRadiusTopRight, cornerRadiusBottomLeft, cornerRadiusBottomRight)
-    :clip => nothing
-)
+$(print_doc(BAR_DEFAULT))
+"""
 mutable struct Bar <: SGMarks
     opts
     function Bar(; opts...)

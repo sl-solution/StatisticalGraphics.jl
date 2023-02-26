@@ -42,6 +42,7 @@ module StatisticalGraphics
 
     include("util.jl")
     include("util_reg.jl")
+    include("kwds.jl")
     include("gradient.jl")
     include("charts/axes.jl")
     include("charts/legend.jl")
