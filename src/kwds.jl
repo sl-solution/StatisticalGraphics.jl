@@ -41,7 +41,8 @@ getcat(d::SGKwds, k) = get(d.opts[:k], :__cat, nothing)
 
 function print_doc(sgkwds::SGKwds)
     sgk=sgkwds.opts
-    ds = Dataset(allk=Symbol[], dfs=Any[], ords=Int[], cat=String[], docs=String[])
+    # ords are float because we sometime like to squeeze categories in specific place
+    ds = Dataset(allk=Symbol[], dfs=Any[], ords=Float64[], cat=String[], docs=String[])
     
     # first we collect every thing into a dataset
     for (k, v) in sgk
@@ -100,6 +101,78 @@ Kwds_docs = Dict{Symbol, String}(
 )
 
 bar_normalizer(x) = x ./ sum(x)
+
+AXES_DEFAULT = SGKwds(
+    :type => __dic(:default=> :linear, :__ord=>0, :__cat => "Scale information", :__doc=>"The scale to be used for the axis, e.g. `:linear`, `:point`, `:band`, `:time`, `:date`, `:log`, `:symlog`, `:sqrt`, `:power`,..."),   
+    :exponent => __dic(:default=> nothing, :__ord=>0, :__cat => "Scale information", :__doc=>"When `type=:power`, this will be used to pass the exponent."),
+    :show => __dic(:default=> true, :__ord=>1, :__cat => "Axis options", :__doc=>"When it is `false`, `domain`, `title`, `ticks`, `labels` are set to `false`."),
+    :values => __dic(:default=> nothing, :__ord=>1, :__cat => "Axis options", :__doc=>"User can use the keyword argument to manually put ticks. When a tuple of vector is passed, the first element will be used for the location and the second one will be used as displayed values."),
+    :color => __dic(:default=> :black, :__ord=>2, :__cat => "Axis appearance", :__doc=>Kwds_docs[:color]),
+    :range => __dic(:default=> nothing, :__ord=>1, :__cat => "Axis options", :__doc=>"Allow to manually set the domain of the axis."),
+    :reverse => __dic(:default=> false, :__ord=>1, :__cat => "Axis options", :__doc=>"Reverse the order of ticks."),
+    :order => __dic(:default=> :data, :__ord=>1, :__cat => "Axis options", :__doc=>"Determine how to order ticks for discrete types axis, e.g. `:data`, `:ascending`, `:descending`."),
+    :dropmissing => __dic(:default=> false, :__ord=>1, :__cat => "Axis options", :__doc=>"When `true` drops missings from discrete type axis domain."),
+    :offset => __dic(:default=> 1, :__ord=>1, :__cat => "Axis options", :__doc=>"The value to offset the axis."),
+    :padding => __dic(:default=> nothing, :__ord=>1, :__cat => "Axis options", :__doc=>"Padding to extend axis. For discrete type axis it should be between 0 and 1, and for other type it indicates the amount in pixel."),
+
+    :domaincolor => __dic(:default=> nothing, :__ord=>3, :__cat => "Domain properties", :__doc=>Kwds_docs[:color]),
+    :domain => __dic(:default=> true, :__ord=>3, :__cat => "Domain properties", :__doc=>"If `false` the domain line would not be shown."),
+    :domainthickness => __dic(:default=> 1.01, :__ord=>3, :__cat => "Domain properties", :__doc=>"The domain line thickness."),
+    :domaindash => __dic(:default=> [0], :__ord=>3, :__cat => "Domain properties", :__doc=>"The domain line dash."),
+
+    :title => __dic(:default=> nothing, :__ord=>5, :__cat => "Title properties", :__doc=>"Axis title."),
+    :titlecolor => __dic(:default=> nothing, :__ord=>5, :__cat => "Title properties", :__doc=>Kwds_docs[:fontcolor]),
+    :titleloc => __dic(:default=> :middle, :__ord=>5, :__cat => "Title properties", :__doc=>"Title location, i.e. `:middle`, `:end`, `:start`."),
+    :titlealign => __dic(:default=> nothing, :__ord=>5, :__cat => "Title properties", :__doc=>Kwds_docs[:fontalign]),
+    :titleangle => __dic(:default=> nothing, :__ord=>5, :__cat => "Title properties", :__doc=>Kwds_docs[:fontangle]),
+    :titlebaseline => __dic(:default=> nothing, :__ord=>5, :__cat => "Title properties", :__doc=>Kwds_docs[:fontbaseline]),
+    :titlepos => __dic(:default=> nothing, :__ord=>5, :__cat => "Title properties", :__doc=>"Title position in the form of [x,y]."),
+    :titlesize => __dic(:default=> nothing, :__ord=>5, :__cat => "Title properties", :__doc=>Kwds_docs[:fontsize]),
+    :titlepadding => __dic(:default=> nothing, :__ord=>5, :__cat => "Title properties", :__doc=>"Title padding."),
+    :titlefont => __dic(:default=> nothing, :__ord=>5, :__cat => "Title properties", :__doc=>Kwds_docs[:font]),
+    :titleitalic => __dic(:default=> nothing, :__ord=>5, :__cat => "Title properties", :__doc=>Kwds_docs[:italic]),
+    :titlefontweight => __dic(:default=> nothing, :__ord=>5, :__cat => "Title properties", :__doc=>Kwds_docs[:fontweight]),
+
+
+    :tickcount => __dic(:default=> nothing, :__ord=>4, :__cat => "Ticks properties", :__doc=>"Number of ticks."),
+    :ticks => __dic(:default=> true, :__ord=>4, :__cat => "Ticks properties", :__doc=>"If `false` the ticks will not be shown."),
+    :ticksize => __dic(:default=> 5, :__ord=>4, :__cat => "Ticks properties", :__doc=>"Ticks size in pixel."),
+    :tickcolor => __dic(:default=> nothing, :__ord=>4, :__cat => "Ticks properties", :__doc=>Kwds_docs[:color]),
+    :tickthickness => __dic(:default=> 1.01, :__ord=>4, :__cat => "Ticks properties", :__doc=>"Tickness of ticks in pixel."),
+    :tickdash => __dic(:default=> [0], :__ord=>4, :__cat => "Ticks properties", :__doc=>"Ticks dash style."),
+
+    :grid => __dic(:default=> false, :__ord=>1.5, :__cat => "Grids", :__doc=>"Determine if the grids are shown."),
+    :griddash => __dic(:default=> [0], :__ord=>1.5, :__cat => "Grids", :__doc=>"Grids dash style."),
+    :gridthickness => __dic(:default=> 0.5, :__ord=>1.5, :__cat => "Grids", :__doc=>"Grids tickness."),
+    :gridcolor => __dic(:default=> :lightgray, :__ord=>1.5, :__cat => "Grids", :__doc=>Kwds_docs[:color]),
+
+
+    :nice => __dic(:default=> true, :__ord=>1, :__cat => "Axis options", :__doc=>"Automatically round axis domain to make it nice."),
+    :d3format => __dic(:default=> nothing, :__ord=>1, :__cat => "Axis options", :__doc=>"Allow users to directly pass an axis format. It must follow the rules described in `d3.format()`."),
+    :d3formattype => __dic(:default=> nothing, :__ord=>1, :__cat => "Axis options", :__doc=>"If values are time or date, this option can be used to control their format."),
+    :labeloverlap => __dic(:default=> true, :__ord=>6, :__cat => "Labels properties", :__doc=>"If `true`, avoids overlapping of labels."),
+    :angle => __dic(:default=> 0, :__ord=>6, :__cat => "Labels properties", :__doc=>Kwds_docs[:fontangle]),
+    :baseline => __dic(:default=> nothing, :__ord=>6, :__cat => "Labels properties", :__doc=>Kwds_docs[:fontbaseline]),
+    :align => __dic(:default=> nothing, :__ord=>6, :__cat => "Labels properties", :__doc=>Kwds_docs[:fontalign]),
+    :showlabels => __dic(:default=> true, :__ord=>6, :__cat => "Labels properties", :__doc=>"If `false` the axis labels will not be shown."),
+    :labelcolor => __dic(:default=> nothing, :__ord=>6, :__cat => "Labels properties", :__doc=>Kwds_docs[:fontcolor]),
+    :labelpadding => __dic(:default=> nothing, :__ord=>6, :__cat => "Labels properties", :__doc=>"The extra padding between labels and ticks."),
+    :labelsize => __dic(:default=> nothing, :__ord=>6, :__cat => "Labels properties", :__doc=>Kwds_docs[:fontsize]),
+    :labelfont => __dic(:default=> nothing, :__ord=>6, :__cat => "Labels properties", :__doc=>Kwds_docs[:font]),
+    :labelitalic => __dic(:default=> nothing, :__ord=>6, :__cat => "Labels properties", :__doc=>Kwds_docs[:italic]),
+    :labelfontweight => __dic(:default=> nothing, :__ord=>6, :__cat => "Labels properties", :__doc=>Kwds_docs[:fontweight]),
+
+
+    :font => __dic(:default=> nothing, :__ord=>2, :__cat => "Axis appearance", :__doc=>"The default font that will be used for all elements of the axis."),
+    :italic => __dic(:default=> nothing, :__ord=>2, :__cat => "Axis appearance", :__doc=>"The default font style that will be used for all elements of the axis."),
+    :fontweight => __dic(:default=> nothing, :__ord=>2, :__cat => "Axis appearance", :__doc=>"The default font weight that will be used for all elements of the axis."),
+
+    :zindex => __dic(:default=> 0, :__ord=>7, :__cat=>"Miscellaneous", :__doc=>"If `1` puts the axis elements on top of other marks in the graph."),
+    :translate => __dic(:default=> nothing, :__ord=>7, :__cat=>"Miscellaneous", :__doc=>"The translate amount of the axis, see `vega` documentations for more information."),
+    # for internal use
+    :label_scale => __dic(:default=> nothing, :__ord=>7, :__cat=>"Miscellaneous", :__doc=>""),
+
+)
 
 BAR_DEFAULT = SGKwds(
     :x => __dic(:default=> 0, :__ord=>0, :__cat => "Required", :__doc=>"User should pass a single column for plotting the bar chart. User must pass either this or the `y` argument."),

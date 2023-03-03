@@ -1,78 +1,10 @@
-AXES_DEFAULT = Dict{Symbol, Any}(:type => :linear,
-                                 :exponent=>nothing,#if type=pow then user can pass exponent
-                                 :show => true, # if it is false, domain, ticks, labels and title are set to false
-                                 :values => nothing, # manually put ticks
+"""
+    Axis(args...)
 
-                                 :color=>:black, # default color
-                                 
-                                 :range=>nothing, #manually specifying axis domain - no effect when linkaxis is something rather than :both
+Represent an Axis with given arguments.
 
-                                 :reverse=>false,
-                                 :order => :data, # we support :ascending, and :descending too
-                                 :dropmissing=>false, #for discrete axes drop missing from domain
-                                 
-                                 :offset => 1,
-
-                                 :padding=>nothing, #padding to extend axis - for :band and :point is between 0 and 1 and for other type is the amount of extra pixels
-
-                                 :domaincolor => nothing,
-                                 :domain=>true,
-                                 :domainthickness=>1.01, #FIXME probably a bug in safari
-                                 :domaindash=>[0],
-                                
-                                 :title => nothing,
-                                 :titlecolor=>nothing,
-                                 :titleloc=>:middle, #:middle, :end, :start
-                                 :titlealign=>nothing,
-                                 :titleangle=>nothing,
-                                 :titlebaseline=>nothing,
-                                 :titlepos=>nothing, # in the form of [x,y]
-                                 :titlesize=>nothing,
-                                 :titlepadding=>nothing,
-
-                                 :tickcount=>nothing,
-                                 :ticks => true, #due to a bug in vega, setting this to false can cause some issues-workaround ticksize=0
-                                 :ticksize => 5,
-                                 :tickcolor=>nothing,
-                                 :tickthickness=>1.01, #FIXME probably a bug in safari
-                                 :tickdash=>[0],
-
-
-                                 :grid=>false,
-                                 :griddash=>[0],
-                                 :gridthickness=>0.5,
-                                 :gridcolor=>"lightgray",
-                                 
-                                 :nice => true,
-                                 :d3format => nothing, # allow users to directly pass an axis format - it must be consistent with d3.format()
-                                 :d3formattype=>nothing,
-                                 :labeloverlap => true,
-
-                                 :angle => 0,
-                                 :baseline=>nothing,
-                                 :align => nothing,
-                                 :showlabels=>true,
-                                 :labelcolor=>nothing,
-                                 :labelpadding=>nothing,
-                                 :labelsize=>nothing,
-
-
-                                 :font=>nothing,
-                                 :italic=>nothing,
-                                 :fontweight=>nothing,
-                                 :titlefont=>nothing,
-                                 :titleitalic=>nothing,
-                                 :titlefontweight=>nothing,
-                                 :labelfont=>nothing,
-                                 :labelitalic=>nothing,
-                                 :labelfontweight=>nothing,    
-                                 
-                                 :zindex=>0,
-                                 :translate=>nothing,
-                                 :label_scale=>nothing
-                                )
-
-
+$(print_doc(AXES_DEFAULT))
+"""
 struct Axis
     opts
     function Axis(; opts...)
