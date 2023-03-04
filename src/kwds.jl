@@ -78,7 +78,8 @@ Kwds_docs = Dict{Symbol, String}(
         :y2axis=>"When set to `true`, the right y-axis will be used for the current plot.",
         :opacity=>"The mark opacity from 0 (transparent) to 1 (opaque).",
         :outlinethickness=>"The mark outline thickness.",
-        :color=>"The default color for the mark. User can pass color's name as symbol (e.g. `:red`), as string (e.g. `\"red\"`), as HTML color value (e.g. `\"#4682b4\"`), or pass a gradient color using the `gradient()` function.",
+        :color=>"The default color for the mark. User can pass color's name as symbol (e.g. `:red`), as string (e.g. `\"red\"`), as HTML color value (e.g. `\"#4682b4\"`).",
+        :color_grad=>"The default color for the mark. User can pass color's name as symbol (e.g. `:red`), as string (e.g. `\"red\"`), as HTML color value (e.g. `\"#4682b4\"`), or pass a gradient color using the `gradient()` function.",
         :colormodel => "It specifies the color scheme to use for the marks.",
         :outlinecolor=>"The mark's outline color.",
         :font=>"The font name for displaying text.",
@@ -188,7 +189,7 @@ BAR_DEFAULT = SGKwds(
     :outlinethickness => __dic(:default=> 1, :__ord=>3, :__cat=>"Bar appearance", :__doc=>Kwds_docs[:outlinethickness]),
     :barwidth => __dic(:default=> 1, :__ord=>3, :__cat=>"Bar appearance", :__doc=>"The bar width proportion with respect to the available space. It can be any number between 0 and 1. User can pass `:nest` too, which in this case the bar width will be automatically calculated for each group in such a way that the bar widths in each group will be smaller than the previous group. Users can pass `nestfactor` to control how fast they would like the bar width change for each group."),
     :nestfactor => __dic(:default=> nothing, :__ord=>3, :__cat=>"Bar appearance", :__doc=>"When the `barwidth` keyword is set to `:nest` this will control how much change should be applied to the current group barwidth compared to the previous one. By default this will be controlled automatically."),
-    :color => __dic(:default=> "#4682b4", :__ord=>3, :__cat=>"Bar appearance", :__doc=>Kwds_docs[:color]),
+    :color => __dic(:default=> "#4682b4", :__ord=>3, :__cat=>"Bar appearance", :__doc=>Kwds_docs[:color_grad]),
     :colorresponse =>__dic(:default=> nothing, :__ord=>1, :__cat=>"Bar options", :__doc=>"Name/index of a numeric column which will be used to change the fill color of each bar based on its values. The function passed to `colorstat` will be used to aggregate the values if there are more than one observation for a specific bar."),
     :colorstat => __dic(:default=> nothing, :__ord=>1, :__cat=>"Bar options", :__doc=>"The function that will be used to aggregate values in column passed as `colorresponse`."),
     :colormodel => __dic(:default=> :diverging, :__ord=>1, :__cat=>"Bar options", :__doc=>Kwds_docs[:colormodel]), # we use linear scale to produce colors
