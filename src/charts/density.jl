@@ -54,34 +54,13 @@ function fit_density(x, type, kernel, bw, f, npoints, scale)::Vector{Tuple}
 end
 
 
-DENSITY_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0, :group => nothing,
-    :x2axis => false,
-    :y2axis => false,
-    :interpolate => :linear,
+"""
+    Density(args...)
 
-    :type => :normal, # :normal or :kernel
-    :weights => :gaussian,
-    :bw => nothing, # automatically calculate
-    :scale => :pdf, # user can pass any function to this option, the function must be in the form of fun(density; midpoints, npoints, samplesize, binwidth) , for :pdf the function is defined as f(x; args...) = x, for :count we compute the expected counts, f(x; args...) = x .* binwidth .* npoints , :cdf (x; binwidth, args...) -> cumsum(x .* binwidth)
-    :baseline => 0.0,
+Represent a Density plot with given arguments.
 
-    :opacity => 1,
-    :fillopacity=>0.5,
-
-    :filled => true,
-    :fillcolor => nothing, # derive from :color
-
-    :color =>nothing,
-
-    :thickness=>1,
-    
-    :npoints=>100, # the grid number of points
-
-   
-    :legend => nothing,
-
-    :clip => nothing
-)
+$(print_doc(DENSITY_DEFAULT))
+"""
 mutable struct Density <: SGMarks
     opts
     function Density(; opts...)

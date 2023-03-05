@@ -258,3 +258,35 @@ BAND_DEFAULT = SGKwds(
 
     :clip => __dic(:default=> nothing, :__ord=>7, :__cat=>"Miscellaneous", :__doc=>Kwds_docs[:clip]),
 )
+
+DENSITY_DEFAULT = SGKwds(
+    :x => __dic(:default=> 0, :__ord=>0, :__cat => "Required", :__doc=>"The column to be used as x coordinate. User must pass either this or the `y` argument."),
+    :y => __dic(:default=> 0, :__ord=>0, :__cat=> "Required", :__doc=>"The column to be used as y coordinate. User must pass either this or the `x` argument."),    
+    :group => __dic(:default=> nothing, :__ord=>2, :__cat=>"Grouping", :__doc=>"The name of column for grouping observation. Each group of observations will create seperate density plot."),
+
+    :x2axis => __dic(:default=> false, :__ord=>5, :__cat=>"Axes options", :__doc=>Kwds_docs[:x2axis]),
+    :y2axis => __dic(:default=> false, :__ord=>5, :__cat=>"Axes options", :__doc=>Kwds_docs[:y2axis]),
+
+    :interpolate => __dic(:default=>  :linear, :__ord=>1, :__cat=>"Density Options", :__doc=>Kwds_docs[:interpolate]),
+    :type => __dic(:default=>  :normal, :__ord=>1, :__cat=>"Density Options", :__doc=>"Type of density fit, i.e. `:normal` or `:kernel`. "),
+    :weights => __dic(:default=> :gaussian, :__ord=>1, :__cat=>"Density Options", :__doc=>"The weighting function to be used when `:kernel` type is selected."),
+    :bw => __dic(:default=> nothing, :__ord=>1, :__cat=>"Density Options", :__doc=>"Band width to be used in the kernel density estimation."),
+    :scale => __dic(:default=> :pdf, :__ord=>1, :__cat=>"Density Options", :__doc=>"user can pass any function to this option, the function must be in the form of `fun(density; midpoints, npoints, samplesize, binwidth)` , for `:pdf` the function is defined as `f(x; args...) = x`, for `:count` we compute the expected counts, `f(x; args...) = x .* binwidth .* npoints` , and for `:cdf` the function is `(x; binwidth, args...) -> cumsum(x .* binwidth)`."),
+    :baseline => __dic(:default=> 0.0, :__ord=>1, :__cat=>"Density Options", :__doc=>"The baseline for filling the curve."),
+
+    :opacity => __dic(:default=> 1, :__ord=>3, :__cat=>"Density appearance", :__doc=>"The opacity value for the outline."),
+
+    :fillopacity => __dic(:default=> 0.5, :__ord=>3, :__cat=>"Density appearance", :__doc=>"The opacity value for the fill color."),
+    :filled => __dic(:default=> true, :__ord=>3, :__cat=>"Density appearance", :__doc=>"Indicate if the curve should be filled."),
+    :fillcolor => __dic(:default=> nothing, :__ord=>3, :__cat=>"Density appearance", :__doc=>Kwds_docs[:color_grad]),
+
+    :color => __dic(:default=> nothing, :__ord=>3, :__cat=>"Density appearance", :__doc=>Kwds_docs[:color_grad]),
+    :thickness => __dic(:default=> 1, :__ord=>3, :__cat=>"Density appearance", :__doc=>Kwds_docs[:outlinethickness]),
+    
+    :npoints => __dic(:default=> 100, :__ord=>1, :__cat=>"Density Options", :__doc=>"The number of points for the grid calculation."), 
+
+   
+    :legend => __dic(:default=> nothing, :__ord=>6, :__cat=>"Legend", :__doc=>Kwds_docs[:legend]),
+
+    :clip => __dic(:default=> nothing, :__ord=>7, :__cat=>"Miscellaneous", :__doc=>Kwds_docs[:clip]),
+)
