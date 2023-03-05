@@ -1,16 +1,10 @@
-BAND_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0, :lower => 0, :upper => 0,
-    :group => nothing,
-    :x2axis => false,
-    :y2axis => false,
-    :opacity => 0.5,
-    :color => "#4682b4",
-    :colorresponse => nothing,
-    :colormodel => ["#2f6790", "#bed8ec"],
-    :interpolate => :linear,
-    :breaks => false, # see Line
-    :legend => nothing,
-    :clip=>nothing
-)
+"""
+    Band(args...)
+
+Represent a Band plot with given arguments.
+
+$(print_doc(BAND_DEFAULT))
+"""
 mutable struct Band <: SGMarks
     opts
     function Band(;opts...)

@@ -96,6 +96,8 @@ Kwds_docs = Dict{Symbol, String}(
         :tooltip=>"A tooltip will be shown upon mouse hover.",
         :legend=>"User can pass a symbol to this keyword argument to indicate that more customisation will be passed for the legened of corresponding mark. User needs to provide the extra customisation via the `Legend` global keyword.",
         :clip=>"Indicates if the marks should be clipped.",
+        :interpolate=>"The interplate function to use for drawing lines, e.g. `:linear`, `:basis`, `:natural`, `:step`, ...",
+        :breaks=>"It causes a break in the line when a missing value is encountered."
 
 
 
@@ -231,6 +233,28 @@ BAR_DEFAULT = SGKwds(
 
     :missingmode => __dic(:default=> 0, :__ord=>1, :__cat=>"Bar options", :__doc=>"Indicate how to handle missing values in category or group.  `0` = nothing, `1` = no missing in category, `2` = no missing in group, `3` = no missing in category or group, `4` = no missing in category and group."),
 
+
+    :clip => __dic(:default=> nothing, :__ord=>7, :__cat=>"Miscellaneous", :__doc=>Kwds_docs[:clip]),
+)
+
+
+BAND_DEFAULT = SGKwds(
+    :x => __dic(:default=> 0, :__ord=>0, :__cat => "Required", :__doc=>"The column to be used as x coordinate. User must pass either this or the `y` argument."),
+    :y => __dic(:default=> 0, :__ord=>0, :__cat=> "Required", :__doc=>"The column to be used as y coordinate. User must pass either this or the `x` argument."),
+    :lower => __dic(:default=> 0, :__ord=>0, :__cat=> "Required", :__doc=>"The lower values for the band plot. User can pass a column or a Float value."),
+    :upper => __dic(:default=> 0, :__ord=>0, :__cat=> "Required", :__doc=>"The upper values for the band plot. User can pass a column or a Float value."),
+    :group => __dic(:default=> nothing, :__ord=>2, :__cat=>"Grouping", :__doc=>"The name of column for grouping observation. Each group of observations will create seperate band plot."),
+
+    :x2axis => __dic(:default=> false, :__ord=>5, :__cat=>"Axes options", :__doc=>Kwds_docs[:x2axis]),
+    :y2axis => __dic(:default=> false, :__ord=>5, :__cat=>"Axes options", :__doc=>Kwds_docs[:y2axis]),
+
+    :opacity => __dic(:default=> 0.5, :__ord=>3, :__cat=>"Band appearance", :__doc=>Kwds_docs[:opacity]),
+    :color => __dic(:default=>  "#4682b4", :__ord=>3, :__cat=>"Band appearance", :__doc=>Kwds_docs[:color_grad]),
+
+    :interpolate => __dic(:default=>  :linear, :__ord=>1, :__cat=>"Band Options", :__doc=>Kwds_docs[:interpolate]),
+    :breaks => __dic(:default=>  false, :__ord=>1, :__cat=>"Band Options", :__doc=>Kwds_docs[:breaks]),
+
+    :legend => __dic(:default=> nothing, :__ord=>6, :__cat=>"Legend", :__doc=>Kwds_docs[:legend]),
 
     :clip => __dic(:default=> nothing, :__ord=>7, :__cat=>"Miscellaneous", :__doc=>Kwds_docs[:clip]),
 )
