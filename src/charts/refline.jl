@@ -1,12 +1,10 @@
-REFLINE_DEFAULT = Dict{Symbol, Any}(:values => 0,  # the position of refline, it can be a vector of values
-                                    :axis => nothing, # which axis should be used to draw refline, :xaxis, :x2axis, :yaxis, :y2axis
-                                    :opacity=>1,
-                                    :thickness=>1,
-                                    :color=>"gray",
-                                    :dash=>[0],
+"""
+    RefLine(args...)
 
-                                    :clip=>nothing
-                                    )
+Represent a Refline with given arguments.
+
+$(print_doc(REFLINE_DEFAULT))
+"""
 mutable struct RefLine <: SGMarks
     opts
     function RefLine(;opts...)

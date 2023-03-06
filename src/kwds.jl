@@ -290,3 +290,14 @@ DENSITY_DEFAULT = SGKwds(
 
     :clip => __dic(:default=> nothing, :__ord=>7, :__cat=>"Miscellaneous", :__doc=>Kwds_docs[:clip]),
 )
+
+REFLINE_DEFAULT = SGKwds(
+    :values => __dic(:default=> 0, :__ord=>0, :__cat => "Required", :__doc=>"The position of reflines, it can be a vector of values."),
+    :axis => __dic(:default=> nothing, :__ord=>0, :__cat => "Required", :__doc=>"WHich axis should be used to draw the reflines, i.e. `:xaxis`, `:x2axis`, `:yaxis`, `:y2axis`."),
+    
+    :opacity => __dic(:default=> 1, :__ord=>3, :__cat=>"Refline appearance", :__doc=>Kwds_docs[:opacity]),
+    :thickness => __dic(:default=> 1, :__ord=>3, :__cat=>"Refline appearance", :__doc=>"The line thickness."),
+    :color => __dic(:default=> :grey, :__ord=>3, :__cat=>"Refline appearance", :__doc=>Kwds_docs[:color_grad]),
+    :dash => __dic(:default=> [0], :__ord=>3, :__cat=>"Refline appearance", :__doc=>"The line dash style."),
+    :clip => __dic(:default=> nothing, :__ord=>7, :__cat=>"Miscellaneous", :__doc=>Kwds_docs[:clip]),
+)
