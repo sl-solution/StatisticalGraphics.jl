@@ -301,3 +301,30 @@ REFLINE_DEFAULT = SGKwds(
     :dash => __dic(:default=> [0], :__ord=>3, :__cat=>"Refline appearance", :__doc=>"The line dash style."),
     :clip => __dic(:default=> nothing, :__ord=>7, :__cat=>"Miscellaneous", :__doc=>Kwds_docs[:clip]),
 )
+
+POLYGON_DEFAULT = SGKwds(
+    :x => __dic(:default=> nothing, :__ord=>0, :__cat => "Required", :__doc=>"The x coordinate of the polygon."),
+    :y => __dic(:default=> nothing, :__ord=>0, :__cat => "Required", :__doc=>"The y coordinate of the polygon."),
+    :id => __dic(:default=> nothing, :__ord=>0, :__cat => "Required", :__doc=>"The function draw a seperate polygon for each unique value of `id`."),
+    
+    :opacity => __dic(:default=> 1, :__ord=>3, :__cat=>"Polygon appearance", :__doc=>Kwds_docs[:opacity]),
+    :color => __dic(:default=> :steelblue, :__ord=>3, :__cat=>"Polygon appearance", :__doc=>Kwds_docs[:color_grad]),
+    :interpolate => __dic(:default=>  :linear, :__ord=>1, :__cat=>"Polygon Options", :__doc=>Kwds_docs[:interpolate]),
+    :outline => __dic(:default=>true, :__ord=>1, :__cat=>"Polygon Options", :__doc=>"If `true` an outline will be drawn for each polygon."),
+    :outlinethickness => __dic(:default=> 1, :__ord=>3, :__cat=>"Polygon appearance", :__doc=>"The outline thickness."),
+    :outlinedash => __dic(:default=> [0], :__ord=>3, :__cat=>"Polygon appearance", :__doc=>"The outline dash style."),
+    :outlinecolor => __dic(:default=> :steelblue, :__ord=>3, :__cat=>"Polygon appearance", :__doc=>Kwds_docs[:color_grad]),
+    :outlineopacity => __dic(:default=>1, :__ord=>3, :__cat=>"Polygon appearance", :__doc=>"The ouline opacity."),
+
+    :opacityresponse => __dic(:default=> nothing, :__ord=>1, :__cat=>"Polygon Options", :__doc=>"The column which its values will be used to determine the opacity of polygons."),
+    :colorresponse => __dic(:default=> nothing, :__ord=>1, :__cat=>"Polygon Options", :__doc=>"The column which its values will be used to determine the fill color of polygons."),
+
+    :colormodel => __dic(:default=>:diverging, :__ord=>3, :__cat=>"Polygon appearance", :__doc=>"The color model which will be used for fill color when `colorresponse` is passed. It can be an scheme or a vector of colors."),
+
+    :group => __dic(:default=> nothing, :__ord=>2, :__cat=>"Grouping", :__doc=>"The name of column for grouping observation. Each group of observations will create seperate polygon and polygons in each group will have different color."),
+    :x2axis => __dic(:default=> false, :__ord=>5, :__cat=>"Axes options", :__doc=>Kwds_docs[:x2axis]),
+    :y2axis => __dic(:default=> false, :__ord=>5, :__cat=>"Axes options", :__doc=>Kwds_docs[:y2axis]),  
+    :legend => __dic(:default=> nothing, :__ord=>6, :__cat=>"Legend", :__doc=>Kwds_docs[:legend]),
+
+    :clip => __dic(:default=> nothing, :__ord=>7, :__cat=>"Miscellaneous", :__doc=>Kwds_docs[:clip]),
+)

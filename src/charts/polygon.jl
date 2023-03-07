@@ -1,26 +1,10 @@
-POLYGON_DEFAULT = Dict{Symbol,Any}(:x => nothing, :y => nothing, :id => nothing,
-    
-    :x2axis => false,
-    :y2axis => false,
-    :opacity=>1, # fill opacity
-    :opacityresponse=>nothing,
-    :color=>:steelblue,
+"""
+    Polygon(args...)
 
-    :interpolate=>:linear, # we change it to linear-closed
+Represent a Polygon with given arguments.
 
-    :outline => true,
-    :outlinethickness=>1,
-    :outlinedash=>[0],
-    :outlinecolor=>:steelblue,
-    :outlineopacity=>1,
-
-    :group => nothing,
-    :colorresponse => nothing,
-    :colormodel => :diverging,
- 
-    :legend => nothing,
-    :clip=>nothing
-)
+$(print_doc(POLYGON_DEFAULT))
+"""
 mutable struct Polygon <: SGMarks
     opts
     function Polygon(;opts...)
