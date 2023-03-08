@@ -197,6 +197,15 @@ function _push_plots!(vspec, plt::Bar, all_args; idx=1)
             s_spec[:from][:facet][:groupby] = col
         end
     end
+
+    if opts[:tooltip]
+        if opts[:group] === nothing
+            s_spec_marks[:encode][:enter][:tooltip] = Dict{Symbol, Any}(:signal=>"{category : datum['$col'], height : datum['__height__bar__'] - datum['__height__bar__start__']}")
+        else
+            s_spec_marks[:encode][:enter][:tooltip] = Dict{Symbol, Any}(:signal=>"{category : datum['$col'], group : datum['$(opts[:group])'], height : datum['__height__bar__'] - datum['__height__bar__start__']}")
+        end  
+    end
+
     s_spec[:marks] = [s_spec_marks]
     push!(vspec[:marks], s_spec)
     if opts[:label] in (:height, :category)
