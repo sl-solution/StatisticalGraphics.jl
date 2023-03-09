@@ -328,3 +328,25 @@ POLYGON_DEFAULT = SGKwds(
 
     :clip => __dic(:default=> nothing, :__ord=>7, :__cat=>"Miscellaneous", :__doc=>Kwds_docs[:clip]),
 )
+
+LINE_DEFAULT = SGKwds(
+    :x => __dic(:default=> 0, :__ord=>0, :__cat => "Required", :__doc=>"The column to be used as x coordinate."),
+    :y => __dic(:default=> 0, :__ord=>0, :__cat=> "Required", :__doc=>"The column to be used as y coordinate."),    
+    :group => __dic(:default=> nothing, :__ord=>2, :__cat=>"Grouping", :__doc=>"The name of column for grouping observation. Each group of observations will create seperate Line."),
+
+    :opacity => __dic(:default=> 1, :__ord=>3, :__cat=>"Line appearance", :__doc=>Kwds_docs[:opacity]),
+    :thickness => __dic(:default=> 1, :__ord=>3, :__cat=>"Line appearance", :__doc=>"The Line thickness."),
+    :dash => __dic(:default=> [0], :__ord=>3, :__cat=>"Line appearance", :__doc=>"The Line dash style."),
+    :color => __dic(:default=> "#4682b4", :__ord=>3, :__cat=>"Line appearance", :__doc=>Kwds_docs[:color_grad]),
+
+    :interpolate => __dic(:default=>:linear, :__ord=>1, :__cat=>"Line Options", :__doc=>Kwds_docs[:interpolate]),
+    :breaks => __dic(:default=>false, :__ord=>1, :__cat=>"Line Options", :__doc=>Kwds_docs[:breaks]),
+
+    :x2axis => __dic(:default=> false, :__ord=>5, :__cat=>"Axes options", :__doc=>Kwds_docs[:x2axis]),
+    :y2axis => __dic(:default=> false, :__ord=>5, :__cat=>"Axes options", :__doc=>Kwds_docs[:y2axis]),
+    :xshift => __dic(:default=> 0, :__ord=>5, :__cat=>"Axes options", :__doc=>"Shift the mark in direction of x. Useful for discrete type axes."),
+    :yshift => __dic(:default=> 0, :__ord=>5, :__cat=>"Axes options", :__doc=>"Shift the mark in direction of y. Useful for discrete type axes."),  
+    :legend => __dic(:default=> nothing, :__ord=>6, :__cat=>"Legend", :__doc=>Kwds_docs[:legend]),
+
+    :clip => __dic(:default=> nothing, :__ord=>7, :__cat=>"Miscellaneous", :__doc=>Kwds_docs[:clip]),
+)

@@ -1,22 +1,10 @@
-LINE_DEFAULT = Dict{Symbol, Any}(:x => 0, :y=>0, :group=>nothing,
-                                    :x2axis=>false,
-                                    :y2axis=>false,
-                                    :opacity=>1,
-                                    :thickness=>1,
-                                    :dash => [0],
-                                    :filled=>true,
-                                    :fill=>"null",
-                                    :fillcolor=> :white,                  
-                                    :color=>"#4682b4",
-                                    :interpolate => :linear,
-                                    :breaks=>false, # false means remove missing values - true means create a break
-                                    :legend=>nothing,
+"""
+    Line(args...)
 
-                                    :xshift=>0, # [0,1] it is usefull for the situation when x axis is discrete
-                                    :yshift=>0,
+Represent a Line plot with given arguments.
 
-                                    :clip=>nothing
-                                    )
+$(print_doc(LINE_DEFAULT))
+"""
 mutable struct Line <: SGMarks
     opts
     function Line(;opts...)
