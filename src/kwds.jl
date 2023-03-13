@@ -350,3 +350,30 @@ LINE_DEFAULT = SGKwds(
 
     :clip => __dic(:default=> nothing, :__ord=>7, :__cat=>"Miscellaneous", :__doc=>Kwds_docs[:clip]),
 )
+
+HISTOGRAM_DEFAULT = SGKwds(
+    :x => __dic(:default=> 0, :__ord=>0, :__cat => "Required", :__doc=>"The column to be used as x coordinate. User must pass either this or the `y` argument."),
+    :y => __dic(:default=> 0, :__ord=>0, :__cat=> "Required", :__doc=>"The column to be used as y coordinate. User must pass either this or the `x` argument."),    
+    :group => __dic(:default=> nothing, :__ord=>2, :__cat=>"Grouping", :__doc=>"The name of column for grouping observation. Each group of observations will create seperate histogram plot."),
+
+    :x2axis => __dic(:default=> false, :__ord=>5, :__cat=>"Axes options", :__doc=>Kwds_docs[:x2axis]),
+    :y2axis => __dic(:default=> false, :__ord=>5, :__cat=>"Axes options", :__doc=>Kwds_docs[:y2axis]),
+
+    :opacity => __dic(:default=> 1, :__ord=>3, :__cat=>"Histogram appearance", :__doc=>"The opacity value for the outline."),
+
+    :outlinethickness => __dic(:default=> 1, :__ord=>3, :__cat=>"Histogram appearance", :__doc=>"The outline thickness."),
+ 
+
+    :color => __dic(:default=> "#4682b4", :__ord=>3, :__cat=>"Histogram appearance", :__doc=>Kwds_docs[:color_grad]),
+    :space => __dic(:default=> 1, :__ord=>3, :__cat=>"Histogram appearance", :__doc=>"Space between bars in pixel."),
+    :outlinecolor => __dic(:default=> :white, :__ord=>3, :__cat=>"Histogram appearance", :__doc=>Kwds_docs[:color_grad]),
+
+    
+    :midpoints => __dic(:default=> :Sturges, :__ord=>1, :__cat=>"Histogram Options", :__doc=>"The location of midpoints. It can be a number to indicate the number of midpoints or a vector of midpoints."), 
+    :scale => __dic(:default=> :pdf, :__ord=>1, :__cat=>"Histogram Options", :__doc=>"The scale to use for the bar heights, e.g. `:pdf`, `:cdf`, `:count`."), 
+    
+   
+    :legend => __dic(:default=> nothing, :__ord=>6, :__cat=>"Legend", :__doc=>Kwds_docs[:legend]),
+
+    :clip => __dic(:default=> nothing, :__ord=>7, :__cat=>"Miscellaneous", :__doc=>Kwds_docs[:clip]),
+)

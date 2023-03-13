@@ -83,25 +83,13 @@ end
 
 ###############################################################
 
-HISTOGRAM_DEFAULT = Dict{Symbol, Any}(:x=>0, :y=>0, :group=>nothing,
-                                    :x2axis=>false,
-                                    :y2axis=>false,
-                                    :opacity=>1,
-                                    :outlinethickness=>1,
-                                    :filled=>true,
-                                    :fill=>"null",
-                                    :fillcolor=> :white,
-                                    :color=>"#4682b4",
-                                    :colorresponse => nothing,
-                                    :colormodel=>["#2f6790", "#bed8ec"],
-                                    :midpoints=>:Sturges,
-                                    :scale => :pdf,
-                                    :space => 1,
-                                    :outlinecolor=>:white,
-                                    :legend=>nothing,
+"""
+    Histogram(args...)
 
-                                    :clip=>nothing
-                                    )
+Represent a Histogram with given arguments.
+
+$(print_doc(HISTOGRAM_DEFAULT))
+"""
 mutable struct Histogram <: SGMarks
     opts
     function Histogram(;opts...)
