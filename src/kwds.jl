@@ -377,3 +377,36 @@ HISTOGRAM_DEFAULT = SGKwds(
 
     :clip => __dic(:default=> nothing, :__ord=>7, :__cat=>"Miscellaneous", :__doc=>Kwds_docs[:clip]),
 )
+
+TEXT_DEFAULT = SGKwds(
+    :x => __dic(:default=> nothing, :__ord=>0, :__cat => "Required", :__doc=>"The column to be used as x coordinate."),
+    :y => __dic(:default=> nothing, :__ord=>0, :__cat=> "Required", :__doc=>"The column to be used as y coordinate."),   
+    :text => __dic(:default=> nothing, :__ord=>0, :__cat=> "Required", :__doc=>"The column to be used as text values for each point."),    
+ 
+    :group => __dic(:default=> nothing, :__ord=>2, :__cat=>"Grouping", :__doc=>"The name of column for grouping observation. Each group of observations will create seperate text plot."),
+
+    :x2axis => __dic(:default=> false, :__ord=>5, :__cat=>"Axes options", :__doc=>Kwds_docs[:x2axis]),
+    :y2axis => __dic(:default=> false, :__ord=>5, :__cat=>"Axes options", :__doc=>Kwds_docs[:y2axis]),
+    
+    :opacity => __dic(:default=> 1, :__ord=>3, :__cat=>"TextPlot appearance", :__doc=>Kwds_docs[:opacity]),
+
+    :opacityresponse => __dic(:default=> nothing, :__ord=>1, :__cat=>"TextPlot Options", :__doc=>"The column which its values will be used to determine the opacity of text."),
+    :angleresponse => __dic(:default=> nothing, :__ord=>1, :__cat=>"TextPlot Options", :__doc=>"The column which its values will be used to determine the angle of text."),
+    :colorresponse => __dic(:default=> nothing, :__ord=>1, :__cat=>"TextPlot Options", :__doc=>"The column which its values will be used to determine the color of text."),
+    
+    :size => __dic(:default=> 10, :__ord=>3, :__cat=>"TextPlot appearance", :__doc=>Kwds_docs[:fontsize]),
+    :font => __dic(:default=> nothing, :__ord=>3, :__cat=>"TextPlot appearance", :__doc=>Kwds_docs[:font]),
+    :fontweight => __dic(:default=> nothing, :__ord=>3, :__cat=>"TextPlot appearance", :__doc=>Kwds_docs[:fontweight]),
+    :italic => __dic(:default=> nothing, :__ord=>3, :__cat=>"TextPlot appearance", :__doc=>Kwds_docs[:italic]),
+    :limit => __dic(:default=> nothing, :__ord=>3, :__cat=>"TextPlot appearance", :__doc=>Kwds_docs[:fontlimit]),
+    :dir => __dic(:default=> :ltr, :__ord=>3, :__cat=>"TextPlot appearance", :__doc=>Kwds_docs[:fontdir]),
+    :align => __dic(:default=> :left, :__ord=>3, :__cat=>"TextPlot appearance", :__doc=>Kwds_docs[:fontalign]),
+    :textbaseline => __dic(:default=> :alphabetic, :__ord=>3, :__cat=>"TextPlot appearance", :__doc=>Kwds_docs[:fontbaseline]),
+    :angle => __dic(:default=> 0, :__ord=>3, :__cat=>"TextPlot appearance", :__doc=>Kwds_docs[:fontangle]),
+    :color => __dic(:default=> :black, :__ord=>3, :__cat=>"TextPlot appearance", :__doc=>Kwds_docs[:fontcolor]),
+    :colormodel => __dic(:default=> :diverging, :__ord=>3, :__cat=>"TextPlot appearance", :__doc=>Kwds_docs[:colormodel]),
+
+    :legend => __dic(:default=> nothing, :__ord=>6, :__cat=>"Legend", :__doc=>Kwds_docs[:legend]),
+
+    :clip => __dic(:default=> nothing, :__ord=>7, :__cat=>"Miscellaneous", :__doc=>Kwds_docs[:clip]),
+)

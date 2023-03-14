@@ -1,18 +1,10 @@
-TEXT_DEFAULT = Dict{Symbol,Any}(:x => nothing, :y => nothing, :text => nothing,
-    :group => nothing,
-    :x2axis => false,
-    :y2axis => false, :opacity => 1,
-    :opacityresponse => nothing, :size => 10,
-    :font => nothing,
-    :fontweight => nothing,
-    :italic => nothing,
-    :limit => nothing,
-    :dir => :ltr, :align => :left, :textbaseline => :alphabetic, :angle => 0,
-    :angleresponse => nothing, :color => :black,
-    :colorresponse => nothing,
-    :colormodel => :diverging, :legend => nothing, #user must give a name to this if further customisation is needed for the legend
-    :clip => nothing
-)
+"""
+    TextPlot(args...)
+
+Represent a Text plot with given arguments.
+
+$(print_doc(TEXT_DEFAULT))
+"""
 mutable struct TextPlot <: SGMarks # we have to use TextPlot instead of Text, since Julia has a Text type already (although it is deprecated)
     opts
     function TextPlot(; opts...)
