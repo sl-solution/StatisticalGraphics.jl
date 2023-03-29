@@ -1,42 +1,10 @@
-SCATTER_DEFAULT = Dict{Symbol, Any}(:x => 0, :y => 0,
-                                    :group=>nothing,
-                                    :x2axis=>false,
-                                    :y2axis=>false,
-                                    :opacity=>1,
-                                    :opacityresponse=>nothing,
-                                    :thickness=>1, # symbol outline thickness
-                               
-                                    :color=> nothing,
-                                    :size=>50,
-                                    :symbol=>"circle",
-                                    :symbolresponse=>nothing,
-                                    :angle=>0,
-                                    :angleresponse=>nothing,
-                                    :outlinecolor=>nothing,
-                                    :colorresponse => nothing,
-                                    :colormodel=>:diverging,
-                                    :legend => nothing , #user must give a name to this if further customisation is needed for the legend
-                                    :jitter=>[0,0], # jitter strength, the first one is the horizontal strength and the second number is the vertical strength
+"""
+    Scatter(args...)
 
-                                    #data label
-                                    :labelresponse=>nothing,
-                                    :labelfont=>nothing,
-                                    :labelfontweight=>nothing,
-                                    :labelitalic=>nothing,
-                                    :labelsize=>nothing,
-                                    :labelcolor=>:black,# allow :group, :colorresponse to use their color if available 
-                                    :labelangle=>0,
-                                    :labeldir=>:ltr,
-                                    :labellimit=>nothing,
-                                    :labelanchor=>[:top, :bottom, :left, :right],
-                                    :labelalgorithm=>:naive,
-                                    :tooltip => false, # it can be true, only if labelresponse is provided
+Represent a Scatter plot with given arguments.
 
-                                    :xshift=>0, # between [0,1], useful for discrete axes
-                                    :yshift=>0,
-
-                                    :clip=>nothing
-                                    )
+$(print_doc(SCATTER_DEFAULT))
+"""
 mutable struct Scatter <: SGMarks
     opts
     function Scatter(;opts...)

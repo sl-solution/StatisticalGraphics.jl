@@ -410,3 +410,50 @@ TEXT_DEFAULT = SGKwds(
 
     :clip => __dic(:default=> nothing, :__ord=>7, :__cat=>"Miscellaneous", :__doc=>Kwds_docs[:clip]),
 )
+
+SCATTER_DEFAULT = SGKwds(
+    :x => __dic(:default=> 0, :__ord=>0, :__cat => "Required", :__doc=>"The column to be used as x coordinate."),
+    :y => __dic(:default=> 0, :__ord=>0, :__cat=> "Required", :__doc=>"The column to be used as y coordinate."), 
+    :group => __dic(:default=> nothing, :__ord=>2, :__cat=>"Grouping", :__doc=>"The name of column for grouping observation. Each group of observations will create seperate scatter plot."),
+
+    :opacity => __dic(:default=> 1, :__ord=>3, :__cat=>"Scatter appearance", :__doc=>Kwds_docs[:opacity]),
+    :thickness => __dic(:default=> 1, :__ord=>3, :__cat=>"Scatter appearance", :__doc=>Kwds_docs[:outlinethickness]),
+    :color => __dic(:default=> nothing, :__ord=>3, :__cat=>"Scatter appearance", :__doc=>Kwds_docs[:color]),
+    :outlinecolor => __dic(:default=> nothing, :__ord=>3, :__cat=>"Scatter appearance", :__doc=>Kwds_docs[:color]),
+    :size => __dic(:default=> 50, :__ord=>3, :__cat=>"Scatter appearance", :__doc=>"The symbol size."),
+    :symbol => __dic(:default=> "circle", :__ord=>3, :__cat=>"Scatter appearance", :__doc=>"The symbol type, e.g. `:circle`, `:square`, ..."),
+    :angle => __dic(:default=> 0, :__ord=>3, :__cat=>"Scatter appearance", :__doc=>"The symbol angle."),
+    :colormodel => __dic(:default=> :diverging, :__ord=>3, :__cat=>"Scatter appearance", :__doc=>Kwds_docs[:colormodel]),
+
+
+
+    :jitter => __dic(:default=> [0,0], :__ord=>1, :__cat=>"Scatter Options", :__doc=>"The jitter strength in the x and y axes direction, respectively."),
+
+    :opacityresponse => __dic(:default=> nothing, :__ord=>1, :__cat=>"Scatter Options", :__doc=>"The column which its values will be used to determine the opacity of the marks."),
+    :symbolresponse => __dic(:default=> nothing, :__ord=>1, :__cat=>"Scatter Options", :__doc=>"The column which its values will be used to determine the symbol of the marks."),
+    :angleresponse => __dic(:default=> nothing, :__ord=>1, :__cat=>"Scatter Options", :__doc=>"The column which its values will be used to determine the angle of the marks."),
+    :colorresponse => __dic(:default=> nothing, :__ord=>1, :__cat=>"Scatter Options", :__doc=>"The column which its values will be used to determine the fill color of the marks."),
+
+    :labelresponse => __dic(:default=> nothing, :__ord=>4, :__cat=>"Scatter Label", :__doc=>"The column which its values will be used to label points."),
+    :labelfont => __dic(:default=> nothing, :__ord=>4, :__cat=>"Scatter Label", :__doc=>Kwds_docs[:font]),
+    :labelfontweight => __dic(:default=> nothing, :__ord=>4, :__cat=>"Scatter Label", :__doc=>Kwds_docs[:fontweight]),
+    :labelitalic => __dic(:default=> nothing, :__ord=>4, :__cat=>"Scatter Label", :__doc=>Kwds_docs[:italic]),
+    :labelsize => __dic(:default=> nothing, :__ord=>4, :__cat=>"Scatter Label", :__doc=>Kwds_docs[:fontsize]),
+    :labelcolor => __dic(:default=> :black, :__ord=>4, :__cat=>"Scatter Label", :__doc=>"The label text color, it can also be `:group` or `:colorresponse` for choosing the color based on the points groups."),
+    :labelangle => __dic(:default=> 0, :__ord=>4, :__cat=>"Scatter Label", :__doc=>Kwds_docs[:fontangle]),
+    :labeldir => __dic(:default=> :ltr, :__ord=>4, :__cat=>"Scatter Label", :__doc=>Kwds_docs[:fontdir]),
+    :labellimit => __dic(:default=> nothing, :__ord=>4, :__cat=>"Scatter Label", :__doc=>Kwds_docs[:fontlimit]),
+    :labelanchor => __dic(:default=> [:top, :bottom, :left, :right], :__ord=>4, :__cat=>"Scatter Label", :__doc=>"The anchors for choosing the location of labels."),
+    :labelalgorithm => __dic(:default=> :naive, :__ord=>4, :__cat=>"Scatter Label", :__doc=>"The algorithm for placing labels."),
+    :tooltip => __dic(:default=> false, :__ord=>4, :__cat=>"Scatter Label", :__doc=>Kwds_docs[:tooltip]),
+
+
+
+    :x2axis => __dic(:default=> false, :__ord=>5, :__cat=>"Axes options", :__doc=>Kwds_docs[:x2axis]),
+    :y2axis => __dic(:default=> false, :__ord=>5, :__cat=>"Axes options", :__doc=>Kwds_docs[:y2axis]),
+    :xshift => __dic(:default=> 0, :__ord=>5, :__cat=>"Axes options", :__doc=>"Shift the mark in direction of x. Useful for discrete type axes."),
+    :yshift => __dic(:default=> 0, :__ord=>5, :__cat=>"Axes options", :__doc=>"Shift the mark in direction of y. Useful for discrete type axes."),  
+    :legend => __dic(:default=> nothing, :__ord=>6, :__cat=>"Legend", :__doc=>Kwds_docs[:legend]),
+
+    :clip => __dic(:default=> nothing, :__ord=>7, :__cat=>"Miscellaneous", :__doc=>Kwds_docs[:clip]),
+)
