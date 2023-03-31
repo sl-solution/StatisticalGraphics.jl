@@ -1,39 +1,10 @@
-BUBBLE_DEFAULT = Dict{Symbol, Any}(:x => 0, :y => 0, :size=>0,
-                                    :group=>nothing,
-                                    :x2axis=>false,
-                                    :y2axis=>false,
-                                    :opacity=>1,
-                                    :opacityresponse=>nothing,
-                                    :thickness=>1, # symbol outline thickness
-                                    :minsize=>nothing, #min and max size control the bubble size
-                                    :maxsize=>nothing, 
-                                   
-                                    :outlinecolor=>nothing,
-                                    :color=>nothing,
-                                    :colorresponse => nothing,
-                                    :colormodel=>:diverging,
+"""
+    Bubble(args...)
 
-                                    :legend => nothing , #user must give a name to this if further customisation is needed for the legend
+Represent a Bubble plot with given arguments.
 
-                                    #data label
-                                    :labelresponse=>nothing,
-                                    :labelfont=>nothing,
-                                    :labelfontweight=>nothing,
-                                    :labelitalic=>nothing,
-                                    :labelsize=>nothing,
-                                    :labelcolor=>:black, # allow :group, :colorresponse to use their color if available
-                                    :labelangle=>0,
-                                    :labeldir=>:ltr,
-                                    :labellimit=>nothing,
-                                    :labelanchor=>[:top, :bottom, :left, :right],
-                                    :labelalgorithm=>:naive,
-                                    :tooltip => false, # it can be true, only if labelresponse is provided
-
-                                    :xshift=>0, #[0,1] useful for discrete axes
-                                    :yshift=>0,
-
-                                    :clip=>nothing
-                                    )
+$(print_doc(BUBBLE_DEFAULT))
+"""
 mutable struct Bubble <: SGMarks
     opts
     function Bubble(;opts...)
