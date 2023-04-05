@@ -11,6 +11,7 @@ module StatisticalGraphics
         SGMarks, 
         Bar,
         Band,
+        Segment,
         Scatter,
         Line,
         Histogram,
@@ -49,6 +50,7 @@ module StatisticalGraphics
     include("charts/scatter.jl")
     include("charts/line.jl")
     include("charts/band.jl")
+    include("charts/segment.jl")
     include("charts/histogram.jl")
     include("charts/hist2d.jl")
     include("charts/density.jl")
