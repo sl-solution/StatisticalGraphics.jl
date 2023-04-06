@@ -262,17 +262,17 @@ BAND_DEFAULT = SGKwds(
 SEGMENT_DEFAULT = SGKwds(
     :x => __dic(:default=> 0, :__ord=>0, :__cat => "Required", :__doc=>"The column to be used as x coordinate. User must pass either this or the `y` argument."),
     :y => __dic(:default=> 0, :__ord=>0, :__cat=> "Required", :__doc=>"The column to be used as y coordinate. User must pass either this or the `x` argument."),
-    :lower => __dic(:default=> 0, :__ord=>0, :__cat=> "Required", :__doc=>"The lower values for the band plot. User can pass a column or a Float value."),
-    :upper => __dic(:default=> 0, :__ord=>0, :__cat=> "Required", :__doc=>"The upper values for the band plot. User can pass a column or a Float value."),
-    :group => __dic(:default=> nothing, :__ord=>2, :__cat=>"Grouping", :__doc=>"The name of column for grouping observation. Each group of observations will create seperate band plot."),
+    :lower => __dic(:default=> 0, :__ord=>0, :__cat=> "Required", :__doc=>"The lower values for segments. User can pass a column or a Float value."),
+    :upper => __dic(:default=> 0, :__ord=>0, :__cat=> "Required", :__doc=>"The upper values for segments. User can pass a column or a Float value."),
+    :group => __dic(:default=> nothing, :__ord=>2, :__cat=>"Grouping", :__doc=>"The name of column for grouping observation. Each group of observations will create seperate segment lines."),
 
     :x2axis => __dic(:default=> false, :__ord=>5, :__cat=>"Axes options", :__doc=>Kwds_docs[:x2axis]),
     :y2axis => __dic(:default=> false, :__ord=>5, :__cat=>"Axes options", :__doc=>Kwds_docs[:y2axis]),
 
-    :opacity => __dic(:default=> 1, :__ord=>3, :__cat=>"Band appearance", :__doc=>Kwds_docs[:opacity]),
-    :color => __dic(:default=>  "#4682b4", :__ord=>3, :__cat=>"Band appearance", :__doc=>Kwds_docs[:color_grad]),
+    :opacity => __dic(:default=> 1, :__ord=>3, :__cat=>"Segment appearance", :__doc=>Kwds_docs[:opacity]),
+    :color => __dic(:default=>  "#4682b4", :__ord=>3, :__cat=>"Segment appearance", :__doc=>Kwds_docs[:color_grad]),
 
-    :thickness => __dic(:default=>  1, :__ord=>1, :__cat=>"Band Options", :__doc=>"The thickness of the mark"),
+    :thickness => __dic(:default=>  1, :__ord=>1, :__cat=>"Segment Options", :__doc=>"The thickness of the mark"),
 
     :legend => __dic(:default=> nothing, :__ord=>6, :__cat=>"Legend", :__doc=>Kwds_docs[:legend]),
 
