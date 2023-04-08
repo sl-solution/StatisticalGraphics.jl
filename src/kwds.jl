@@ -272,7 +272,7 @@ SEGMENT_DEFAULT = SGKwds(
     :opacity => __dic(:default=> 1, :__ord=>3, :__cat=>"Segment appearance", :__doc=>Kwds_docs[:opacity]),
     :color => __dic(:default=>  "#4682b4", :__ord=>3, :__cat=>"Segment appearance", :__doc=>Kwds_docs[:color_grad]),
 
-    :thickness => __dic(:default=>  1, :__ord=>1, :__cat=>"Segment Options", :__doc=>"The thickness of the mark"),
+    :thickness => __dic(:default=>  1, :__ord=>3, :__cat=>"Segment appearance", :__doc=>"The thickness of the mark"),
 
     :legend => __dic(:default=> nothing, :__ord=>6, :__cat=>"Legend", :__doc=>Kwds_docs[:legend]),
 
