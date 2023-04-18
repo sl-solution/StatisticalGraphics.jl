@@ -177,6 +177,36 @@ AXES_DEFAULT = SGKwds(
 
 )
 
+LEGEND_DEFAULT = SGKwds(
+    :name => __dic(:default=> nothing, :__ord=>0, :__cat => "Legend identity", :__doc=>"The legend id which refers to a legend id of a plot."), 
+    :title => __dic(:default=> nothing, :__ord=>5, :__cat => "Title properties", :__doc=>"Legend title."),
+    :titlefont => __dic(:default=> nothing, :__ord=>5, :__cat => "Title properties", :__doc=>Kwds_docs[:font]),
+    :titleitalic => __dic(:default=> nothing, :__ord=>5, :__cat => "Title properties", :__doc=>Kwds_docs[:italic]),
+    :titlefontweight => __dic(:default=> nothing, :__ord=>5, :__cat => "Title properties", :__doc=>Kwds_docs[:fontweight]),
+    :titlesize => __dic(:default=> nothing, :__ord=>5, :__cat => "Title properties", :__doc=>Kwds_docs[:fontsize]),
+    :labelfont => __dic(:default=> nothing, :__ord=>6, :__cat => "Labels properties", :__doc=>Kwds_docs[:font]),
+    :labelitalic => __dic(:default=> nothing, :__ord=>6, :__cat => "Labels properties", :__doc=>Kwds_docs[:italic]),
+    :labelfontweight => __dic(:default=> nothing, :__ord=>6, :__cat => "Labels properties", :__doc=>Kwds_docs[:fontweight]),
+    :labelsize => __dic(:default=> nothing, :__ord=>6, :__cat => "Labels properties", :__doc=>Kwds_docs[:fontsize]),
+    :font => __dic(:default=> nothing, :__ord=>2, :__cat => "Legend appearance", :__doc=>"The default font that will be used for all elements of the legend."),
+    :italic => __dic(:default=> nothing, :__ord=>2, :__cat => "Legend appearance", :__doc=>"The default font style that will be used for all elements of the legend."),
+    :fontweight => __dic(:default=> nothing, :__ord=>2, :__cat => "Legend appearance", :__doc=>"The default font weight that will be used for all elements of the legend."),
+    :d3format => __dic(:default=> nothing, :__ord=>1, :__cat => "Legend options", :__doc=>"Allow users to directly pass a legend format. It must follow the rules described in `d3.format()`."),
+    :d3formattype => __dic(:default=> nothing, :__ord=>1, :__cat => "Legend options", :__doc=>"If values are time or date, this option can be used to control their format."),
+    :limit => __dic(:default=> nothing, :__ord=>1, :__cat => "Legend options", :__doc=>"The number of elements to be shown in the legend."),
+    :orient => __dic(:default=> :right, :__ord=>2, :__cat => "Legend appearance", :__doc=>"The location of the legend. User can pass `[legendX, legendY]` for a precise location."),
+    :symbol => __dic(:default=> nothing, :__ord=>2, :__cat => "Legend appearance", :__doc=>"Indicate the symbol for discrete type legends."),
+    :columns => __dic(:default=> 1, :__ord=>2, :__cat => "Legend appearance", :__doc=>"The number of columns to be used to show the legend elements."),
+    :direction => __dic(:default=> :vertical, :__ord=>2, :__cat => "Legend appearance", :__doc=>"The direction of the legend."),
+    :size => __dic(:default=> 100, :__ord=>2, :__cat => "Legend appearance", :__doc=>"The legend element size."),
+    :gradientlength => __dic(:default=> nothing, :__ord=>2, :__cat => "Legend appearance", :__doc=>"Control the size of a gradient type legend."),
+    :gradientthickness => __dic(:default=> nothing, :__ord=>2, :__cat => "Legend appearance", :__doc=>"Control the size of a gradient type legend (width)."),
+    :gridalign => __dic(:default=> :each, :__ord=>2, :__cat => "Legend appearance", :__doc=>"Control how to align multiple legends."),
+    :rowspace => __dic(:default=> 1, :__ord=>2, :__cat => "Legend appearance", :__doc=>"The space between rows."),
+    :columnspace => __dic(:default=> 1, :__ord=>2, :__cat => "Legend appearance", :__doc=>"The space between columns."),
+    :values => __dic(:default=> nothing, :__ord=>1, :__cat => "Legend options", :__doc=>"Allow user manually provide the values for the legend."),
+)
+
 BAR_DEFAULT = SGKwds(
     :x => __dic(:default=> 0, :__ord=>0, :__cat => "Required", :__doc=>"User should pass a single column for plotting the bar chart. User must pass either this or the `y` argument."),
     :y => __dic(:default=> 0, :__ord=>0, :__cat=> "Required", :__doc=>"User should pass a single column for plotting the bar chart. User must pass either this or the `x` argument."),
