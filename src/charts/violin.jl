@@ -1,38 +1,10 @@
-VIOLIN_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0, :category => nothing, # x or y can be a set of analysis variables
-   
-    :x2axis => false,
-    :y2axis => false,
-    
-    :side=>:both, # :both, :right(:bottom), :left(:top)
+"""
+    Violin(args...)
 
-    :thickness => 1,
+Represent a Violin Plot with given arguments.
 
-    :weights => :gaussian,
-    :bw => nothing,
-    :npoints=>100, # the grid number of points
-    :interpolate => :linear,
-    :scale => (x; args...) -> x, # see Density for more information
-
-    :fillopacity=>0.5,
-    :opacity=>1,
-
-    :filled => true,
-    :fillcolor => nothing, # derive from :color
-
-
-    :color => nothing,
-    :space => 0.1, # the space between violins 
-    :groupspace => 0.05, # the space between violins inside each group 
-    :categoryorder => :ascending, # :data, :ascending, :descending
-  
-    :legend => nothing,
-
-    :missingmode => 0, # how to handle missings in category.  0 = nothing, 1 = no missing in category
-
-    :tooltip=>false,
-    :clip=>nothing
-
-)
+$(print_doc(VIOLIN_DEFAULT))
+"""
 mutable struct Violin <: SGMarks
     opts
     function Violin(; opts...)

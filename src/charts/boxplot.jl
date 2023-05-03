@@ -1,45 +1,10 @@
-BOXPLOT_DEFAULT = Dict{Symbol,Any}(:x => 0, :y => 0, :category => nothing, # x or y can be a set of analysis variables
-   
-    :x2axis => false,
-    :y2axis => false,
-    :opacity => 1,
-    :outlinethickness => 1,
-    :boxwidth => 1, # can be between[0,1]
-    :boxcorner=>0,
-    :filled => true,
-    :fill => "null",
-    :color => "#4682b4",
-    :space => 0.1, # the space between box 
-    :groupspace => 0.05, # the space between boxes inside each group 
-    :outlinecolor => :white,
-    :categoryorder => :ascending, # :data, :ascending, :descending
-    :outliers => false, # if the outlier should be shown?
-    :outliersfactor => 1.5, # default factor for calculating outliers
-    :medianwidth => 1, # width of median line
-    :mediancolor=>:white,
-    :medianthickness=>1.0,
-    :whiskercolor => :black, # color for the line which connect q1 and q3 to min and max values
-    :whiskerdash => [3,3],
-    :whiskerthickness => 1,
-    :fencewidth=>0.5,
-    :fencecolor=>:black,
-    :meansymbol=>:diamond,
-    :meansymbolsize=>40,
-    :outliercolor => nothing,
-    :outlieroutlinecolor=>nothing,
-    :outlierthickness=>1,
-    :outliersymbolsize=>30,
-    :outlierjitter=>0,
-    :outliersymbol=>:circle,
-    :outlieropacity=>1,
-    :legend => nothing,
+"""
+    BoxPlot(args...)
 
-    :missingmode => 0, # how to handle missings in category.  0 = nothing, 1 = no missing in category
+Represent a Box Plot with given arguments.
 
-    :tooltip=>false,
-    :clip=>nothing
-
-)
+$(print_doc(BOXPLOT_DEFAULT))
+"""
 mutable struct BoxPlot <: SGMarks
     opts
     function BoxPlot(; opts...)

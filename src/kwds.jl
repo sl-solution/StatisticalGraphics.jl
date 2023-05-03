@@ -553,5 +553,93 @@ BUBBLE_DEFAULT = SGKwds(
     :clip => __dic(:default=> nothing, :__ord=>7, :__cat=>"Miscellaneous", :__doc=>Kwds_docs[:clip]),
 )
                                   
-                             
-                                  
+BOXPLOT_DEFAULT = SGKwds(
+    :x => __dic(:default=> 0, :__ord=>0, :__cat => "Required", :__doc=>"User should pass multiple columns for plotting the comparative box plot, i.e. side by side box plot for passed columns. User must pass either this or the `y` argument."),
+    :y => __dic(:default=> 0, :__ord=>0, :__cat=> "Required", :__doc=>"User should pass multiple columns for plotting the comparative box plot, i.e. side by side box plot for passed columns. User must pass either this or the `x` argument."),
+
+    :category => __dic(:default=> nothing, :__ord=>2, :__cat=>"Grouping", :__doc=>"A category column which indicates the box plot must be drawn within each category."),
+
+    :categoryorder => __dic(:default=> :ascending, :__ord=>1, :__cat=>"BoxPlot options", :__doc=>"How the category should be ordered, i.e. `:ascending`, `:descending`, `:data`."),
+    :outliers => __dic(:default=> false, :__ord=>1, :__cat=>"BoxPlot options", :__doc=>"If `true` the oultliers will be shown. The outliers are computed based on how many `outliersfactor` they are far from quartiles." ),
+    :outliersfactor => __dic(:default=> 1.5, :__ord=>1, :__cat=>"BoxPlot options", :__doc=>"The factor to be used for computing outliers." ),
+
+    :opacity => __dic(:default=> 1, :__ord=>3, :__cat=>"BoxPlot appearance", :__doc=>Kwds_docs[:opacity]),
+    :outlinethickness => __dic(:default=> 1, :__ord=>3, :__cat=>"BoxPlot appearance", :__doc=>Kwds_docs[:outlinethickness]),
+    :boxwidth => __dic(:default=> 1, :__ord=>3, :__cat=>"BoxPlot appearance", :__doc=>"The box width, it must be a number between 0 and 1."),
+    :boxcorner => __dic(:default=> 0, :__ord=>3, :__cat=>"BoxPlot appearance", :__doc=>"Corner radius for boxes. (`cornerRadiusTopLeft`, `cornerRadiusTopRight`, `cornerRadiusBottomLeft`, `cornerRadiusBottomRight`)."),
+    :space => __dic(:default=> 0.1, :__ord=>3, :__cat=>"BoxPlot appearance", :__doc=>"The space between boxes. It must be a number between 0 and 1."),
+    :groupspace => __dic(:default=> 0.05, :__ord=>3, :__cat=>"BoxPlot appearance", :__doc=>"The space between boxes inside each category. It must be a number between 0 and 1."),
+    :outlinecolor => __dic(:default=> :white, :__ord=>3, :__cat=>"BoxPlot appearance", :__doc=>Kwds_docs[:color]),
+    :medianwidth => __dic(:default=> 1, :__ord=>3, :__cat=>"BoxPlot appearance", :__doc=>"The total width to be used for the median indicator. It must be a number between 0 and 1."),
+    :mediancolor => __dic(:default=> :white, :__ord=>3, :__cat=>"BoxPlot appearance", :__doc=>"Specifiy the color for the median indicator."),
+    :medianthickness => __dic(:default=> 1, :__ord=>3, :__cat=>"BoxPlot appearance", :__doc=>"Specifiy the thickness for the median indicator."),
+    :tooltip => __dic(:default=> false, :__ord=>4, :__cat=>"BoxPlot tooltip", :__doc=>Kwds_docs[:tooltip]), 
+    :whiskercolor => __dic(:default=> :black, :__ord=>3, :__cat=>"BoxPlot appearance", :__doc=>"Specifiy the color for the whisker lines."),
+    :whiskerdash => __dic(:default=> [3,3], :__ord=>3, :__cat=>"BoxPlot appearance", :__doc=>"Specifiy the dash style for the whisker lines."),
+    :whiskerthickness => __dic(:default=> 1, :__ord=>3, :__cat=>"BoxPlot appearance", :__doc=>"Specifiy the thickness for the whisker lines."),
+    :fencewidth => __dic(:default=> 0.5, :__ord=>3, :__cat=>"BoxPlot appearance", :__doc=>"Specifiy the total width for the fence lines. It must be a number between 0 and 1."),
+    :fencecolor => __dic(:default=> :black, :__ord=>3, :__cat=>"BoxPlot appearance", :__doc=>"Specifiy the color for the fence lines."),
+    :meansymbol => __dic(:default=> :diamond, :__ord=>3, :__cat=>"BoxPlot appearance", :__doc=>"Specifiy the symbol to be used for the mean indicator."),
+    :meansymbolsize => __dic(:default=> 40, :__ord=>3, :__cat=>"BoxPlot appearance", :__doc=>"Specifiy the symbol size to be used for the mean indicator."),
+
+    :outliercolor => __dic(:default=> nothing, :__ord=>3.5, :__cat=>"Outliers appearance", :__doc=>"Specifiy the color for the outliers symobls."),
+    :outlieroutlinecolor => __dic(:default=> nothing, :__ord=>3.5, :__cat=>"Outliers appearance", :__doc=>"Specifiy the outline color for the outliers symobls."),
+    :outlierthickness => __dic(:default=> 1, :__ord=>3.5, :__cat=>"Outliers appearance", :__doc=>"Specifiy the outline thickness for the outliers symobls."),
+    :outliersymbolsize => __dic(:default=> 30, :__ord=>3.5, :__cat=>"Outliers appearance", :__doc=>"Specifiy the symbol size for the outliers symobls."),
+    :outlierjitter => __dic(:default=> 0, :__ord=>3.5, :__cat=>"Outliers appearance", :__doc=>"Specifiy the jitter strength for the outliers symobls."),
+    :outliersymbol => __dic(:default=> :circle, :__ord=>3.5, :__cat=>"Outliers appearance", :__doc=>"Specifiy the symbol shape for the outliers symobls."),
+    :outlieropacity => __dic(:default=> 1, :__ord=>3.5, :__cat=>"Outliers appearance", :__doc=>"Specifiy the mark opacity for the outliers symobls."),
+
+    :x2axis => __dic(:default=> false, :__ord=>5, :__cat=>"Axes options", :__doc=>Kwds_docs[:x2axis]),
+    :y2axis => __dic(:default=> false, :__ord=>5, :__cat=>"Axes options", :__doc=>Kwds_docs[:y2axis]),
+
+    :legend => __dic(:default=> nothing, :__ord=>6, :__cat=>"Legend", :__doc=>Kwds_docs[:legend]),
+
+    :clip => __dic(:default=> nothing, :__ord=>7, :__cat=>"Miscellaneous", :__doc=>Kwds_docs[:clip]),
+
+    
+    :missingmode => __dic(:default=> 0, :__ord=>1, :__cat=>"BoxPlot options", :__doc=>"Indicate how to handle missing values in category or group.  `0` = nothing, `1` = no missing in category.")
+
+)                 
+
+violin_default_scale(x; args...) = x
+
+VIOLIN_DEFAULT = SGKwds(
+    :x => __dic(:default=> 0, :__ord=>0, :__cat => "Required", :__doc=>"User should pass multiple columns for plotting the comparative violin plot, i.e. side by side violin plot for passed columns. User must pass either this or the `y` argument."),
+    :y => __dic(:default=> 0, :__ord=>0, :__cat=> "Required", :__doc=>"User should pass multiple columns for plotting the comparative violin plot, i.e. side by side violin plot for passed columns. User must pass either this or the `x` argument."),
+
+    :weights => __dic(:default=> :gaussian, :__ord=>1, :__cat=>"Violin options", :__doc=>"The kernel weight function."),
+    :bw => __dic(:default=> nothing, :__ord=>1, :__cat=>"Violin options", :__doc=>"The kernel bandwidth."),
+    :npoints => __dic(:default=> 100, :__ord=>1, :__cat=>"Violin options", :__doc=>"The number of points for drawing the density line."),
+    :interpolate => __dic(:default=> :linear, :__ord=>1, :__cat=>"Violin options", :__doc=>"The line interpolation algorithm for drawing the density line."),
+    :scale => __dic(:default=> violin_default_scale, :__ord=>1, :__cat=>"Violin options", :__doc=>"The scale to be used for density estimation, see `Density`."),
+
+
+    :category => __dic(:default=> nothing, :__ord=>2, :__cat=>"Grouping", :__doc=>"A category column which indicates the violin plot must be drawn within each category."),
+
+    :side => __dic(:default=> :both, :__ord=>3, :__cat=>"Violin appearance", :__doc=>"Specifiy which half of the violin plot should be plotted, i.e. `:right(:bottom)`, `:left(:top)`."),
+    :thickness => __dic(:default=> 1, :__ord=>3, :__cat=>"Violin appearance", :__doc=>"Specifiy The thickness of the outline line."),
+    :fillopacity => __dic(:default=> 0.5, :__ord=>3, :__cat=>"Violin appearance", :__doc=>"Specifiy The fill opacity of the plot."),
+    :opacity => __dic(:default=> 1, :__ord=>3, :__cat=>"Violin appearance", :__doc=>"Specifiy The opacity of the density line."),
+    :filled => __dic(:default=> true, :__ord=>3, :__cat=>"Violin appearance", :__doc=>"Specifiy the plot should be filled with color."),
+    :color => __dic(:default=> nothing, :__ord=>3, :__cat=>"Violin appearance", :__doc=>Kwds_docs[:color_grad]),
+
+
+
+    :x2axis => __dic(:default=> false, :__ord=>5, :__cat=>"Axes options", :__doc=>Kwds_docs[:x2axis]),
+    :y2axis => __dic(:default=> false, :__ord=>5, :__cat=>"Axes options", :__doc=>Kwds_docs[:y2axis]),
+
+    :legend => __dic(:default=> nothing, :__ord=>6, :__cat=>"Legend", :__doc=>Kwds_docs[:legend]),
+
+    :clip => __dic(:default=> nothing, :__ord=>7, :__cat=>"Miscellaneous", :__doc=>Kwds_docs[:clip]),
+
+    
+    :missingmode => __dic(:default=> 0, :__ord=>1, :__cat=>"Violin options", :__doc=>"Indicate how to handle missing values in category or group.  `0` = nothing, `1` = no missing in category."),
+
+    :categoryorder => __dic(:default=> :ascending, :__ord=>1, :__cat=>"Violin options", :__doc=>"How the category should be ordered, i.e. `:ascending`, `:descending`, `:data`."),
+    :space => __dic(:default=> 0.1, :__ord=>3, :__cat=>"Violin appearance", :__doc=>"The space between violins. It must be a number between 0 and 1."),
+    :groupspace => __dic(:default=> 0.05, :__ord=>3, :__cat=>"Violin appearance", :__doc=>"The space between violins inside each category. It must be a number between 0 and 1.")
+    # :scale => (x; args...) -> x, # see Density for more information
+  
+
+)
