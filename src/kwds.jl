@@ -643,3 +643,35 @@ VIOLIN_DEFAULT = SGKwds(
   
 
 )
+
+REG_DEFAULT = SGKwds(
+    :x => __dic(:default=> 0, :__ord=>0, :__cat => "Required", :__doc=>"The column to be used as x, i.e. the independent variable."),
+    :y => __dic(:default=> 0, :__ord=>0, :__cat=> "Required", :__doc=>"The column to be used as y, i.e. the response variable."),    
+    :group => __dic(:default=> nothing, :__ord=>2, :__cat=>"Grouping", :__doc=>"The name of column for grouping observation. Each group of observations will create seperate Regression Line."),
+
+    :opacity => __dic(:default=> 1, :__ord=>3, :__cat=>"Reg appearance", :__doc=>Kwds_docs[:opacity]),
+    :thickness => __dic(:default=> 1, :__ord=>3, :__cat=>"Reg appearance", :__doc=>"The Line thickness."),
+    :dash => __dic(:default=> [0], :__ord=>3, :__cat=>"Reg appearance", :__doc=>"The Line dash style."),
+    :color => __dic(:default=> "#4682b4", :__ord=>3, :__cat=>"Reg appearance", :__doc=>Kwds_docs[:color_grad]),
+
+    :interpolate => __dic(:default=>:linear, :__ord=>1, :__cat=>"Reg Options", :__doc=>Kwds_docs[:interpolate]),
+    :degree => __dic(:default=>1, :__ord=>1, :__cat=>"Reg Options", :__doc=>"The maximum polynomial degree for the fitted line."),
+    :intercept => __dic(:default=>true, :__ord=>1, :__cat=>"Reg Options", :__doc=>"Whether the fitted line should have the intercept term."),
+    :npoints => __dic(:default=>100, :__ord=>1, :__cat=>"Reg Options", :__doc=>"The number of points in grid for drawing the regression line."),
+
+    :clm => __dic(:default=>false, :__ord=>4, :__cat=>"Confidence Interval ", :__doc=>"Draw the mean confidence interval."),
+    :clmcolor => __dic(:default=>nothing, :__ord=>4, :__cat=>"Confidence Interval ", :__doc=>"The filling color for the mean confidence interval."),
+    :clmopacity => __dic(:default=>0.3, :__ord=>4, :__cat=>"Confidence Interval ", :__doc=>"The opacity for the mean confidence interval."),
+
+    :cli => __dic(:default=>false, :__ord=>4, :__cat=>"Confidence Interval ", :__doc=>"Draw the prediction confidence interval."),
+    :clicolor => __dic(:default=>nothing, :__ord=>4, :__cat=>"Confidence Interval ", :__doc=>"The filling color for the prediction confidence interval."),
+    :cliopacity => __dic(:default=>0.3, :__ord=>4, :__cat=>"Confidence Interval ", :__doc=>"The opacity for the prediction confidence interval."),
+    :alpha => __dic(:default=>0.05, :__ord=>4, :__cat=>"Confidence Interval ", :__doc=>"Control the confidence intervals level."),
+
+
+    :x2axis => __dic(:default=> false, :__ord=>5, :__cat=>"Axes options", :__doc=>Kwds_docs[:x2axis]),
+    :y2axis => __dic(:default=> false, :__ord=>5, :__cat=>"Axes options", :__doc=>Kwds_docs[:y2axis]),
+    :legend => __dic(:default=> nothing, :__ord=>6, :__cat=>"Legend", :__doc=>Kwds_docs[:legend]),
+
+    :clip => __dic(:default=> nothing, :__ord=>7, :__cat=>"Miscellaneous", :__doc=>Kwds_docs[:clip]),
+)

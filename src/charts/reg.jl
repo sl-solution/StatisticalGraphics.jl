@@ -70,34 +70,7 @@ function reg_fit(x, y, _f_x, _f_y; degree=1, intercept=true, alpha=0.05, cl=fals
     end
     tuple.(collect(x0), fit, lower_clm, upper_clm, lower_cli, upper_cli)
 end
-REG_DEFAULT = Dict{Symbol, Any}(:x => 0, :y=>0, :group=>nothing,
-                                    :x2axis=>false,
-                                    :y2axis=>false,
-                                    :opacity=>1,
-                                    :thickness=>1,
-                                    :dash => [0],
-                                    :color=>"#4682b4",
-                                    :interpolate => :linear,
 
-                                    :legend=>nothing,
-
-                                    :clm => false, # confidence for mean
-                                    :clmcolor=>nothing, # if user pass this, it will overwrite group color
-                                    :clmopacity=>0.3,
-
-                                    :cli => false, # confidence for individual
-                                    :clicolor=>nothing,
-                                    :cliopacity=>0.3,
-
-                                    :degree=>1, # between 1 and 10
-                                    :intercept=>true,
-                                    :alpha=>0.05,
-
-                                    :npoints=>100,
-
-
-                                    :clip=>nothing
-                                    )
 mutable struct Reg <: SGMarks
     opts
     function Reg(;opts...)
