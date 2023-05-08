@@ -70,7 +70,13 @@ function reg_fit(x, y, _f_x, _f_y; degree=1, intercept=true, alpha=0.05, cl=fals
     end
     tuple.(collect(x0), fit, lower_clm, upper_clm, lower_cli, upper_cli)
 end
+"""
+    Reg(args...)
 
+Represent a Regression Line with given arguments.
+
+$(print_doc(REG_DEFAULT))
+"""
 mutable struct Reg <: SGMarks
     opts
     function Reg(;opts...)
