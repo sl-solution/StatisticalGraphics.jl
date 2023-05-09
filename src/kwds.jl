@@ -237,7 +237,7 @@ BAR_DEFAULT = SGKwds(
     :baselinestat => __dic(:default=> nothing, :__ord=>1, :__cat=>"Bar options", :__doc=>"The function that will be used to aggregate values in column passed as `baselineresponse`."), # same rule as :stat
 
     #data label
-    :label=>__dic(:default=> :none, :__ord=>4, :__cat=>"Bar labels", :__doc=>"What information should be used for bar labels. It can be :none, :height, or :category."), # :height or :category
+    :label=>__dic(:default=> :none, :__ord=>4, :__cat=>"Bar labels", :__doc=>"What information should be used for bar labels. It can be `:none`, `:height`, or `:category`."), # :height or :category
     :labelfont=>__dic(:default=> nothing, :__ord=>4, :__cat=>"Bar labels", :__doc=>Kwds_docs[:font]),
     :labelbaseline=>__dic(:default=> nothing, :__ord=>4, :__cat=>"Bar labels", :__doc=>Kwds_docs[:fontbaseline]),
     :labelfontweight=>__dic(:default=> nothing, :__ord=>4, :__cat=>"Bar labels", :__doc=>Kwds_docs[:fontweight]),
