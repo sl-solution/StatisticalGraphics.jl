@@ -3,32 +3,6 @@ using StatisticalGraphics
 using DemoCards
 
 
-function Base.show(io::IO, ::MIME"text/html", v::SG.SGManipulate)
-    divid="vg"*string(rand(UInt128), base=16)
-    print(io, """
-    <div id='$divid' style="width:100%;height:100%;"></div>
-    <script type='text/javascript'>
-    requirejs.config({
-        paths: {
-            'vg-embed': 'https://cdn.jsdelivr.net/npm/vega-embed@6?noext',
-            'vega-lib': 'https://cdn.jsdelivr.net/npm/vega-lib?noext',
-            'vega-lite': 'https://cdn.jsdelivr.net/npm/vega-lite@5?noext',
-            'vega': 'https://cdn.jsdelivr.net/npm/vega@5?noext'
-        }
-    });
-    require(['vg-embed'], function(vegaEmbed) {
-        vegaEmbed('#$divid', 
-    """
-    )
-    print(io, SG.JSON.json(v.json_spec))
-    print(io, """
-    , {
-        mode: 'vega'
-        }).catch(console.warn);
-        })
-        </script>
-    """)
-end
 
 # DocMeta.setdocmeta!(InMemoryDatasets, :DocTestSetup, :(using InMemoryDatasets); recursive=true)
 
