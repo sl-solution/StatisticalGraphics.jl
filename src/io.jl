@@ -22,7 +22,7 @@ end
 
 """
     svg(filename::AbstractString, v::SGPlots; s=1)
-Save the plot ``v`` as a svg file with name ``filename``.
+Save the plot `v` as a svg file with name `filename`. The `s` keyword can be used to scale the output.
 """
 function svg(filename::AbstractString, v::SGPlots; s=1)
     savefig(filename, "image/svg+xml", v, s=s)
@@ -30,7 +30,7 @@ end
 
 """
     pdf(filename::AbstractString, v::SGPlots; s=1)
-Save the plot ``v`` as a pdf file with name ``filename``.
+Save the plot `v` as a pdf file with name `filename`. The `s` keyword can be used to scale the output.
 """
 function pdf(filename::AbstractString, v::SGPlots; s=1)
     savefig(filename, "application/pdf", v; s=s)
@@ -38,7 +38,7 @@ end
 
 """
     png(filename::AbstractString, v::SGPlots; s=1)
-Save the plot ``v`` as a png file with name ``filename``.
+Save the plot `v` as a png file with name `filename`. The `s` keyword can be used to scale the output.
 """
 function png(filename::AbstractString, v::SGPlots; s=1)
     savefig(filename, "image/png", v, s=s)
