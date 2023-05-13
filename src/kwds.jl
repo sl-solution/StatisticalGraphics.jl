@@ -697,3 +697,55 @@ HEAT_DEFAULT = SGKwds(
 
     :clip => __dic(:default=> nothing, :__ord=>7, :__cat=>"Miscellaneous", :__doc=>Kwds_docs[:clip]),
 )
+
+PIE_DEFAULT = SGKwds(
+    
+    :category => __dic(:default=> 0, :__ord=>0, :__cat=>"Required", :__doc=>"A category column which indicates each slice."),
+
+    :response => __dic(:default=> nothing, :__ord=>1, :__cat=>"Pie options", :__doc=>"A numeric column which its aggregated values based on the `stat` keyword argument will be used to determine the radius of each slice."),
+
+    :stat => __dic(:default=> nothing, :__ord=>1, :__cat=>"Pie options", :__doc=>"A function for aggregating the `response` keyword argument. When `response` is passed the default value of the keword change to `IMD.sum`, however, user can pass any function to this argument. The function must accept two arguments `f`(format), and `x` the input values and return the aggregated values."),
+    :sort => __dic(:default=> false, :__ord=>1, :__cat=>"Pie options", :__doc=>"If `true` the slices will be sorted based on their total angle."),
+
+    :startangle => __dic(:default=> 0, :__ord=>1, :__cat=>"Pie options", :__doc=>"The start angle in degree."),
+    :endangle => __dic(:default=> 360, :__ord=>1, :__cat=>"Pie options", :__doc=>"The end angle in degree."),
+    :missingmode => __dic(:default=> 0, :__ord=>1, :__cat=>"Pie options", :__doc=>"Indicate how to handle missing values in category or group.  `0` = nothing, `1` = no missing in category, `2` = no missing in group, `3` = no missing in category or group, `4` = no missing in category and group."),
+
+    :group => __dic(:default=> nothing, :__ord=>2, :__cat=>"Grouping", :__doc=>"A nested pie chart will be created by passing a single column to this argument."),
+
+    :groupspace => __dic(:default=> 0.01, :__ord=>2, :__cat=>"Grouping", :__doc=>"The space between nested pie."), 
+
+    :opacity => __dic(:default=> 1, :__ord=>3, :__cat=>"Pie appearance", :__doc=>Kwds_docs[:opacity]),
+    :outlinethickness => __dic(:default=> 1, :__ord=>3, :__cat=>"Pie appearance", :__doc=>Kwds_docs[:outlinethickness]),
+    :outerradius => __dic(:default=> 1, :__ord=>3, :__cat=>"Pie appearance", :__doc=>"The outer radius. It must be a number between 0 and 1."),
+    :innerradius => __dic(:default=> 0, :__ord=>3, :__cat=>"Pie appearance", :__doc=>"The donut radius. It must be a number between 0 and 1."),
+    :piecorner => __dic(:default=> 0, :__ord=>3, :__cat=>"Pie appearance", :__doc=>"The corner of slice in pixel."),
+    :space => __dic(:default=> 0, :__ord=>3, :__cat=>"Pie appearance", :__doc=>"The space between slices. It can be any number between 0 and 1. "),  
+    :outlinecolor => __dic(:default=> :white, :__ord=>3, :__cat=>"Pie appearance", :__doc=>Kwds_docs[:outlinecolor]),
+    :colormodel => __dic(:default=> :category, :__ord=>3, :__cat=>"Pie appearance", :__doc=>Kwds_docs[:colormodel]),
+
+
+
+    :label=>__dic(:default=> nothing, :__ord=>4, :__cat=>"Pie labels", :__doc=>"What information should be used for slice labels. It can be `:category`, `:percent`, or `:both`."),
+    :decimal=>__dic(:default=> 1, :__ord=>4, :__cat=>"Pie labels", :__doc=>"Numbe of digits after the decimal when percentage is used."),
+    :labelpos=>__dic(:default=> 0.5, :__ord=>4, :__cat=>"Pie labels", :__doc=>"Vertical position of lables."),
+    :labelfont=>__dic(:default=> nothing, :__ord=>4, :__cat=>"Pie labels", :__doc=>Kwds_docs[:font]),
+    :labelfontweight=>__dic(:default=> nothing, :__ord=>4, :__cat=>"Pie labels", :__doc=>Kwds_docs[:fontweight]),
+    :labelitalic=>__dic(:default=> nothing, :__ord=>4, :__cat=>"Pie labels", :__doc=>Kwds_docs[:italic]),
+    :labelsize=>__dic(:default=> nothing, :__ord=>4, :__cat=>"Pie labels", :__doc=>Kwds_docs[:fontsize]),
+    :labelcolor=>__dic(:default=> :black, :__ord=>4, :__cat=>"Pie labels", :__doc=>Kwds_docs[:color]),
+    :labelangle=>__dic(:default=> nothing, :__ord=>4, :__cat=>"Pie labels", :__doc=>Kwds_docs[:fontangle]),
+    :labeldir=>__dic(:default=> :ltr, :__ord=>4, :__cat=>"Pie labels", :__doc=>Kwds_docs[:fontdir]),
+    :labellimit=>__dic(:default=> nothing, :__ord=>4, :__cat=>"Pie labels", :__doc=>Kwds_docs[:fontlimit]),
+    :labelalign=>__dic(:default=> :center, :__ord=>4, :__cat=>"Pie labels", :__doc=>Kwds_docs[:fontalign]),
+    :labelbaseline=>__dic(:default=> :middle, :__ord=>4, :__cat=>"Pie labels", :__doc=>Kwds_docs[:fontbaseline]),
+    :labelopacity=>__dic(:default=> 1, :__ord=>4, :__cat=>"Pie labels", :__doc=>Kwds_docs[:fontopacity]),
+    :labelthreshold=>__dic(:default=> 0.0, :__ord=>4, :__cat=>"Pie labels", :__doc=>"Labels will be drop for the slices with smaller angle than `:labelthreshold`."),
+    :labelrotate=>__dic(:default=> false, :__ord=>4, :__cat=>"Pie labels", :__doc=>"It rotates text 90 degree."),
+   
+    :tooltip => __dic(:default=> false, :__ord=>4, :__cat=>"Pie labels", :__doc=>Kwds_docs[:tooltip]),
+
+    :legend => __dic(:default=> nothing, :__ord=>6, :__cat=>"Legend", :__doc=>Kwds_docs[:legend]),
+
+    :clip => __dic(:default=> nothing, :__ord=>7, :__cat=>"Miscellaneous", :__doc=>Kwds_docs[:clip]),
+)

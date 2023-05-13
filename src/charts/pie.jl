@@ -1,51 +1,10 @@
-PIE_DEFAULT = Dict{Symbol,Any}(:category => nothing,
-    :response => nothing,
-    :stat => nothing, #by default, if response is given we use sum, if not we use freq - the function passed as stat must accept two arguments f and x, f is a function and x is a abstract vector. function apply f on each elements of x and return the aggregations
-    :group => nothing,
-    :groupspace=>0.01, # space between groups
+"""
+    Pie(args...)
 
-    :sort => false,
+Represent a Pie chart with given arguments.
 
-    :opacity => 1,
-    :outlinethickness => 1,
-
-    :outerradius=>1, # [0,1], proportion of the pie radius compared to the maximum possilbe
-    :innerradius=>0, # donut pie [0,1]
-    :piecorner=>0,
-    :startangle => 0, # can be between[0,1], or :nest to display each group nested in the other one
-    :endangle=>360,
-    :opacity => 1,
-    :space => 0,
-
-    :missingmode => 0, # how to handle missings in category or group.  0 = nothing, 1 = no missing in category, 2 = no missing in group, 3 = no missing in category or group, 4 = no missing in both category and group
-
-
-    :label=>nothing,  # show labels for each piecorner - :category, :percent, :both are valid options
-    :decimal=>1, # number of digits after the decimal when percentages are shown
-    :labelpos => 0.5, # where to put the labels
-    :labelfont=>nothing,
-    :labelfontweight=>nothing,
-    :labelitalic=>nothing,
-    :labelsize=>nothing,
-    :labelcolor=>:black,
-    :labelangle=>nothing,
-    :labeldir=>:ltr,
-    :labellimit=>nothing,
-    :labelalign=>:center,
-    :labelbaseline=>:middle,
-    :labelopacity => 1,
-    :labelthreshold => 0.0,
-    :labelrotate=>false, # rotate labels 90 degree, when is true
-
-   
-    :outlinecolor => :white,
-    :colormodel=>:category,
-    
-    :tooltip=>false,
-
-    :legend => nothing,
-    :clip => nothing
-)
+$(print_doc(PIE_DEFAULT))
+"""
 mutable struct Pie <: SGMarks
     opts
     function Pie(; opts...)

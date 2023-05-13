@@ -7,6 +7,7 @@ Density
 Heatmap
 Histogram
 Line
+Pie
 Polygon
 RefLine
 Reg
