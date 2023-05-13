@@ -27,23 +27,35 @@ mutable struct SGPlot_Args
 end
 
 # include default value for global sgplot specification
-SGPLOT_DEFAULT = Dict(:width => 600,
-                      :height => 400,
-                      
-                      # the global font specification
-                      :font => "sans-serif",
-                      :italic=>false,
-                      :fontweight=>400,
+SGPLOT_DEFAULT = SGKwds(
 
-                      :groupcolormodel => "category",
-                      
-                      :clip => true,
-                      :backcolor => :white, # the background color for the whole graph area
-                      :wallcolor => :transparent, # the background of the plot area / or panel area
+    :width => __dic(:default=> 600, :__ord=>1, :__cat=>"Plot appearance", :__doc=>"The width of plot."),
+    :height => __dic(:default=> 400, :__ord=>1, :__cat=>"Plot appearance", :__doc=>"The width of plot."),
+    :font => __dic(:default=> "sans-serif", :__ord=>1, :__cat=>"Plot appearance", :__doc=>"The default font."),
+    :italic => __dic(:default=> false, :__ord=>1, :__cat=>"Plot appearance", :__doc=>"The default value whether the package use italic fonts."),
+    :fontweight => __dic(:default=> 400, :__ord=>1, :__cat=>"Plot appearance", :__doc=>"The font weight value."),
+
+    :groupcolormodel => __dic(:default=> :category, :__ord=>1, :__cat=>"Plot appearance", :__doc=>"The color model to be used when `group` is used for specific plot."),
+
+    :backcolor => __dic(:default=> :white, :__ord=>1, :__cat=>"Plot appearance", :__doc=>"The backgroud color for whole graph."),
+    :wallcolor => __dic(:default=> :transparent, :__ord=>1, :__cat=>"Plot appearance", :__doc=>"The backgroud color for plot area."),
+
+    :clip => __dic(:default=> true, :__ord=>1, :__cat=>"Plot appearance", :__doc=>"The clip option for whole plot."),
+)
 
 
-                      )
+"""
+    sgplot(ds, plots; mapformats=true, nominal=nothing, xaxis=Axis(), x2axis=Axis(), yaxis=Axis(), y2axis=Axis(), legend=true, threads=automatic, opts...)
 
+Produce a statistical graphics. The `ds` argument is referring to a data set (or grouped data set) and `plots` is a vector of marks, such as Bar, Pie,.... 
+
+The `opts...` refers to extra keyword arguments which can be passed to `sgplot`. These keywords depend depend whether `ds` is a data set or a grouped data set. Below shows the available keyword arguments for each case.
+
+# Non-grouped data sets
+$(print_doc(SGPLOT_DEFAULT))
+
+# Grouped data sets
+"""
 function sgplot(ds::Union{AbstractDataset, IMD.GroupBy, IMD.GatherBy}, plts::Vector{<:SGMarks}; mapformats=true, nominal::Union{Nothing,IMD.ColumnIndex, IMD.MultiColumnIndex}=nothing, xaxis=Axis(), x2axis=Axis(), yaxis=Axis(), y2axis=Axis(), legend::Union{Bool, Legend, Vector{Legend}}=true, threads=nrow(ds) > 10^6, opts...)
     
     nominal_tmp = String[]
