@@ -5,6 +5,11 @@ function savefig(filename::AbstractString, mime::AbstractString, v::SGPlots; s =
     end
 end
 
+"""
+    savefig(filename::AbstractString, v::SGPlots; s = 1)
+Save the plot `v` as a file with name `filename`. The file format
+will be picked based on the extension of the filename.
+"""
 function savefig(filename::AbstractString, v::SGPlots; s=1)
     file_ext = lowercase(splitext(filename)[2])
     if file_ext == ".svg"
