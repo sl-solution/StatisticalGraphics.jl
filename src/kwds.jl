@@ -675,3 +675,25 @@ REG_DEFAULT = SGKwds(
 
     :clip => __dic(:default=> nothing, :__ord=>7, :__cat=>"Miscellaneous", :__doc=>Kwds_docs[:clip]),
 )
+
+default_bin_heatmap(x) = max(2, Int(ceil(log2(x)) + 1))
+HEAT_DEFAULT = SGKwds(
+    :x => __dic(:default=> 0, :__ord=>0, :__cat => "Required", :__doc=>"The column to be used as x coordinate. User must pass this and the `y` argument."),
+    :y => __dic(:default=> 0, :__ord=>0, :__cat=> "Required", :__doc=>"The column to be used as y coordinate. User must pass this and the `x` argument."),        
+
+    :opacity => __dic(:default=> 1, :__ord=>3, :__cat=>"Heatmap appearance", :__doc=>"The opacity value for the outline."),
+    :tooltip => __dic(:default=> false, :__ord=>1, :__cat=>"Heatmap options", :__doc=>Kwds_docs[:tooltip]), # it can be true, only if labelresponse is provided
+    :xbincount => __dic(:default=> nothing, :__ord=>1, :__cat=>"Heatmap Options", :__doc=>"The number of points for the grid calculation in x direction."), 
+    :ybincount => __dic(:default=> nothing, :__ord=>1, :__cat=>"Heatmap Options", :__doc=>"The number of points for the grid calculation in y direction."), 
+    :bincountmethod => __dic(:default=> default_bin_heatmap, :__ord=>1, :__cat=>"Heatmap Options", :__doc=>"The number of points for the grid calculation in both direction."), 
+    :colormodel => __dic(:default=> (:scheme=>:viridis), :__ord=>3, :__cat=>"Heatmap appearance", :__doc=>"Define the color model to be used for the heatmap plot."),
+
+
+    :x2axis => __dic(:default=> false, :__ord=>5, :__cat=>"Axes options", :__doc=>Kwds_docs[:x2axis]),
+    :y2axis => __dic(:default=> false, :__ord=>5, :__cat=>"Axes options", :__doc=>Kwds_docs[:y2axis]),
+
+
+    :legend => __dic(:default=> nothing, :__ord=>6, :__cat=>"Legend", :__doc=>Kwds_docs[:legend]),
+
+    :clip => __dic(:default=> nothing, :__ord=>7, :__cat=>"Miscellaneous", :__doc=>Kwds_docs[:clip]),
+)
