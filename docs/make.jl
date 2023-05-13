@@ -33,10 +33,12 @@ makedocs(
             "Pyramid" => "man/pyramid.md",
             "Nations" => "man/nations.md",
             "Movies" => "man/movies.md"
+        ],
+        "API" => Any[
+            "Functions" => "lib/Functions.md",
+            "Plots" => "lib/Plots.md",
+            "Axis & Legend" => "lib/Axis_Legend.md"
         ]
-        # "API" => Any[
-        #     "Functions" => "lib/functions.md"
-        # ]
     ],
     strict = true
 )

@@ -1,0 +1,17 @@
+```@docs
+Band
+Bar
+BoxPlot
+Bubble
+Density
+Heatmap
+Histogram
+Line
+Polygon
+RefLine
+Reg
+Scatter
+Segment
+TextPlot
+Violin
+```
