@@ -35,7 +35,7 @@ makedocs(
             "Movies" => "man/movies.md"
         ],
         "API" => Any[
-            "Functions" => "lib/Functions.md",
+            "Functions" => "lib/functions.md",
             "Plots" => "lib/Plots.md",
             "Axis & Legend" => "lib/Axis_Legend.md"
         ]
