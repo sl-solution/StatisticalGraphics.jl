@@ -76,24 +76,6 @@ sgplot(
 
 ![iris](assets/iris_violin.svg)
 
-
-**Bar chart**
-
-```julia
-bar_ds = Dataset(x = repeat(1:50, outer=50), group = repeat(1:50, inner = 50))
-insertcols!(bar_ds, :y => rand(nrow(bar_ds)))
-sgplot(
-        bar_ds,
-        Bar(x=2, response=3, group=1), # refer columns by their indices
-        groupcolormodel = Dict(:scheme=>"turbo"),
-        xaxis=Axis(show=false),
-        yaxis=Axis(show=false),
-        legend = false
-      )
-```
-
-![bar_random](assets/bar_random.svg)
-
 **unemployment stacked area plot across industries** 
 
 Reproducing an example from the [`vega`](https://vega.github.io)`s examples collection.
@@ -115,108 +97,6 @@ sgplot(
 ```
 
 ![unemployment](assets/unemployment.svg)
-
-**[Revenue by Music Format, 1973–2018](https://observablehq.com/@mbostock/revenue-by-music-format-1973-2018)**
-
-Reproducing an example from the [`D3`](http://d3js.org)`s examples collection.
-
-```julia
-music = filereader("assets/music.csv")
-color_ds = filereader("assets/color_ds.csv")
-leftjoin!(music, color_ds, on = :Format)# sort data - original example
-sort!(music, [:Year, :order], rev = [false, true]) # rev = true for :order to make the color similar to the original example
-
-inbillion(x) = x/10^9 # make the yaxis' values in billion $
-setformat!(music, r"Infla" => inbillion)
-
-sgplot(
-        music,
-        [
-          Bar(x = :Year, response = r"Infla",
-              group = :Format,
-              grouporder = :data,
-              outlinethickness = 0,
-              space = 0.05,
-              legend = :music_leg
-            )
-        ],
-        groupcolormodel = reverse!(color_ds[:, :Color]),
-        yaxis = Axis(title = "Revenue (billion, adj.)", domain = false, titlepos=[5,5], titleangle=0, titlealign=:left, titlesize=10),
-        xaxis = Axis(values = 1975:5:2015),
-        legend = Legend(name = :music_leg, rowspace=0, gridalign = :all, columns = 4, orient = :top, values = color_ds[:, :Format]),
-        width = 700
-      )
-```
-
-![music](assets/music.svg)
-
-**Normalised bar chart**
-
-```julia
-sgplot(
-        music,
-        Bar(x=:Year, response=r"Infla",
-            group=:Format,
-            grouporder=:data,
-            outlinethickness=0,
-            space=0.05,
-            normalize=true,
-            legend=:music_leg
-          ),
-        groupcolormodel=reverse!(color_ds[:, :Color]),
-        yaxis=Axis(title="Revenue %", domain=false, nice=false, d3format = "%"),
-        xaxis=Axis(values=1975:5:2015),
-        legend=Legend(name=:music_leg, rowspace=0, gridalign=:all, columns=4, orient=:top, values=color_ds[:, :Format]),
-        width=700
-)
-```
-
-![normalised_music](assets/normalised_music.svg)
-
-**[Stacked Bar Chart, Diverging](https://observablehq.com/@d3/diverging-stacked-bar-chart)**
-
-Reproducing an example from the [`D3`](http://d3js.org)`s examples collection.
-
-Using the `baselineresponse` keyword argument to control the baseline of bars in each category.
-
-```julia
-ds = filereader("assets/politifact.csv")
-ds_order = Dataset(ruling = ["true", "mostly-true", "half-true","barely-true", "false", "full-flop", "pants-fire"], 
-                  Ruling = ["True", "Mostly true", "Half true", "Mostly false", "False", "False", "Pants on fire!"],
-                  order = 1:7,
-                  weight = [0,0,0,-1,-1,-1,-1])
-leftjoin!(ds, ds_order, on = :ruling)
-sort!(ds, [:order], rev=true) # order Ruling
-modify!(
-        groupby(ds, :speaker), 
-        :count=> x->x ./ IMD.sum(x), # normalise counts
-        [:count, :weight]=> byrow(prod) =>:baseline
-        )
-
-sgplot(
-        ds,
-        [
-          Bar(y=:speaker, response=:count,
-              group=:Ruling,
-              grouporder=:data,
-              baselineresponse=:baseline,
-              orderresponse=:baseline,
-              outlinethickness=0.1,
-              legend = :bar_leg,
-              x2axis=true
-            ),
-          RefLine(values = 0.0, axis=:x2axis)
-        ],
-        x2axis=Axis(title = "← more lies · Truthiness · more truths →", domain = false, d3format="%", nice=false, grid=true),
-        yaxis=Axis(title = "", domain = false, ticks = false),
-        legend = Legend(name = :bar_leg, title = "", orient=:top, columns=0, size=200, columnspace = 10 ),
-        width=800,
-        height=200,
-        groupcolormodel=["#d53e4f", "#fc8d59", "#fee08b", "#e6f598", "#99d594", "#3288bd"]
-    )
-```
-
-![stack-div-bar](assets/stack-div-bar.svg)
 
 # Examples - grouped datasets
 
