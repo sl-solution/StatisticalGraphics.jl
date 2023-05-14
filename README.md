@@ -49,50 +49,6 @@ sgplot(
 
 ![hist_ex](assets/hist_ex.svg)
 
-**Dubai Weather**
-
-```julia
-using DLMReader
-dubai_weather = filereader("assets/dubai_weather.csv", types=Dict(1 => Date))
-sgplot(
-        dubai_weather,
-        [
-          Band(x=:date, lower=:min, upper=:max),
-          Line(x=:date, y=:min, color="#4682b4", thickness=1),
-          Line(x=:date, y=:max, color="#ff7f0e", thickness=0.5),
-          Line(x=:date, y=:pressure, color="#2ca02c", y2axis=true, breaks=true),
-          Scatter(x=:date, y=:pressure, outlinecolor="#2ca02c", size=10, y2axis=true)
-        ],
-        xaxis=Axis(offset=10, type=:date, grid=true, griddash=[1, 1], title="Date"),
-        yaxis=Axis(offset=10, grid=true, griddash=[1, 1], title="Temperature(°C)"),
-        y2axis=Axis(offset=10, title="Pressure")
-      )
-```
-
-![dubai_ex](assets/dubai.svg)
-
-Using `BoxPlot` to plot monthly temperature (minimum and maximum), and add second axes for plotting weekly pressure.
-
-```julia
-modify!(dubai_weather, :date=>byrow(week)=>:Week)
-setformat!(dubai_weather, :date=>month)
-
-sgplot(
-        dubai_weather,
-        [
-          BoxPlot(y=[:min, :max], category=:date, outliers=true),
-          BoxPlot(y=:pressure, category=:Week, opacity=0.5, y2axis=true, outliers=true, x2axis=true)
-        ],
-        xaxis=Axis(title="Month"),
-        yaxis=Axis(title="Temperature"),
-        y2axis=Axis(title="Pressure", d3format="f"),
-        x2axis=Axis(values=3:4:53),
-        height=600
-      )
-```
-
-![dubai_boxplot](assets/dubai_boxplot.svg)
-
 **Iris Data**
 
 ```julia
@@ -120,38 +76,6 @@ sgplot(
 
 ![iris](assets/iris_violin.svg)
 
-**[Box Plot](https://observablehq.com/@d3/box-plot)**
-
-Reproducing an example from the [`D3`](http://d3js.org)`s examples collection.
-
-Using the `format` feature of `InMemoryDataset` to manually bin data before plotting a box plot.
-
-```julia
-diamond = filereader("assets/diamonds.csv")
-carat_fmt(x) = round((searchsortedfirst(0.19:0.2:5.02, x)-2)*.2 + 0.3, digits=2)
-setformat!(diamond, :carat=>carat_fmt)
-
-sgplot(
-        diamond, 
-        BoxPlot(y=:price, category =:carat,
-                mediancolor=:black, medianthickness = 0.5,
-                fencewidth=0,
-                whiskerdash=[0], whiskerthickness = 0.5,
-
-                outliers = true,
-                outlierjitter = 5,
-                outliersymbolsize=10,
-                outliercolor=:black,
-                outlieropacity=0.1
-              ),
-        yaxis=Axis(domain = false, nice=false, grid=true),
-        groupcolormodel=["lightgray"],
-        legend=false,
-        width=800
-      )
-```
-
-![diamond](assets/diamond.svg)
 
 **Bar chart**
 
