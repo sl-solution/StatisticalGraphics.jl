@@ -76,7 +76,7 @@ function sgplot(ds::Union{AbstractDataset, IMD.GroupBy, IMD.GatherBy}, plts::Vec
         end
         # strings and pooled array are assumed to be nominal
         # TODO user may want to use pa as a quantitative column, and we do not allow this here
-        if Core.Compiler.return_type(_f, Tuple{eltype(parent(ds)[!,col])}) <: Union{<:AbstractString, Missing, <: AbstractChar} || IMD.DataAPI.refpool(parent(ds)[!, col]) !== nothing
+        if Core.Compiler.return_type(_f, Tuple{eltype(parent(ds)[!,col])}) <: Union{<:AbstractString, Missing, <: AbstractChar, Symbol} || IMD.DataAPI.refpool(parent(ds)[!, col]) !== nothing
             push!(nominal, col)
         end
     end 
