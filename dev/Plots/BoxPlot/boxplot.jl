@@ -55,5 +55,25 @@ sgplot(ds, BoxPlot(y=1:10, category=:Category,
                       clip=false
                       )
 
+dubai_weather = filereader(joinpath(dirname(pathof(StatisticalGraphics)),
+                                 "..", "docs", "assets", "dubai_weather.csv"),
+                                 types=Dict(1 =>Date))
+
+modify!(dubai_weather, :date=>byrow(week)=>:Week)
+setformat!(dubai_weather, :date=>month)
+
+sgplot(
+        dubai_weather,
+        [
+          BoxPlot(y=[:min, :max], category=:date, outliers=true),
+          BoxPlot(y=:pressure, category=:Week, opacity=0.5, y2axis=true, outliers=true, x2axis=true)
+        ],
+        xaxis=Axis(title="Month"),
+        yaxis=Axis(title="Temperature"),
+        y2axis=Axis(title="Pressure", d3format="f"),
+        x2axis=Axis(values=3:4:53),
+        height=600
+      )
+
 # This file was generated using Literate.jl, https://github.com/fredrikekre/Literate.jl
 
