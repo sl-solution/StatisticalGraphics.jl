@@ -1,6 +1,6 @@
 # StatisticalGraphics.jl
 
-Welcome to the StatisticalGraphics.jl documentation!
+Welcome to the [StatisticalGraphics.jl](https://github.com/sl-solution/StatisticalGraphics.jl) documentation!
 
 This resource aims to teach you everything you need to know to get up and running with the `StatisticalGraphics.jl` package.
 

@@ -29,6 +29,10 @@ makedocs(
         "Usage" => [
             scatter
         ],
+        "Multiple panels" => [
+            "Panel" => "man/panel.md",
+            "Grid" => "man/grid.md"
+        ],
         "Interactive" => [
             "Pyramid" => "man/pyramid.md",
             "Nations" => "man/nations.md",
