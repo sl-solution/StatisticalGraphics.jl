@@ -19,7 +19,8 @@ sgplot(cars_sum,
                     Scatter(y=:Origin, x=r"^max", symbol=:stroke, angle=90)
                 ],
                 xaxis=Axis(title="Acceleration", padding=10),
-                yaxis=Axis(padding=.5)
+                yaxis=Axis(padding=.5),
+                width=200
         )
 
 ohlc = filereader(joinpath(dirname(pathof(StatisticalGraphics)),
