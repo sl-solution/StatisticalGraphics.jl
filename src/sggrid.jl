@@ -1,18 +1,27 @@
 mutable struct SGGrid <: SGPlots
     json_spec
 end
-SGGRID_DEFAULT = Dict{Symbol, Any}(:align => :none, # :all, :each, :none
-    :columns => nothing,
-    :backcolor=>nothing,
-    :center=>[false, false], # for row-column
-    :bounds=>:full, # :full/:flush see vega docs
-    :rowspace=>0,
-    :columnspace=>0,
-    :bordercolor=>:transparent
+SGGRID_DEFAULT = SGKwds(
+    :align => __dic(:default=> :none, :__ord=>1, :__cat=>"Plot appearance", :__doc=>"Determine how to align plots. It can be one of `:all`, `:each`, or `:none`."),
+    :columns => __dic(:default=> nothing, :__ord=>1, :__cat=>"Plot appearance", :__doc=>"Number of columns to be created."),
+    :backcolor => __dic(:default=> nothing, :__ord=>1, :__cat=>"Plot appearance", :__doc=>"The back color."),
+    :center => __dic(:default=> [false, false], :__ord=>1, :__cat=>"Plot appearance", :__doc=>"The row and column centering, respectively."),
+    :bounds => __dic(:default=> :full, :__ord=>1, :__cat=>"Plot appearance", :__doc=>"One of `:full` or `:flush`. See `vega` docs for more information."),
+    :rowspace => __dic(:default=> 0, :__ord=>1, :__cat=>"Plot appearance", :__doc=>"Space between rows."),
+    :columnspace => __dic(:default=> 0, :__ord=>1, :__cat=>"Plot appearance", :__doc=>"Space between columns."),
+    :bordercolor => __dic(:default=> :transparent, :__ord=>1, :__cat=>"Plot appearance", :__doc=>"The color for the border of plots."),
 )
 
 
 # sggrid positions a collection of SGPlots within a grid
+"""
+    sggrid(sgps...; opts...)
+
+Position a collection of SG plots within a grid.
+The `opts...` refers to extra keyword arguments which can be passed to `sggrid`. 
+
+$(print_doc(SGGRID_DEFAULT))
+"""
 function sggrid(sgp...; opts...)
     optsd = val_opts(opts)
     global_opts = update_default_opts!(deepcopy(SGGRID_DEFAULT), optsd)

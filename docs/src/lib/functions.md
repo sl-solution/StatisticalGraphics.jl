@@ -3,6 +3,7 @@
 ## Plotting functions
 
 ```@docs
+sggrid
 sgplot
 ```
 
