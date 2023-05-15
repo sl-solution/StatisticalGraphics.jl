@@ -36,7 +36,8 @@ makedocs(
         "Interactive" => [
             "Pyramid" => "man/pyramid.md",
             "Nations" => "man/nations.md",
-            "Movies" => "man/movies.md"
+            "Movies" => "man/movies.md",
+            "Polygon" => "man/polygon.md"
         ],
         "API" => Any[
             "Functions" => "lib/functions.md",
