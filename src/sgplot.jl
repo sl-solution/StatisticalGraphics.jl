@@ -45,7 +45,16 @@ SGPLOT_DEFAULT = SGKwds(
 
 
 """
-    sgplot(ds, plots; mapformats=true, nominal=nothing, xaxis=Axis(), x2axis=Axis(), yaxis=Axis(), y2axis=Axis(), legend=true, threads=automatic, opts...)
+    sgplot(ds, plots;
+                    mapformats=true,
+                    nominal=nothing,
+                    xaxis=Axis(),
+                    x2axis=Axis(),
+                    yaxis=Axis(),
+                    y2axis=Axis(),
+                    legend=true,
+                    threads=automatic,
+                    opts...)
 
 Produce a statistical graphics. The `ds` argument is referring to a data set (or grouped data set) and `plots` is a vector of marks, such as Bar, Pie,.... 
 
