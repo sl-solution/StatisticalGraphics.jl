@@ -2,6 +2,9 @@
 
 ## Plotting functions
 
+```@docs
+sgplot
+```
 
 ## Save figures
 
