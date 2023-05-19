@@ -49,21 +49,21 @@ function _write_json(vspec::SGPlots)
 end
 
 function _convert_to_svg(vspec; s = 1)
-    nodejscmd = Vega.NodeJS_18_jll.node()
+    nodejscmd = Vega.NodeJS.nodejs_cmd()
     node_modules = joinpath(Vega.vegalite_app_path(), "node_modules/vega-cli/bin/vg2svg")
     ftmp = _write_json(vspec)
     res = read(Cmd(`$nodejscmd $node_modules -s $s $ftmp`), String)
     res
 end
 function _convert_to_png(vspec; s = 1)
-    nodejscmd = Vega.NodeJS_18_jll.node()
+    nodejscmd = Vega.NodeJS.nodejs_cmd()
     node_modules = joinpath(Vega.vegalite_app_path(), "node_modules/vega-cli/bin/vg2png")
     ftmp = _write_json(vspec)
     res = read(Cmd(`$nodejscmd $node_modules -s $s $ftmp`), String)
     res
 end
 function _convert_to_pdf(vspec; s = 1)
-    nodejscmd = Vega.NodeJS_18_jll.node()
+    nodejscmd = Vega.NodeJS.nodejs_cmd()
     node_modules = joinpath(Vega.vegalite_app_path(), "node_modules/vega-cli/bin/vg2pdf")
     ftmp = _write_json(vspec)
     res = read(Cmd(`$nodejscmd $node_modules -s $s $ftmp`), String)
