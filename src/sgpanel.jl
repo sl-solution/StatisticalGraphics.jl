@@ -50,6 +50,8 @@ SGPANEL_DEFAULT = Dict(:layout=>:panel, # it can be :panel, :lattice - panel sho
 
 
 function _sgpanel(ds, panelby::IMD.MultiColumnIndex, plts::Vector{<:SGMarks}; mapformats=true, nominal::Union{Nothing,IMD.ColumnIndex,IMD.MultiColumnIndex}=nothing, xaxis=Axis(), x2axis=Axis(), yaxis=Axis(), y2axis=Axis(), legend::Union{Bool,Legend,Vector{Legend}}=true, threads=nrow(ds) > 10^6, opts...)
+    # check the consistency of the passed grouped data set
+    IMD._check_consistency(ds)
     IMD._get_fmt(ds) != mapformats && throw(ArgumentError("the input data set uses mapformats = $(IMD._get_fmt(ds)), but the sgplot is called with mapformats = $(mapformats)"))
 
     # read opts
