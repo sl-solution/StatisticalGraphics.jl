@@ -37,7 +37,8 @@ makedocs(
             "Pyramid" => "man/pyramid.md",
             "Nations" => "man/nations.md",
             "Movies" => "man/movies.md",
-            "Polygon" => "man/polygon.md"
+            "Polygon" => "man/polygon.md",
+            "Pyramid - sggrid" => "man/pyramid2.md"
         ],
         "API" => Any[
             "Functions" => "lib/functions.md",
