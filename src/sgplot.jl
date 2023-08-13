@@ -58,7 +58,7 @@ SGPLOT_DEFAULT = SGKwds(
 
 Produce a statistical graphics. The `ds` argument is referring to a data set (or grouped data set) and `plots` is a vector of marks, such as Bar, Pie,.... 
 
-The `opts...` refers to extra keyword arguments which can be passed to `sgplot`. These keywords depend depend whether `ds` is a data set or a grouped data set. Below shows the available keyword arguments for each case.
+The `opts...` refers to extra keyword arguments which can be passed to `sgplot`. These keywords will differ whether `ds` is a data set or a grouped data set. Below shows the available keyword arguments for each case.
 
 # Non-grouped data sets
 $(print_doc(SGPLOT_DEFAULT))
